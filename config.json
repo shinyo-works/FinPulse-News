@@ -1,0 +1,59 @@
+{
+  "_comment": "mode: 'test'=全件取得 / 'weekly'=過去7日分のみ",
+  "mode": "test",
+
+  "institutions": [
+    {
+      "name": "帯広信用金庫",
+      "url": "https://www.shinkin.co.jp/obishin/news/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "exclude_rules": [
+        { "keyword": "メンテナンス" },
+        { "keyword": "採用" },
+        { "keyword": "休止" },
+        { "keyword": "休業" },
+        { "keyword": "詐欺" },
+        { "keyword": "外国送金" },
+        { "keyword": "規定", "unless": ["取扱開始", "預金", "貯金"] },
+        { "keyword": "十勝管内主要経済指標" },
+        { "keyword": "保険" }
+      ]
+    },
+    {
+      "name": "北海道銀行",
+      "url": "https://www.hokkaidobank.co.jp/info/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "exclude_rules": [
+        { "keyword": "採用" },
+        { "keyword": "詐欺" },
+        { "keyword": "メンテナンス" },
+        { "keyword": "休止" },
+        { "keyword": "休業" }
+      ]
+    },
+    {
+      "name": "北洋銀行",
+      "url": "https://www.hokuyobank.co.jp/announcement/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "exclude_rules": [
+        { "keyword": "採用" },
+        { "keyword": "詐欺" },
+        { "keyword": "メンテナンス" },
+        { "keyword": "休止" },
+        { "keyword": "休業" }
+      ]
+    },
+    {
+      "name": "JAおとふけ",
+      "url": "https://www.ja-otofuke.jp/newslist/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "exclude_rules": [
+        { "keyword": "採用" },
+        { "keyword": "詐欺" },
+        { "keyword": "メンテナンス" },
+        { "keyword": "休止" },
+        { "keyword": "休業" }
+      ]
+    }
+  ]
+}
