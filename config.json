@@ -67,6 +67,56 @@
         { "keyword": "入賞者" },
         { "keyword": "採用" }
       ]
+    },
+    {
+      "name": "十勝信用組合",
+      "url": "https://www.tokachishinkumi.com/info/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "exclude_rules": [
+        { "keyword": "奨学金" },
+        { "keyword": "採用" },
+        { "keyword": "ATM稼働スケジュール" },
+        { "keyword": "ATM稼動スケジュール" },
+        { "keyword": "障害" },
+        { "keyword": "ディスクロージャー" },
+        { "keyword": "詐欺" },
+        { "keyword": "搾取" },
+        { "keyword": "締結" },
+        { "keyword": "規定" },
+        { "keyword": "注意喚起" }
+      ]
+    },
+    {
+      "name": "JAめむろ",
+      "url": "https://www.ja-memuro.or.jp/category/finance_info/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融"],
+      "exclude_rules": [
+        { "keyword": "定型約款" },
+        { "keyword": "ATM稼働日程" },
+        { "keyword": "ATM稼動日程" },
+        { "keyword": "規定" },
+        { "keyword": "犯罪" },
+        { "keyword": "採用" },
+        { "keyword": "詐欺" }
+      ]
+    },
+    {
+      "name": "JA木野",
+      "url": "https://ja-kino.com/news/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "ローン"],
+      "exclude_rules": [
+        { "keyword": "組合だより" },
+        { "keyword": "組合長あいさつ" },
+        { "keyword": "共済" },
+        { "keyword": "詐欺" },
+        { "keyword": "JA共済" },
+        { "keyword": "ATM営業" },
+        { "keyword": "採用" },
+        { "keyword": "会社説明会" },
+        { "keyword": "女性部" },
+        { "keyword": "青年部" },
+        { "keyword": "規定" }
+      ]
     }
   ]
 }
