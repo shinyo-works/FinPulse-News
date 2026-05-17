@@ -22,13 +22,24 @@
     {
       "name": "北海道銀行",
       "url": "https://www.hokkaidobank.co.jp/info/",
+      "target_sections": ["お知らせ"],
       "include_keywords": ["キャンペーン", "金利", "お知らせ"],
       "exclude_rules": [
+        { "keyword": "投資信託" },
+        { "keyword": "規定" },
+        { "keyword": "債券" },
+        { "keyword": "国債" },
+        { "keyword": "不具合" },
+        { "keyword": "システムメンテナンス" },
+        { "keyword": "障害" },
+        { "keyword": "臨時休止" },
+        { "keyword": "外国送金" },
+        { "keyword": "被災" },
+        { "keyword": "復旧" },
+        { "keyword": "犯罪" },
+        { "keyword": "在留外国人" },
         { "keyword": "採用" },
-        { "keyword": "詐欺" },
-        { "keyword": "メンテナンス" },
-        { "keyword": "休止" },
-        { "keyword": "休業" }
+        { "keyword": "カーリング" }
       ]
     },
     {
@@ -46,13 +57,15 @@
     {
       "name": "JAおとふけ",
       "url": "https://www.ja-otofuke.jp/newslist/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "共済", "営業"],
       "exclude_rules": [
-        { "keyword": "採用" },
-        { "keyword": "詐欺" },
-        { "keyword": "メンテナンス" },
-        { "keyword": "休止" },
-        { "keyword": "休業" }
+        { "keyword": "燃料" },
+        { "keyword": "入札" },
+        { "keyword": "ガソリン" },
+        { "keyword": "共済" },
+        { "keyword": "ワイパー" },
+        { "keyword": "入賞者" },
+        { "keyword": "採用" }
       ]
     }
   ]

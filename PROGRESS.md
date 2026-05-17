@@ -5,7 +5,7 @@
 - プロジェクト方針決定・ロードマップ策定
 - CLAUDE.md / PROGRESS.md 作成
 
-## 2026-05-17 — Phase 1 / Step 1 完了
+## 2026-05-17 — Phase 1 / Step 2 完了
 
 - 対象URL: https://www.shinkin.co.jp/obishin/news/（帯広信用金庫）
 - Chrome MCP でページ取得成功（30件）
