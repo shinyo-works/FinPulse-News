@@ -183,20 +183,18 @@ def apply_filters(items, institution):
 
 
 def format_report(results, today, mode):
-    """Markdown形式のレポートを生成"""
+    """Markdown形式のレポートを生成（通過セクション→除外セクションの順）"""
     lines = [f"# 金融機関新着情報レポート — {today}", ""]
-    total_passed = 0
-    total_excluded = 0
+    total_passed = sum(len(p) for _, p, _, _, _ in results)
+    total_excluded = sum(len(e) for _, _, e, _, _ in results)
 
+    # ── 通過セクション ──
+    lines.append("# ✅ 通過")
+    lines.append("")
     for name, passed, excluded, method, is_fallback in results:
-        lines.append(f"## {name}　*（収集: {method}）*")
-        lines.append("")
-
+        lines.append(f"## {name}")
         if is_fallback:
-            lines.append("### ✅ 通過（直近7日以内の対象記事なし / 最新情報のみ表示）")
-        else:
-            lines.append(f"### ✅ 通過（{len(passed)}件）")
-
+            lines.append("*直近7日以内の対象記事なし — 最新情報のみ表示*")
         if passed:
             lines.append("| 日付 | タイトル | URL |")
             lines.append("|---|---|---|")
@@ -205,21 +203,29 @@ def format_report(results, today, mode):
                 lines.append(f"| {item.get('date','')} | {item['title']}{star} | {item.get('url','')} |")
         else:
             lines.append("（該当なし）")
+        lines.append("")
 
-        lines.append("")
-        if not is_fallback:
-            lines.append(f"### ❌ 除外（{len(excluded)}件）")
-            if excluded:
-                lines.append("| 日付 | タイトル | 除外キーワード |")
-                lines.append("|---|---|---|")
-                for item in excluded:
-                    lines.append(f"| {item.get('date','')} | {item['title']} | {item.get('exclude_keyword','')} |")
-        lines.append("")
-        lines.append("---")
-        lines.append("")
-        total_passed += len(passed)
-        total_excluded += len(excluded)
+    lines.append("---")
+    lines.append("")
 
+    # ── 除外セクション ──
+    lines.append("# ❌ 除外")
+    lines.append("")
+    for name, passed, excluded, method, is_fallback in results:
+        if is_fallback:
+            continue  # フォールバック機関は除外セクション省略
+        lines.append(f"## {name}")
+        if excluded:
+            lines.append("| 日付 | タイトル | 除外キーワード |")
+            lines.append("|---|---|---|")
+            for item in excluded:
+                lines.append(f"| {item.get('date','')} | {item['title']} | {item.get('exclude_keyword','')} |")
+        else:
+            lines.append("（除外なし）")
+        lines.append("")
+
+    lines.append("---")
+    lines.append("")
     lines.append(f"*収集日時: {today} / モード: {mode}*")
     lines.append(f"*合計: 通過 {total_passed}件 / 除外 {total_excluded}件*")
     return "\n".join(lines)
