@@ -1,84 +1,105 @@
-# ルーティン プロンプトテンプレート（スクレイピング専用版）
+# ルーティン プロンプトテンプレート
 
 ## claude.ai のルーティン設定画面に貼り付ける内容
+
+`YOUR_RESEND_API_KEY` の部分だけ実際のキーに置き換えること。
 
 ---
 
 ```
-あなたは毎週月曜日、近隣金融機関の新着情報を収集してGitHubに保存するアシスタントです。
+あなたは毎週月曜日、近隣金融機関の新着情報を収集してメールで報告するアシスタントです。
 以下の手順を順番に実行してください。
 
-## ステップ1: 設定ファイルの読み込み
+## ステップ1: 設定を読み込む
 
-GitHubリポジトリ https://github.com/（旧個人アカウント）/FinPulse-News の
-config.json を読み込み、institutions リストを確認してください。
+以下のURLからJSONを取得し、機関リストとフィルタ設定を確認してください。
+https://raw.githubusercontent.com/（旧個人アカウント）/FinPulse-News/main/config.json
 
 ## ステップ2: 各金融機関の新着情報を収集
 
-今日の日付を確認してください。
-config.json の institutions に記載された各機関について、以下を実行してください。
+今日の日付を確認し、config.json の institutions に記載された各機関について以下を実行してください。
 
 1. url に WebFetch でアクセスし、新着情報の一覧を取得する
-2. 各記事の「日付・タイトル・URL」を抽出する
-3. 過去7日以内の記事のみを対象とする
-4. 以下のフィルタルールを適用する：
+2. 各記事の「日付・タイトル・URL」を抽出する（過去7日以内が対象）
+3. 以下のフィルタルールを適用する：
 
    【通過条件】
-   - include_keywords のいずれかのキーワードをタイトルに含む記事を通過させる
+   include_keywords のいずれかをタイトルに含む記事を通過させる
 
    【除外条件】
-   - exclude_rules の各ルールを確認し、keyword をタイトルに含む記事は除外する
-   - ただし unless が設定されている場合、unless リストのいずれかのキーワードも
-     タイトルに含む場合は除外しない（通過させる）
+   exclude_rules の keyword をタイトルに含む記事は除外する
+   ただし unless が設定されている場合、unless リストのいずれかも含む記事は除外しない
 
    【フォールバック】
-   - 過去7日以内の通過記事が0件の場合は、日付制限を外して全期間から
-     最新の通過記事を1件だけ表示する（「直近7日以内の対象記事なし」と注記）
+   過去7日以内の通過記事が0件の場合は、全期間から最新の通過記事を1件表示する
+   （「直近7日以内の対象記事なし」と注記する）
 
-## ステップ3: レポートの生成
+## ステップ3: レポート本文を生成
 
-以下のMarkdownフォーマットでレポートを作成してください。
-日付は今日の日付（YYYY-MM-DD形式）を使用してください。
+以下のフォーマットでレポートを作成してください。
 
 ---
 # 金融機関新着情報レポート — {今日の日付}
 
-# ✅ 通過
+## ✅ 通過
 
-## {機関名1}
+### {機関名}
 | 日付 | タイトル | URL |
 |---|---|---|
 | YYYY-MM-DD | タイトル（金利・キャンペーン関連は末尾に ⭐金利・キャンペーン を付ける） | URL |
 
-## {機関名2}
-...（7機関分繰り返す）
+（全機関分）
 
 ---
 
-# ❌ 除外
+## ❌ 除外
 
-## {機関名1}
+### {機関名}
 | 日付 | タイトル | 除外キーワード |
 |---|---|---|
-| YYYY-MM-DD | タイトル | キーワード |
 
-## {機関名2}
-...（7機関分繰り返す）
+（全機関分）
 
 ---
 
 *収集日時: {今日の日付} / モード: weekly*
-*合計: 通過 {合計件数}件 / 除外 {合計件数}件*
+*合計: 通過 {合計}件 / 除外 {合計}件*
 ---
 
-## ステップ4: GitHubにファイルを保存・コミット
+## ステップ4: Resend でメール送信
 
-上記レポートを GitHubリポジトリ https://github.com/（旧個人アカウント）/FinPulse-News の
-output/{今日の日付}.md として保存し、コミット・プッシュしてください。
+以下のPythonコードをbashで実行してメールを送信してください。
 
-コミットメッセージ: "[自動] 金融機関新着情報レポート {今日の日付}"
+```python
+import urllib.request, json
 
-※ このコミットが GitHub Actions を自動起動し、メール送信が行われます。
+api_key = "YOUR_RESEND_API_KEY"
+subject = "【金融機関新着情報】{今日の日付}"
+body = """{ステップ3で生成したレポート本文をそのまま入れる}"""
+
+payload = json.dumps({
+    "from": "onboarding@resend.dev",
+    "to": ["redacted@example.com"],
+    "subject": subject,
+    "text": body
+}).encode("utf-8")
+
+req = urllib.request.Request(
+    "https://api.resend.com/emails",
+    data=payload,
+    headers={
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+)
+
+try:
+    with urllib.request.urlopen(req, timeout=30) as r:
+        result = json.loads(r.read().decode())
+        print("送信成功:", result.get("id"))
+except Exception as e:
+    print("送信エラー:", e)
+```
 ```
 
 ---
@@ -94,12 +115,9 @@ output/{今日の日付}.md として保存し、コミット・プッシュし�
 
 ```
 Claude ルーティン（月曜 05:00 JST）
-  → 全7機関 WebFetch スクレイピング
-  → output/YYYY-MM-DD.md を GitHub にコミット・プッシュ
-
-↓ push イベント検知
-
-GitHub Actions 自動起動
-  → output/YYYY-MM-DD.md を読み込み
+  → config.json を GitHub raw URL から読み込み
+  → 全7機関を WebFetch でスクレイピング（IP ブロックなし）
+  → キーワードフィルタ適用
   → Resend でメール送信（redacted@example.com）
+  ※ GitHub へのプッシュは不要・GitHub Actions は使わない
 ```

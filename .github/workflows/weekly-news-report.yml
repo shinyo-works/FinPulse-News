@@ -1,10 +1,7 @@
 name: 金融機関新着情報メール送信
 
 on:
-  push:
-    paths:
-      - 'output/20**.md'   # ルーティンが output/*.md をプッシュしたら起動
-  workflow_dispatch:        # 手動実行ボタン
+  workflow_dispatch:        # 手動実行のみ（スクレイピングはClaudeルーティンが直接メール送信）
 
 jobs:
   send-report:
