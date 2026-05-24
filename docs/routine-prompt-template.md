@@ -1,106 +1,105 @@
-# ルーティン プロンプトテンプレート（Resend版）
+# ルーティン プロンプトテンプレート（スクレイピング専用版）
 
 ## claude.ai のルーティン設定画面に貼り付ける内容
 
-以下をそのままコピーして、ルーティンのプロンプトとして設定してください。
-`YOUR_RESEND_API_KEY` の部分だけ実際のキーに置き換えること。
-
 ---
 
 ```
-あなたは毎週、近隣金融機関の新着情報を収集してメールで報告するアシスタントです。
+あなたは毎週月曜日、近隣金融機関の新着情報を収集してGitHubに保存するアシスタントです。
 以下の手順を順番に実行してください。
 
-## ステップ1: 各金融機関サイトの新着情報取得
-
-以下の7機関のURLにアクセスし、新着情報の一覧（タイトル・日付・URL）を取得してください。
-過去7日以内の記事のみ対象です。
-
-1. 帯広信用金庫: https://www.shinkin.co.jp/obishin/news/
-2. 北海道銀行: https://www.hokkaidobank.co.jp/info/
-3. 北洋銀行: https://www.hokuyobank.co.jp/announcement/
-4. JAおとふけ: https://www.ja-otofuke.jp/newslist/
-5. 十勝信用組合: https://www.tokachishinkumi.com/info/
-6. JAめむろ: https://www.ja-memuro.or.jp/category/finance_info/
-7. JA木野: https://ja-kino.com/news/
-
-## ステップ2: キーワードフィルタ適用
-
-各機関の記事に対して以下のルールでフィルタを適用してください。
-
-【通過キーワード（いずれか含む記事を通過）】
-キャンペーン、金利、お知らせ、金融、ローン
-
-【除外キーワード（含む記事を除外）】
-採用、詐欺、メンテナンス、休止、休業、ATM稼動、ATM稼働、規定、共済、燃料、ガソリン、入札、奨学金
-
-## ステップ3: レポート本文の生成
-
-以下のフォーマットでメール本文を作成してください:
-
----
-【金融機関新着情報】{今日の日付}
-
-━━━━━━━━━━━━━━━━━━━━━━━━
-■ {機関名}（{通過件数}件）
-━━━━━━━━━━━━━━━━━━━━━━━━
-{各記事: 日付 | タイトル | URL}
-
-（除外: {除外件数}件）
-
-（7機関分繰り返す）
-
-━━━━━━━━━━━━━━━━━━━━━━━━
-合計: 通過 {合計}件 ／ 除外 {合計}件
-収集日時: {日時}
----
-
-## ステップ4: Resend でメール送信
-
-以下のPythonコードをbashで実行してメールを送信してください:
-
-```python
-import urllib.request, json
-
-api_key = "YOUR_RESEND_API_KEY"
-subject = "【金融機関新着情報】{今日の日付}"
-body = """{ステップ3で生成した本文をそのまま入れる}"""
-
-payload = json.dumps({
-    "from": "onboarding@resend.dev",
-    "to": ["redacted@example.com"],
-    "subject": subject,
-    "text": body
-}).encode("utf-8")
-
-req = urllib.request.Request(
-    "https://api.resend.com/emails",
-    data=payload,
-    headers={
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-)
-
-try:
-    with urllib.request.urlopen(req, timeout=30) as r:
-        result = json.loads(r.read().decode())
-        print("送信成功:", result.get("id"))
-except Exception as e:
-    print("送信エラー:", e)
-```
-
-## ステップ5: レポートファイルに保存
+## ステップ1: 設定ファイルの読み込み
 
 GitHubリポジトリ https://github.com/（旧個人アカウント）/FinPulse-News の
-output/{今日の日付}.md にレポート内容を保存してコミット・プッシュしてください。
+config.json を読み込み、institutions リストを確認してください。
+
+## ステップ2: 各金融機関の新着情報を収集
+
+今日の日付を確認してください。
+config.json の institutions に記載された各機関について、以下を実行してください。
+
+1. url に WebFetch でアクセスし、新着情報の一覧を取得する
+2. 各記事の「日付・タイトル・URL」を抽出する
+3. 過去7日以内の記事のみを対象とする
+4. 以下のフィルタルールを適用する：
+
+   【通過条件】
+   - include_keywords のいずれかのキーワードをタイトルに含む記事を通過させる
+
+   【除外条件】
+   - exclude_rules の各ルールを確認し、keyword をタイトルに含む記事は除外する
+   - ただし unless が設定されている場合、unless リストのいずれかのキーワードも
+     タイトルに含む場合は除外しない（通過させる）
+
+   【フォールバック】
+   - 過去7日以内の通過記事が0件の場合は、日付制限を外して全期間から
+     最新の通過記事を1件だけ表示する（「直近7日以内の対象記事なし」と注記）
+
+## ステップ3: レポートの生成
+
+以下のMarkdownフォーマットでレポートを作成してください。
+日付は今日の日付（YYYY-MM-DD形式）を使用してください。
+
+---
+# 金融機関新着情報レポート — {今日の日付}
+
+# ✅ 通過
+
+## {機関名1}
+| 日付 | タイトル | URL |
+|---|---|---|
+| YYYY-MM-DD | タイトル（金利・キャンペーン関連は末尾に ⭐金利・キャンペーン を付ける） | URL |
+
+## {機関名2}
+...（7機関分繰り返す）
+
+---
+
+# ❌ 除外
+
+## {機関名1}
+| 日付 | タイトル | 除外キーワード |
+|---|---|---|
+| YYYY-MM-DD | タイトル | キーワード |
+
+## {機関名2}
+...（7機関分繰り返す）
+
+---
+
+*収集日時: {今日の日付} / モード: weekly*
+*合計: 通過 {合計件数}件 / 除外 {合計件数}件*
+---
+
+## ステップ4: GitHubにファイルを保存・コミット
+
+上記レポートを GitHubリポジトリ https://github.com/（旧個人アカウント）/FinPulse-News の
+output/{今日の日付}.md として保存し、コミット・プッシュしてください。
+
+コミットメッセージ: "[自動] 金融機関新着情報レポート {今日の日付}"
+
+※ このコミットが GitHub Actions を自動起動し、メール送信が行われます。
 ```
 
 ---
 
-## ルーティンのスケジュール設定（推奨）
+## ルーティンのスケジュール設定
 
 | 項目 | 設定値 |
 |---|---|
-| 実行タイミング | 毎週月曜 23:00 UTC（= 火曜 08:00 JST） |
-| モデル | claude-sonnet-4-5 |
+| 実行タイミング | 毎週月曜 05:00 JST（= 日曜 20:00 UTC） |
+| モデル | claude-sonnet-4-5 以上 |
+
+## 処理の流れ
+
+```
+Claude ルーティン（月曜 05:00 JST）
+  → 全7機関 WebFetch スクレイピング
+  → output/YYYY-MM-DD.md を GitHub にコミット・プッシュ
+
+↓ push イベント検知
+
+GitHub Actions 自動起動
+  → output/YYYY-MM-DD.md を読み込み
+  → Resend でメール送信（redacted@example.com）
+```

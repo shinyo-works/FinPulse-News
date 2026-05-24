@@ -25,7 +25,16 @@
 - AI-trend-weather-Newsと同じ GitHub Actions 構成を採用 ✅
 - `.github/workflows/weekly-news-report.yml` 作成（毎週火曜08:00 JSTに自動実行） ✅
 - `scripts/collect_and_send.py` 作成（HTTP取得→Claude API抽出→フィルタ→Resend送信） ✅
-- 次の一手: GitHub Secrets に RESEND_API_KEY と ANTHROPIC_API_KEY を登録
+- 次の一手: Claude ルーティン × GitHub Actions 連携構成に移行
+
+## 2026-05-24 — Phase 3 構成変更（ルーティン連携）
+
+- 帯広信用金庫・JAめむろが GitHub Actions の IP からブロックされることが判明 ✅
+- スクレイピングを Claude ルーティン（月曜05:00 JST）に移管 ✅
+- GitHub Actions は output/*.md の push をトリガーにメール送信のみに変更 ✅
+- scripts/collect_and_send.py をメール送信専用に簡略化 ✅
+- ANTHROPIC_API_KEY 不要に（GitHub Secrets から削除可） ✅
+- 次の一手: claude.ai でルーティンを新規作成し routine-prompt-template.md のプロンプトを設定
 
 ## 2026-05-17 — Phase 1 / Step 2 完了
 

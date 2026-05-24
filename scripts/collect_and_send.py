@@ -1,239 +1,21 @@
 """
-scripts/collect_and_send.py — 金融機関新着情報収集・レポート送信
-GitHub Actions で週次実行される
+scripts/collect_and_send.py — output/ の最新レポートを Resend でメール送信
+GitHub Actions (push トリガー) で実行される
 
-収集方式:
-  - 標準サイト: BeautifulSoup（プログラム解析）
-  - 複雑サイト: Claude API（config.json で use_claude: true を指定）
-
-週次モード(weekly)で通過0件の機関は、全期間から最新1件をフォールバック表示する。
+スクレイピングは Claude ルーティンが担当し、このスクリプトは送信のみ行う。
 """
 import os
-import json
-import re
-from datetime import datetime, timedelta
-from pathlib import Path
-from urllib.parse import urljoin
-
+import sys
 import requests
-from bs4 import BeautifulSoup
-import anthropic
-
-
-def load_config():
-    with open("config.json", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def fetch_page(url):
-    """HTMLページを取得"""
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    try:
-        resp = requests.get(url, headers=headers, timeout=30)
-        resp.raise_for_status()
-        resp.encoding = resp.apparent_encoding
-        return resp.text
-    except Exception as e:
-        print(f"  取得失敗 ({url}): {e}")
-        return None
-
-
-def extract_date_from_text(text):
-    """テキストから日付（YYYY-MM-DD）を抽出"""
-    patterns = [
-        r'(\d{4})[./\-](\d{1,2})[./\-](\d{1,2})',
-        r'(\d{4})年(\d{1,2})月(\d{1,2})日',
-    ]
-    for pat in patterns:
-        m = re.search(pat, text)
-        if m:
-            y, mo, d = m.group(1), m.group(2), m.group(3)
-            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
-    return ""
-
-
-_SKIP_WORDS = [
-    "ホーム", "トップ", "サイトマップ", "お問い合わせ", "アクセス",
-    "English", "プライバシー", "個人情報", "免責事項", "著作権", "ログイン",
-    "会員登録", "資料請求", "店舗", "ATM", "もっと見る", "一覧へ", "詳しくはこちら",
-]
-
-
-def scrape_news_programmatic(html, base_url):
-    """BeautifulSoupでニュース一覧を汎用的に抽出（全件・日付フィルタなし）"""
-    soup = BeautifulSoup(html, "html.parser")
-    items = []
-    seen_titles = set()
-
-    for a in soup.find_all("a", href=True):
-        title = a.get_text(strip=True)
-        if not (8 <= len(title) <= 150):
-            continue
-        if any(w in title for w in _SKIP_WORDS):
-            continue
-
-        href = a["href"]
-        if not href or href.startswith(("#", "javascript", "mailto", "tel")):
-            continue
-
-        url = urljoin(base_url, href)
-        if title in seen_titles:
-            continue
-        seen_titles.add(title)
-
-        date = ""
-        for candidate in [a, a.parent, a.parent.parent if a.parent else None]:
-            if candidate:
-                date = extract_date_from_text(candidate.get_text())
-                if date:
-                    break
-
-        items.append({"date": date, "title": title, "url": url})
-
-    return items[:60]
-
-
-def extract_news_with_claude(client, name, url, html):
-    """Claude APIでHTMLからニュース一覧を抽出（全件・日付フィルタなし）"""
-    html_truncated = html[:15000]
-
-    prompt = f"""以下は「{name}」（{url}）の新着情報ページのHTMLです。
-
-ニュース記事の一覧をすべて抽出し、以下のJSON形式のみ返してください（説明文不要）。
-記事が見つからない場合は空配列 [] を返してください。
-URLは絶対URLに変換してください。
-
-[
-  {{"date": "YYYY-MM-DD", "title": "記事タイトル", "url": "https://..."}}
-]
-
-HTML:
-{html_truncated}"""
-
-    try:
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text.strip()
-        match = re.search(r'\[.*\]', text, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        return []
-    except Exception as e:
-        print(f"  Claude抽出失敗: {e}")
-        return []
-
-
-def filter_by_mode(items, mode):
-    """weeklyモードは過去7日以内のみ通過（日付不明は含める）"""
-    if mode != "weekly":
-        return items
-    cutoff = datetime.now() - timedelta(days=7)
-    result = []
-    for item in items:
-        date_str = item.get("date", "")
-        if not date_str:
-            result.append(item)
-            continue
-        try:
-            if datetime.strptime(date_str, "%Y-%m-%d") >= cutoff:
-                result.append(item)
-        except ValueError:
-            result.append(item)
-    return result
-
-
-def apply_filters(items, institution):
-    """include_keywords・exclude_rules でフィルタ適用"""
-    include_kw = institution.get("include_keywords", [])
-    exclude_rules = institution.get("exclude_rules", [])
-    passed = []
-    excluded = []
-
-    for item in items:
-        title = item.get("title", "")
-
-        # 除外チェック
-        excluded_by = None
-        for rule in exclude_rules:
-            kw = rule["keyword"]
-            if kw in title:
-                unless = rule.get("unless", [])
-                if unless and any(u in title for u in unless):
-                    continue
-                excluded_by = kw
-                break
-
-        if excluded_by:
-            item["exclude_keyword"] = excluded_by
-            excluded.append(item)
-            continue
-
-        # 通過チェック
-        if not include_kw or any(kw in title for kw in include_kw):
-            if any(k in title for k in ["金利", "キャンペーン"]):
-                item["star"] = True
-            passed.append(item)
-        else:
-            excluded.append(item)
-
-    return passed, excluded
-
-
-def format_report(results, today, mode):
-    """Markdown形式のレポートを生成（通過セクション→除外セクションの順）"""
-    lines = [f"# 金融機関新着情報レポート — {today}", ""]
-    total_passed = sum(len(p) for _, p, _, _, _ in results)
-    total_excluded = sum(len(e) for _, _, e, _, _ in results)
-
-    # ── 通過セクション ──
-    lines.append("# ✅ 通過")
-    lines.append("")
-    for name, passed, excluded, method, is_fallback in results:
-        lines.append(f"## {name}")
-        if is_fallback:
-            lines.append("*直近7日以内の対象記事なし — 最新情報のみ表示*")
-        if passed:
-            lines.append("| 日付 | タイトル | URL |")
-            lines.append("|---|---|---|")
-            for item in passed:
-                star = " ⭐金利・キャンペーン" if item.get("star") else ""
-                lines.append(f"| {item.get('date','')} | {item['title']}{star} | {item.get('url','')} |")
-        else:
-            lines.append("（該当なし）")
-        lines.append("")
-
-    lines.append("---")
-    lines.append("")
-
-    # ── 除外セクション ──
-    lines.append("# ❌ 除外")
-    lines.append("")
-    for name, passed, excluded, method, is_fallback in results:
-        if is_fallback:
-            continue  # フォールバック機関は除外セクション省略
-        lines.append(f"## {name}")
-        if excluded:
-            lines.append("| 日付 | タイトル | 除外キーワード |")
-            lines.append("|---|---|---|")
-            for item in excluded:
-                lines.append(f"| {item.get('date','')} | {item['title']} | {item.get('exclude_keyword','')} |")
-        else:
-            lines.append("（除外なし）")
-        lines.append("")
-
-    lines.append("---")
-    lines.append("")
-    lines.append(f"*収集日時: {today} / モード: {mode}*")
-    lines.append(f"*合計: 通過 {total_passed}件 / 除外 {total_excluded}件*")
-    return "\n".join(lines)
+from pathlib import Path
 
 
 def send_email(subject, body):
-    """Resend APIでメールを送信"""
-    api_key = os.environ["RESEND_API_KEY"].strip()
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    if not api_key:
+        print("エラー: RESEND_API_KEY が設定されていません")
+        sys.exit(1)
+
     response = requests.post(
         "https://api.resend.com/emails",
         headers={
@@ -255,66 +37,19 @@ def send_email(subject, body):
 
 
 if __name__ == "__main__":
-    today = datetime.now().strftime("%Y-%m-%d")
-    config = load_config()
-    mode = config.get("mode", "weekly")
+    output_dir = Path("output")
+    files = sorted(output_dir.glob("20??-??-??.md"))
 
-    print(f"=== 金融機関新着情報収集 ({today} / {mode}モード) ===")
+    if not files:
+        print("送信対象の output/*.md ファイルがありません")
+        sys.exit(0)
 
-    claude_client = anthropic.Anthropic()
-    results = []
+    latest = files[-1]
+    date_str = latest.stem
+    body = latest.read_text(encoding="utf-8")
 
-    for institution in config["institutions"]:
-        name = institution["name"]
-        url = institution["url"]
-        use_claude = institution.get("use_claude", False)
-        method = "Claude API" if use_claude else "プログラム"
-        print(f"\n▶ {name}（{method}）")
-
-        html = fetch_page(url)
-        if not html:
-            results.append((name, [], [], method, False))
-            continue
-
-        # 全件取得（日付フィルタなし）
-        if use_claude:
-            all_items = extract_news_with_claude(claude_client, name, url, html)
-        else:
-            all_items = scrape_news_programmatic(html, url)
-
-        print(f"  全件取得: {len(all_items)}件")
-
-        # 週次フィルタ適用
-        items = filter_by_mode(all_items, mode)
-        print(f"  期間内: {len(items)}件")
-
-        # キーワードフィルタ
-        passed, excluded = apply_filters(items, institution)
-        print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
-
-        # フォールバック: 週次で通過0件 → 全期間から最新1件
-        is_fallback = False
-        if not passed and mode == "weekly":
-            all_passed, _ = apply_filters(all_items, institution)
-            if all_passed:
-                latest = sorted(all_passed, key=lambda x: x.get("date", ""), reverse=True)[0]
-                passed = [latest]
-                is_fallback = True
-                print(f"  フォールバック: {latest['title'][:30]}...")
-
-        results.append((name, passed, excluded, method, is_fallback))
-
-    # レポート生成・保存
-    report = format_report(results, today, mode)
-    output_path = Path("output") / f"{today}.md"
-    output_path.parent.mkdir(exist_ok=True)
-    output_path.write_text(report, encoding="utf-8")
-    print(f"\nレポート保存: {output_path}")
-
-    # メール送信
-    total_passed = sum(len(p) for _, p, _, _, _ in results)
-    subject = f"【金融機関新着情報】{today}（通過 {total_passed}件）"
-    print(f"送信中: {subject}")
-    send_email(subject, report)
-
-    print("\n完了！")
+    subject = f"【金融機関新着情報】{date_str}"
+    print(f"送信対象: {latest.name}")
+    print(f"件名: {subject}")
+    send_email(subject, body)
+    print("完了！")

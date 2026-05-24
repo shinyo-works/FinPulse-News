@@ -11,9 +11,9 @@
 | 役割 | ツール | 状態 |
 |---|---|---|
 | Webサイト巡回・取得 | Claude in Chrome MCP（接続済み） | ✅ Phase 1で使用 |
-| メール送信 | Resend API（`send_resend.py` / `scripts/collect_and_send.py`） | ✅ Phase 2で使用 |
-| 自動実行 | GitHub Actions（週次スケジュール） | ✅ Phase 3で使用 |
-| 記事抽出 | Claude API（claude-haiku-4-5） | GitHub Actions内で使用 |
+| メール送信 | Resend API（`scripts/collect_and_send.py`） | ✅ Phase 2で使用 |
+| スクレイピング自動化 | Claude ルーティン（月曜 05:00 JST） | ✅ Phase 3で使用 |
+| メール自動送信 | GitHub Actions（push トリガー） | ✅ Phase 3で使用 |
 | LINE通知 | LINE Notify REST API（要設定） | Phase 3候補 |
 | データ保存 | Markdown ファイル | Phase 1から使用 |
 
@@ -46,7 +46,6 @@ FinPulse-News/
 | キー | 用途 | 設定場所 |
 |---|---|---|
 | `RESEND_API_KEY` | Resend メール送信 | .env + GitHub Secrets |
-| `ANTHROPIC_API_KEY` | Claude API（記事抽出） | GitHub Secrets のみ |
 
 ## 設計決定事項
 
