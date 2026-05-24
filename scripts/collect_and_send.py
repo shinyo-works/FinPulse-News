@@ -1,11 +1,13 @@
 """
-scripts/collect_and_send.py — output/ の最新レポートを Resend でメール送信
-GitHub Actions (push トリガー) で実行される
+scripts/collect_and_send.py — Resend でメール送信
 
-スクレイピングは Claude ルーティンが担当し、このスクリプトは送信のみ行う。
+2つのモードで動作:
+  repository_dispatch: ルーティンからの dispatch イベントを受け取り送信
+  workflow_dispatch:   output/ の最新 .md ファイルを送信
 """
 import os
 import sys
+import json
 import requests
 from pathlib import Path
 
@@ -37,19 +39,31 @@ def send_email(subject, body):
 
 
 if __name__ == "__main__":
-    output_dir = Path("output")
-    files = sorted(output_dir.glob("20??-??-??.md"))
+    event_name = os.environ.get("GITHUB_EVENT_NAME", "")
 
-    if not files:
-        print("送信対象の output/*.md ファイルがありません")
-        sys.exit(0)
+    if event_name == "repository_dispatch":
+        # ルーティンが dispatch したペイロードを読み込む
+        event_path = os.environ.get("GITHUB_EVENT_PATH", "")
+        with open(event_path, encoding="utf-8") as f:
+            event = json.load(f)
+        payload = event.get("client_payload", {})
+        subject = payload.get("subject", "【金融機関新着情報】")
+        body = payload.get("body", "")
+        if not body:
+            print("エラー: dispatch payload に body がありません")
+            sys.exit(1)
+        print(f"dispatch モード / 件名: {subject}")
+    else:
+        # workflow_dispatch: output/ の最新ファイルを使用
+        output_dir = Path("output")
+        files = sorted(output_dir.glob("20??-??-??.md"))
+        if not files:
+            print("送信対象の output/*.md ファイルがありません")
+            sys.exit(0)
+        latest = files[-1]
+        subject = f"【金融機関新着情報】{latest.stem}"
+        body = latest.read_text(encoding="utf-8")
+        print(f"ファイルモード / 送信対象: {latest.name}")
 
-    latest = files[-1]
-    date_str = latest.stem
-    body = latest.read_text(encoding="utf-8")
-
-    subject = f"【金融機関新着情報】{date_str}"
-    print(f"送信対象: {latest.name}")
-    print(f"件名: {subject}")
     send_email(subject, body)
     print("完了！")

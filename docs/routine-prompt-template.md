@@ -5,7 +5,8 @@
 以下の「コピーここから」〜「コピーここまで」の間の文章だけをコピーして、
 ルーティンのプロンプトとして設定してください。
 
-`YOUR_RESEND_API_KEY` の部分のみ実際のキーに置き換えること。
+`YOUR_GITHUB_PAT` の部分のみ実際のトークンに置き換えること。
+（GitHub PAT の取得方法は下部参照）
 
 ---
 
@@ -71,42 +72,54 @@ https://raw.githubusercontent.com/（旧個人アカウント）/FinPulse-News/m
 
 ---
 
-## ステップ4: Resend でメール送信
+## ステップ4: GitHub Actions でメール送信をトリガー
 
 ステップ3で作成したレポートを body 変数に入れて、以下の Python コードを bash で実行してください。
 
 ```python
 import urllib.request, json
 
-api_key = "YOUR_RESEND_API_KEY"
+github_token = "YOUR_GITHUB_PAT"
 subject = "【金融機関新着情報】{今日の日付}"
 body = """ここにステップ3のレポート全文を入れる"""
 
 payload = json.dumps({
-    "from": "onboarding@resend.dev",
-    "to": ["redacted@example.com"],
-    "subject": subject,
-    "text": body
+    "event_type": "send-report",
+    "client_payload": {
+        "subject": subject,
+        "body": body
+    }
 }).encode("utf-8")
 
 req = urllib.request.Request(
-    "https://api.resend.com/emails",
+    "https://api.github.com/repos/（旧個人アカウント）/FinPulse-News/dispatches",
     data=payload,
     headers={
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"token {github_token}",
+        "Accept": "application/vnd.github.v3+json",
         "Content-Type": "application/json"
     }
 )
 
 try:
     with urllib.request.urlopen(req, timeout=30) as r:
-        result = json.loads(r.read().decode())
-        print("送信成功:", result.get("id"))
+        print(f"GitHub Actions トリガー成功（ステータス: {r.status}）")
 except Exception as e:
-    print("送信エラー:", e)
+    print(f"エラー: {e}")
 ```
 
 <!-- コピーここまで -->
+
+---
+
+## GitHub PAT（Personal Access Token）の取得方法
+
+1. https://github.com/settings/tokens/new を開く
+2. Note（名前）: `FinPulse-News routine`
+3. Expiration: 任意（1年推奨）
+4. Select scopes: **repo** にチェック（`public_repo` だけでも可）
+5. 「Generate token」→ 表示されたトークン（`ghp_...`）をコピー
+6. ルーティンプロンプトの `YOUR_GITHUB_PAT` を置き換える
 
 ---
 
@@ -124,12 +137,9 @@ Claude ルーティン（月曜 05:00 JST）
   → config.json を GitHub raw URL から読み込み
   → 全7機関を WebFetch でスクレイピング（IP ブロックなし）
   → キーワードフィルタ適用
+  → GitHub dispatch API を呼び出す（Python）
+
+GitHub Actions（dispatch イベント受信）
+  → GITHUB_EVENT_PATH からレポートを読み込み
   → Resend でメール送信（redacted@example.com）
-  ※ GitHub へのプッシュは不要・GitHub Actions は使わない
 ```
-
-## コピーする際の注意
-
-- 「コピーここから」〜「コピーここまで」の HTML コメント行は含めない（自動的に除外される）
-- 最後の Python コードブロックの閉じ ` ``` ` まで含める
-- `YOUR_RESEND_API_KEY` は貼り付け後に実際のキーに置き換える

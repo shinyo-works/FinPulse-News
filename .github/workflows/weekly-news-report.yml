@@ -1,7 +1,9 @@
 name: 金融機関新着情報メール送信
 
 on:
-  workflow_dispatch:        # 手動実行のみ（スクレイピングはClaudeルーティンが直接メール送信）
+  repository_dispatch:
+    types: [send-report]   # Claudeルーティンからのトリガー
+  workflow_dispatch:        # 手動実行
 
 jobs:
   send-report:
