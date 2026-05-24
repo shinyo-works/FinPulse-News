@@ -5,6 +5,8 @@ GitHub Actions で週次実行される
 収集方式:
   - 標準サイト: BeautifulSoup（プログラム解析）
   - 複雑サイト: Claude API（config.json で use_claude: true を指定）
+
+週次モード(weekly)で通過0件の機関は、全期間から最新1件をフォールバック表示する。
 """
 import os
 import json
@@ -50,27 +52,23 @@ def extract_date_from_text(text):
     return ""
 
 
-# ナビゲーションや不要リンクのキーワード
 _SKIP_WORDS = [
-    "ホーム", "トップ", "サイトマップ", "お問い合わせ", "アクセス", "採用",
+    "ホーム", "トップ", "サイトマップ", "お問い合わせ", "アクセス",
     "English", "プライバシー", "個人情報", "免責事項", "著作権", "ログイン",
     "会員登録", "資料請求", "店舗", "ATM", "もっと見る", "一覧へ", "詳しくはこちら",
 ]
 
 
 def scrape_news_programmatic(html, base_url):
-    """BeautifulSoupでニュース一覧を汎用的に抽出"""
+    """BeautifulSoupでニュース一覧を汎用的に抽出（全件・日付フィルタなし）"""
     soup = BeautifulSoup(html, "html.parser")
     items = []
     seen_titles = set()
 
     for a in soup.find_all("a", href=True):
         title = a.get_text(strip=True)
-
-        # タイトル長フィルタ（短すぎ・長すぎを除外）
         if not (8 <= len(title) <= 150):
             continue
-        # ナビゲーション系を除外
         if any(w in title for w in _SKIP_WORDS):
             continue
 
@@ -83,7 +81,6 @@ def scrape_news_programmatic(html, base_url):
             continue
         seen_titles.add(title)
 
-        # 日付を周辺要素（自身→親→祖父母）から探す
         date = ""
         for candidate in [a, a.parent, a.parent.parent if a.parent else None]:
             if candidate:
@@ -96,17 +93,13 @@ def scrape_news_programmatic(html, base_url):
     return items[:60]
 
 
-def extract_news_with_claude(client, name, url, html, mode):
-    """Claude APIでHTMLからニュース一覧を抽出（複雑サイト用）"""
-    cutoff_note = "過去7日以内の記事のみ抽出してください。" if mode == "weekly" else "すべての記事を抽出してください。"
-    today = datetime.now().strftime("%Y-%m-%d")
+def extract_news_with_claude(client, name, url, html):
+    """Claude APIでHTMLからニュース一覧を抽出（全件・日付フィルタなし）"""
     html_truncated = html[:15000]
 
     prompt = f"""以下は「{name}」（{url}）の新着情報ページのHTMLです。
-今日の日付: {today}
-{cutoff_note}
 
-ニュース記事の一覧を抽出し、以下のJSON形式のみ返してください（説明文不要）。
+ニュース記事の一覧をすべて抽出し、以下のJSON形式のみ返してください（説明文不要）。
 記事が見つからない場合は空配列 [] を返してください。
 URLは絶対URLに変換してください。
 
@@ -134,7 +127,7 @@ HTML:
 
 
 def filter_by_mode(items, mode):
-    """weeklyモードは過去7日以内のみ通過"""
+    """weeklyモードは過去7日以内のみ通過（日付不明は含める）"""
     if mode != "weekly":
         return items
     cutoff = datetime.now() - timedelta(days=7)
@@ -142,7 +135,7 @@ def filter_by_mode(items, mode):
     for item in items:
         date_str = item.get("date", "")
         if not date_str:
-            result.append(item)  # 日付不明は含める
+            result.append(item)
             continue
         try:
             if datetime.strptime(date_str, "%Y-%m-%d") >= cutoff:
@@ -169,7 +162,7 @@ def apply_filters(items, institution):
             if kw in title:
                 unless = rule.get("unless", [])
                 if unless and any(u in title for u in unless):
-                    continue  # unless条件一致 → このルールは適用しない
+                    continue
                 excluded_by = kw
                 break
 
@@ -195,10 +188,15 @@ def format_report(results, today, mode):
     total_passed = 0
     total_excluded = 0
 
-    for name, passed, excluded, method in results:
+    for name, passed, excluded, method, is_fallback in results:
         lines.append(f"## {name}　*（収集: {method}）*")
         lines.append("")
-        lines.append(f"### ✅ 通過（{len(passed)}件）")
+
+        if is_fallback:
+            lines.append("### ✅ 通過（直近7日以内の対象記事なし / 最新情報のみ表示）")
+        else:
+            lines.append(f"### ✅ 通過（{len(passed)}件）")
+
         if passed:
             lines.append("| 日付 | タイトル | URL |")
             lines.append("|---|---|---|")
@@ -207,13 +205,15 @@ def format_report(results, today, mode):
                 lines.append(f"| {item.get('date','')} | {item['title']}{star} | {item.get('url','')} |")
         else:
             lines.append("（該当なし）")
+
         lines.append("")
-        lines.append(f"### ❌ 除外（{len(excluded)}件）")
-        if excluded:
-            lines.append("| 日付 | タイトル | 除外キーワード |")
-            lines.append("|---|---|---|")
-            for item in excluded:
-                lines.append(f"| {item.get('date','')} | {item['title']} | {item.get('exclude_keyword','')} |")
+        if not is_fallback:
+            lines.append(f"### ❌ 除外（{len(excluded)}件）")
+            if excluded:
+                lines.append("| 日付 | タイトル | 除外キーワード |")
+                lines.append("|---|---|---|")
+                for item in excluded:
+                    lines.append(f"| {item.get('date','')} | {item['title']} | {item.get('exclude_keyword','')} |")
         lines.append("")
         lines.append("---")
         lines.append("")
@@ -255,7 +255,6 @@ if __name__ == "__main__":
 
     print(f"=== 金融機関新着情報収集 ({today} / {mode}モード) ===")
 
-    # Claude APIクライアント（use_claude サイト用）
     claude_client = anthropic.Anthropic()
     results = []
 
@@ -268,20 +267,36 @@ if __name__ == "__main__":
 
         html = fetch_page(url)
         if not html:
-            results.append((name, [], [], method))
+            results.append((name, [], [], method, False))
             continue
 
+        # 全件取得（日付フィルタなし）
         if use_claude:
-            items = extract_news_with_claude(claude_client, name, url, html, mode)
+            all_items = extract_news_with_claude(claude_client, name, url, html)
         else:
-            items = scrape_news_programmatic(html, url)
-            items = filter_by_mode(items, mode)
+            all_items = scrape_news_programmatic(html, url)
 
-        print(f"  取得: {len(items)}件")
+        print(f"  全件取得: {len(all_items)}件")
 
+        # 週次フィルタ適用
+        items = filter_by_mode(all_items, mode)
+        print(f"  期間内: {len(items)}件")
+
+        # キーワードフィルタ
         passed, excluded = apply_filters(items, institution)
         print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
-        results.append((name, passed, excluded, method))
+
+        # フォールバック: 週次で通過0件 → 全期間から最新1件
+        is_fallback = False
+        if not passed and mode == "weekly":
+            all_passed, _ = apply_filters(all_items, institution)
+            if all_passed:
+                latest = sorted(all_passed, key=lambda x: x.get("date", ""), reverse=True)[0]
+                passed = [latest]
+                is_fallback = True
+                print(f"  フォールバック: {latest['title'][:30]}...")
+
+        results.append((name, passed, excluded, method, is_fallback))
 
     # レポート生成・保存
     report = format_report(results, today, mode)
@@ -291,7 +306,7 @@ if __name__ == "__main__":
     print(f"\nレポート保存: {output_path}")
 
     # メール送信
-    total_passed = sum(len(p) for _, p, _, _ in results)
+    total_passed = sum(len(p) for _, p, _, _, _ in results)
     subject = f"【金融機関新着情報】{today}（通過 {total_passed}件）"
     print(f"送信中: {subject}")
     send_email(subject, report)

@@ -73,7 +73,7 @@
     {
       "name": "十勝信用組合",
       "url": "https://www.tokachishinkumi.com/info/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手数料", "取扱開始", "取り扱い", "提携"],
       "exclude_rules": [
         { "keyword": "奨学金" },
         { "keyword": "採用" },
