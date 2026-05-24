@@ -11,8 +11,9 @@
 | 役割 | ツール | 状態 |
 |---|---|---|
 | Webサイト巡回・取得 | Claude in Chrome MCP（接続済み） | ✅ Phase 1で使用 |
-| メール送信 | Resend API（`send_resend.py`） | ✅ Phase 2で使用 |
-| 自動実行 | Claude Routines | Phase 3で使用 |
+| メール送信 | Resend API（`send_resend.py` / `scripts/collect_and_send.py`） | ✅ Phase 2で使用 |
+| 自動実行 | GitHub Actions（週次スケジュール） | ✅ Phase 3で使用 |
+| 記事抽出 | Claude API（claude-haiku-4-5） | GitHub Actions内で使用 |
 | LINE通知 | LINE Notify REST API（要設定） | Phase 3候補 |
 | データ保存 | Markdown ファイル | Phase 1から使用 |
 
@@ -23,7 +24,13 @@ FinPulse-News/
 ├── .env                   # APIキー保存（Git管理外）
 ├── .env.example           # キーのテンプレ
 ├── config.json            # 対象URL・キーワード設定
-├── send_resend.py         # Resend経由メール送信スクリプト
+├── send_resend.py         # Resend経由メール送信スクリプト（手動用）
+├── send_report.py         # 最新レポート送信スクリプト（手動用）
+├── scripts/
+│   └── collect_and_send.py  # GitHub Actions用 収集・送信スクリプト
+├── .github/
+│   └── workflows/
+│       └── weekly-news-report.yml  # 週次自動実行ワークフロー
 ├── output/                # 収集結果の保存先
 │   └── YYYY-MM-DD.md      # 日付別レポート
 ├── docs/
@@ -34,9 +41,12 @@ FinPulse-News/
 └── PROGRESS.md            # 作業ログ
 ```
 
-## 環境変数（.env）
+## 環境変数（.env / GitHub Secrets）
 
-- `RESEND_API_KEY` : Resend のAPIキー（`re_` で始まる文字列）
+| キー | 用途 | 設定場所 |
+|---|---|---|
+| `RESEND_API_KEY` | Resend メール送信 | .env + GitHub Secrets |
+| `ANTHROPIC_API_KEY` | Claude API（記事抽出） | GitHub Secrets のみ |
 
 ## 設計決定事項
 
@@ -48,5 +58,5 @@ FinPulse-News/
 ## Phase 進捗
 
 - [x] Phase 1: 複数サイト手動スクレイピング → ファイル保存（7機関）
-- [ ] Phase 2: Resend でメール送信
-- [ ] Phase 3: 週次自動化（Claude Routines）
+- [x] Phase 2: Resend でメール送信
+- [x] Phase 3: 週次自動化（GitHub Actions）

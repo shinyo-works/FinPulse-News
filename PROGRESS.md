@@ -18,7 +18,14 @@
 - `send_report.py` 作成（output/最新ファイルを自動検出してResend送信） ✅
 - テスト送信成功 ✅（件名: 【FinPulse-News】テスト送信）
 - レポート送信成功 ✅（件名: 【金融機関新着情報】2026-05-17、7機関37件）
-- 次の一手: Phase 3 — Claude Routines で週次自動化
+- 次の一手: Phase 3 — GitHub Actions で週次自動化
+
+## 2026-05-24 — Phase 3 完了
+
+- AI-trend-weather-Newsと同じ GitHub Actions 構成を採用 ✅
+- `.github/workflows/weekly-news-report.yml` 作成（毎週火曜08:00 JSTに自動実行） ✅
+- `scripts/collect_and_send.py` 作成（HTTP取得→Claude API抽出→フィルタ→Resend送信） ✅
+- 次の一手: GitHub Secrets に RESEND_API_KEY と ANTHROPIC_API_KEY を登録
 
 ## 2026-05-17 — Phase 1 / Step 2 完了
 

@@ -1,0 +1,40 @@
+name: 週次金融機関新着情報レポート
+
+on:
+  schedule:
+    - cron: '0 23 * * 1'  # 毎週月曜 23:00 UTC = 火曜 08:00 JST
+  workflow_dispatch:       # 手動実行ボタン
+
+jobs:
+  collect-and-report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python環境セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 必要パッケージをインストール
+        run: pip install anthropic requests
+
+      - name: 収集・レポート生成・送信
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/collect_and_send.py
+
+      - name: レポートをGitにコミット
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/
+          git diff --staged --quiet || git commit -m "[自動] 金融機関新着情報レポート $(date '+%Y-%m-%d')"
+          git push
