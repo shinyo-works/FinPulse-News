@@ -1,14 +1,20 @@
 """
 scripts/collect_and_send.py — 金融機関新着情報収集・レポート送信
 GitHub Actions で週次実行される
+
+収集方式:
+  - 標準サイト: BeautifulSoup（プログラム解析）
+  - 複雑サイト: Claude API（config.json で use_claude: true を指定）
 """
 import os
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import urljoin
 
 import requests
+from bs4 import BeautifulSoup
 import anthropic
 
 
@@ -30,13 +36,69 @@ def fetch_page(url):
         return None
 
 
+def extract_date_from_text(text):
+    """テキストから日付（YYYY-MM-DD）を抽出"""
+    patterns = [
+        r'(\d{4})[./\-](\d{1,2})[./\-](\d{1,2})',
+        r'(\d{4})年(\d{1,2})月(\d{1,2})日',
+    ]
+    for pat in patterns:
+        m = re.search(pat, text)
+        if m:
+            y, mo, d = m.group(1), m.group(2), m.group(3)
+            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+    return ""
+
+
+# ナビゲーションや不要リンクのキーワード
+_SKIP_WORDS = [
+    "ホーム", "トップ", "サイトマップ", "お問い合わせ", "アクセス", "採用",
+    "English", "プライバシー", "個人情報", "免責事項", "著作権", "ログイン",
+    "会員登録", "資料請求", "店舗", "ATM", "もっと見る", "一覧へ", "詳しくはこちら",
+]
+
+
+def scrape_news_programmatic(html, base_url):
+    """BeautifulSoupでニュース一覧を汎用的に抽出"""
+    soup = BeautifulSoup(html, "html.parser")
+    items = []
+    seen_titles = set()
+
+    for a in soup.find_all("a", href=True):
+        title = a.get_text(strip=True)
+
+        # タイトル長フィルタ（短すぎ・長すぎを除外）
+        if not (8 <= len(title) <= 150):
+            continue
+        # ナビゲーション系を除外
+        if any(w in title for w in _SKIP_WORDS):
+            continue
+
+        href = a["href"]
+        if not href or href.startswith(("#", "javascript", "mailto", "tel")):
+            continue
+
+        url = urljoin(base_url, href)
+        if title in seen_titles:
+            continue
+        seen_titles.add(title)
+
+        # 日付を周辺要素（自身→親→祖父母）から探す
+        date = ""
+        for candidate in [a, a.parent, a.parent.parent if a.parent else None]:
+            if candidate:
+                date = extract_date_from_text(candidate.get_text())
+                if date:
+                    break
+
+        items.append({"date": date, "title": title, "url": url})
+
+    return items[:60]
+
+
 def extract_news_with_claude(client, name, url, html, mode):
-    """Claude APIでHTMLからニュース一覧を抽出"""
-    cutoff_note = (
-        "過去7日以内の記事のみ抽出してください。"
-        if mode == "weekly"
-        else "すべての記事を抽出してください。"
-    )
+    """Claude APIでHTMLからニュース一覧を抽出（複雑サイト用）"""
+    cutoff_note = "過去7日以内の記事のみ抽出してください。" if mode == "weekly" else "すべての記事を抽出してください。"
     today = datetime.now().strftime("%Y-%m-%d")
     html_truncated = html[:15000]
 
@@ -46,7 +108,7 @@ def extract_news_with_claude(client, name, url, html, mode):
 
 ニュース記事の一覧を抽出し、以下のJSON形式のみ返してください（説明文不要）。
 記事が見つからない場合は空配列 [] を返してください。
-URLは絶対URLに変換してください（/path/... → {url.rstrip('/')}/../）。
+URLは絶対URLに変換してください。
 
 [
   {{"date": "YYYY-MM-DD", "title": "記事タイトル", "url": "https://..."}}
@@ -71,11 +133,29 @@ HTML:
         return []
 
 
+def filter_by_mode(items, mode):
+    """weeklyモードは過去7日以内のみ通過"""
+    if mode != "weekly":
+        return items
+    cutoff = datetime.now() - timedelta(days=7)
+    result = []
+    for item in items:
+        date_str = item.get("date", "")
+        if not date_str:
+            result.append(item)  # 日付不明は含める
+            continue
+        try:
+            if datetime.strptime(date_str, "%Y-%m-%d") >= cutoff:
+                result.append(item)
+        except ValueError:
+            result.append(item)
+    return result
+
+
 def apply_filters(items, institution):
     """include_keywords・exclude_rules でフィルタ適用"""
     include_kw = institution.get("include_keywords", [])
     exclude_rules = institution.get("exclude_rules", [])
-
     passed = []
     excluded = []
 
@@ -115,8 +195,8 @@ def format_report(results, today, mode):
     total_passed = 0
     total_excluded = 0
 
-    for name, passed, excluded in results:
-        lines.append(f"## {name}")
+    for name, passed, excluded, method in results:
+        lines.append(f"## {name}　*（収集: {method}）*")
         lines.append("")
         lines.append(f"### ✅ 通過（{len(passed)}件）")
         if passed:
@@ -175,25 +255,33 @@ if __name__ == "__main__":
 
     print(f"=== 金融機関新着情報収集 ({today} / {mode}モード) ===")
 
-    client = anthropic.Anthropic()
+    # Claude APIクライアント（use_claude サイト用）
+    claude_client = anthropic.Anthropic()
     results = []
 
     for institution in config["institutions"]:
         name = institution["name"]
         url = institution["url"]
-        print(f"\n▶ {name}")
+        use_claude = institution.get("use_claude", False)
+        method = "Claude API" if use_claude else "プログラム"
+        print(f"\n▶ {name}（{method}）")
 
         html = fetch_page(url)
         if not html:
-            results.append((name, [], []))
+            results.append((name, [], [], method))
             continue
 
-        items = extract_news_with_claude(client, name, url, html, mode)
+        if use_claude:
+            items = extract_news_with_claude(claude_client, name, url, html, mode)
+        else:
+            items = scrape_news_programmatic(html, url)
+            items = filter_by_mode(items, mode)
+
         print(f"  取得: {len(items)}件")
 
         passed, excluded = apply_filters(items, institution)
         print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
-        results.append((name, passed, excluded))
+        results.append((name, passed, excluded, method))
 
     # レポート生成・保存
     report = format_report(results, today, mode)
@@ -203,7 +291,7 @@ if __name__ == "__main__":
     print(f"\nレポート保存: {output_path}")
 
     # メール送信
-    total_passed = sum(len(p) for _, p, _ in results)
+    total_passed = sum(len(p) for _, p, _, _ in results)
     subject = f"【金融機関新着情報】{today}（通過 {total_passed}件）"
     print(f"送信中: {subject}")
     send_email(subject, report)

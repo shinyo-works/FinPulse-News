@@ -22,6 +22,7 @@
     {
       "name": "北海道銀行",
       "url": "https://www.hokkaidobank.co.jp/info/",
+      "use_claude": true,
       "target_sections": ["お知らせ"],
       "include_keywords": ["キャンペーン", "金利", "お知らせ"],
       "exclude_rules": [
@@ -45,6 +46,7 @@
     {
       "name": "北洋銀行",
       "url": "https://www.hokuyobank.co.jp/announcement/",
+      "use_claude": true,
       "include_keywords": ["キャンペーン", "金利", "お知らせ"],
       "exclude_rules": [
         { "keyword": "採用" },
