@@ -13,6 +13,13 @@
 - `.env.example` 作成（RESEND_API_KEY テンプレ） ✅
 - 次の一手: `.env` に RESEND_API_KEY を設定 → Phase 2 実行テスト
 
+## 2026-05-24 — Phase 2 完了
+
+- `send_report.py` 作成（output/最新ファイルを自動検出してResend送信） ✅
+- テスト送信成功 ✅（件名: 【FinPulse-News】テスト送信）
+- レポート送信成功 ✅（件名: 【金融機関新着情報】2026-05-17、7機関37件）
+- 次の一手: Phase 3 — Claude Routines で週次自動化
+
 ## 2026-05-17 — Phase 1 / Step 2 完了
 
 - 対象URL: https://www.shinkin.co.jp/obishin/news/（帯広信用金庫）
