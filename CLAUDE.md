@@ -11,35 +11,42 @@
 | 役割 | ツール | 状態 |
 |---|---|---|
 | Webサイト巡回・取得 | Claude in Chrome MCP（接続済み） | ✅ Phase 1で使用 |
-| Gmail送信 | Gmail MCP コネクタ（接続済み） | ✅ Phase 2で使用 |
+| メール送信 | Resend API（`send_resend.py`） | ✅ Phase 2で使用 |
+| 自動実行 | Claude Routines | Phase 3で使用 |
 | LINE通知 | LINE Notify REST API（要設定） | Phase 3候補 |
-| データ保存 | CSV / Markdown ファイル | Phase 1から使用 |
+| データ保存 | Markdown ファイル | Phase 1から使用 |
 
 ## ファイル構成
 
 ```
-金融機関新着情報/
+FinPulse-News/
 ├── .env                   # APIキー保存（Git管理外）
 ├── .env.example           # キーのテンプレ
-├── config.json            # 対象URL・キーワード設定（Phase 1で作成）
+├── config.json            # 対象URL・キーワード設定
+├── send_resend.py         # Resend経由メール送信スクリプト
 ├── output/                # 収集結果の保存先
 │   └── YYYY-MM-DD.md      # 日付別レポート
 ├── docs/
 │   ├── setup-connectors.md
+│   ├── routine-prompt-template.md
 │   └── research-line-notify.md
 ├── CLAUDE.md              # このファイル
 └── PROGRESS.md            # 作業ログ
 ```
 
+## 環境変数（.env）
+
+- `RESEND_API_KEY` : Resend のAPIキー（`re_` で始まる文字列）
+
 ## 設計決定事項
 
-- 報告手段: Gmail（標準コネクタで追加設定ゼロのため優先）
+- メール送信: Resend API（AI-trend-weather-News と同じ実績ある仕組み）
 - LINEは Phase 3 候補（REST API 必要）
 - Slack は未採用（ユーザー環境にコネクタなし）
 - スクレイピング: Chrome MCP（puppeteer不要・インストールゼロ）
 
 ## Phase 進捗
 
-- [ ] Phase 1: 1サイト手動スクレイピング → ファイル保存
-- [ ] Phase 2: 複数サイト + キーワードフィルタ + Gmail下書き
-- [ ] Phase 3: 週次自動化（スケジュール実行）
+- [x] Phase 1: 複数サイト手動スクレイピング → ファイル保存（7機関）
+- [ ] Phase 2: Resend でメール送信
+- [ ] Phase 3: 週次自動化（Claude Routines）

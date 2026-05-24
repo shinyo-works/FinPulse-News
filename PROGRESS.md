@@ -5,6 +5,14 @@
 - プロジェクト方針決定・ロードマップ策定
 - CLAUDE.md / PROGRESS.md 作成
 
+## 2026-05-24 — Phase 2 準備完了
+
+- AI-trend-weather-News の実績ある Resend 送信方式を採用 ✅
+- `send_resend.py` 作成（Resend SDK経由・redacted@example.com 宛） ✅
+- `docs/routine-prompt-template.md` 作成（Phase 3 ルーティン用） ✅
+- `.env.example` 作成（RESEND_API_KEY テンプレ） ✅
+- 次の一手: `.env` に RESEND_API_KEY を設定 → Phase 2 実行テスト
+
 ## 2026-05-17 — Phase 1 / Step 2 完了
 
 - 対象URL: https://www.shinkin.co.jp/obishin/news/（帯広信用金庫）
