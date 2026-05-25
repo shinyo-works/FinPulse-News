@@ -19,8 +19,7 @@
 
 ## ステップ1: 設定を読み込む
 
-以下のURLからJSONを取得し、機関リストとフィルタ設定を確認してください。
-https://raw.githubusercontent.com/（旧個人アカウント）/FinPulse-News/main/config.json
+接続されているリポジトリ（FinPulse-News）の `config.json` を読み込み、機関リストとフィルタ設定を確認してください。
 
 ## ステップ2: 各金融機関の新着情報を収集
 
