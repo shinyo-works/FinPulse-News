@@ -104,9 +104,9 @@ def scrape_news_programmatic(html, base_url):
     return items[:60]
 
 
-def extract_news_with_claude(client, name, url, html, mode):
+def extract_news_with_claude(client, name, url, html, lookback_days):
     """Claude APIでHTMLからニュース一覧を抽出（複雑サイト用）"""
-    cutoff_note = "過去7日以内の記事のみ抽出してください。" if mode == "weekly" else "すべての記事を抽出してください。"
+    cutoff_note = f"過去{lookback_days}日以内の記事のみ抽出してください。" if lookback_days else "すべての記事を抽出してください。"
     today = datetime.now().strftime("%Y-%m-%d")
     html_truncated = html[:15000]
 
@@ -141,11 +141,11 @@ HTML:
         return []
 
 
-def filter_by_mode(items, mode):
-    """weeklyモードは過去7日以内のみ通過"""
-    if mode != "weekly":
+def filter_by_lookback(items, lookback_days):
+    """lookback_days日以内の記事のみ通過（0=全件）"""
+    if not lookback_days:
         return items
-    cutoff = datetime.now() - timedelta(days=7)
+    cutoff = datetime.now() - timedelta(days=lookback_days)
     result = []
     for item in items:
         date_str = item.get("date", "")
@@ -195,7 +195,7 @@ def apply_filters(items, institution):
     return passed, excluded
 
 
-def format_report(results, today, mode):
+def format_report(results, today, lookback_days):
     """Markdown形式のレポートを生成"""
     lines = [f"# 金融機関新着情報レポート — {today}", ""]
     total_passed = 0
@@ -226,7 +226,8 @@ def format_report(results, today, mode):
         total_passed += len(passed)
         total_excluded += len(excluded)
 
-    lines.append(f"*収集日時: {today} / モード: {mode}*")
+    period = f"過去{lookback_days}日" if lookback_days else "全件"
+    lines.append(f"*収集日時: {today} / 対象期間: {period}*")
     lines.append(f"*合計: 通過 {total_passed}件 / 除外 {total_excluded}件*")
     return "\n".join(lines)
 
@@ -257,9 +258,9 @@ def send_email(subject, body):
 if __name__ == "__main__":
     today = datetime.now().strftime("%Y-%m-%d")
     config = load_config()
-    mode = config.get("mode", "weekly")
+    lookback_days = config.get("lookback_days", 30)
 
-    print(f"=== 金融機関新着情報収集 ({today} / {mode}モード) ===")
+    print(f"=== 金融機関新着情報収集 ({today} / 過去{lookback_days}日) ===")
 
     claude_client = anthropic.Anthropic()
     results = []
@@ -277,10 +278,10 @@ if __name__ == "__main__":
             continue
 
         if use_claude:
-            items = extract_news_with_claude(claude_client, name, url, html, mode)
+            items = extract_news_with_claude(claude_client, name, url, html, lookback_days)
         else:
             items = scrape_news_programmatic(html, url)
-            items = filter_by_mode(items, mode)
+            items = filter_by_lookback(items, lookback_days)
 
         print(f"  取得: {len(items)}件")
 
@@ -288,7 +289,7 @@ if __name__ == "__main__":
         print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
         results.append((name, passed, excluded, method))
 
-    report = format_report(results, today, mode)
+    report = format_report(results, today, lookback_days)
     output_path = Path("output") / f"{today}.md"
     output_path.parent.mkdir(exist_ok=True)
     output_path.write_text(report, encoding="utf-8")

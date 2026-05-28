@@ -1,6 +1,6 @@
 {
-  "_comment": "mode: 'test'=全件取得 / 'weekly'=過去7日分のみ",
-  "mode": "test",
+  "_comment": "lookback_days: 収集対象とする過去日数（0=全件取得）",
+  "lookback_days": 30,
 
   "institutions": [
     {
