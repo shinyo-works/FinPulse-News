@@ -40,7 +40,7 @@ def extract_date_from_text(text):
     """テキストから日付（YYYY-MM-DD）を抽出"""
     patterns = [
         r'(\d{4})[./\-](\d{1,2})[./\-](\d{1,2})',
-        r'(\d{4})年(\d{1,2})月(\d{1,2})日',
+        r'(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日',
     ]
     for pat in patterns:
         m = re.search(pat, text)
