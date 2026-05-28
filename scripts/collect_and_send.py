@@ -201,6 +201,7 @@ def format_report(results, today, lookback_days):
     total_passed = 0
     total_excluded = 0
 
+    # 通過セクション（全機関）
     for name, passed, excluded, method in results:
         lines.append(f"## {name}　*（収集: {method}）*")
         lines.append("")
@@ -214,17 +215,22 @@ def format_report(results, today, lookback_days):
         else:
             lines.append("（該当なし）")
         lines.append("")
-        lines.append(f"### ❌ 除外（{len(excluded)}件）")
+        lines.append("---")
+        lines.append("")
+        total_passed += len(passed)
+        total_excluded += len(excluded)
+
+    # 除外セクション（全機関まとめて末尾）
+    lines.append("# 除外一覧")
+    lines.append("")
+    for name, passed, excluded, method in results:
+        lines.append(f"## {name}　❌ 除外（{len(excluded)}件）")
         if excluded:
             lines.append("| 日付 | タイトル | 除外キーワード |")
             lines.append("|---|---|---|")
             for item in excluded:
                 lines.append(f"| {item.get('date','')} | {item['title']} | {item.get('exclude_keyword','')} |")
         lines.append("")
-        lines.append("---")
-        lines.append("")
-        total_passed += len(passed)
-        total_excluded += len(excluded)
 
     period = f"過去{lookback_days}日" if lookback_days else "全件"
     lines.append(f"*収集日時: {today} / 対象期間: {period}*")
