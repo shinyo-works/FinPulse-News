@@ -51,7 +51,8 @@
         { "keyword": "詐欺" },
         { "keyword": "メンテナンス" },
         { "keyword": "休止" },
-        { "keyword": "休業" }
+        { "keyword": "休業" },
+        { "keyword": "休日相談会" }
       ]
     },
     {
@@ -97,7 +98,9 @@
         { "keyword": "規定" },
         { "keyword": "犯罪" },
         { "keyword": "採用" },
-        { "keyword": "詐欺" }
+        { "keyword": "詐欺" },
+        { "keyword": "金融・JAバンク" },
+        { "keyword": "金融（JAバンク）" }
       ]
     },
     {

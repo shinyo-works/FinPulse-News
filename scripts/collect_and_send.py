@@ -160,6 +160,29 @@ def filter_by_lookback(items, lookback_days):
     return result
 
 
+def get_fallback_item(passed_all, lookback_days):
+    """期間内に通過記事がない場合、期間外で最も新しい通過記事を返す"""
+    if not lookback_days:
+        return None
+    cutoff = datetime.now() - timedelta(days=lookback_days)
+    older = []
+    for item in passed_all:
+        date_str = item.get("date", "")
+        if not date_str:
+            continue
+        try:
+            if datetime.strptime(date_str, "%Y-%m-%d") < cutoff:
+                older.append(item)
+        except ValueError:
+            pass
+    if not older:
+        return None
+    best = max(older, key=lambda x: x["date"])
+    best = dict(best)
+    best["fallback"] = True
+    return best
+
+
 def apply_filters(items, institution):
     """include_keywords・exclude_rules でフィルタ適用"""
     include_kw = institution.get("include_keywords", [])
@@ -211,7 +234,8 @@ def format_report(results, today, lookback_days):
             lines.append("|---|---|---|")
             for item in passed:
                 star = " ⭐金利・キャンペーン" if item.get("star") else ""
-                lines.append(f"| {item.get('date','')} | {item['title']}{star} | {item.get('url','')} |")
+                note = " ※1ヵ月超・最新" if item.get("fallback") else ""
+                lines.append(f"| {item.get('date','')} | {item['title']}{star}{note} | {item.get('url','')} |")
         else:
             lines.append("（該当なし）")
         lines.append("")
@@ -285,13 +309,17 @@ if __name__ == "__main__":
 
         if use_claude:
             items = extract_news_with_claude(claude_client, name, url, html, lookback_days)
+            passed, excluded = apply_filters(items, institution)
         else:
             items = scrape_news_programmatic(html, url)
-            items = filter_by_lookback(items, lookback_days)
+            passed_all, excluded = apply_filters(items, institution)
+            passed = filter_by_lookback(passed_all, lookback_days)
+            if not passed:
+                fallback = get_fallback_item(passed_all, lookback_days)
+                if fallback:
+                    passed = [fallback]
 
         print(f"  取得: {len(items)}件")
-
-        passed, excluded = apply_filters(items, institution)
         print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
         results.append((name, passed, excluded, method))
 
