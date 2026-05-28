@@ -22,8 +22,6 @@
     {
       "name": "北海道銀行",
       "url": "https://www.hokkaidobank.co.jp/info/",
-      "use_claude": true,
-      "target_sections": ["お知らせ"],
       "include_keywords": ["キャンペーン", "金利", "お知らせ"],
       "exclude_rules": [
         { "keyword": "投資信託" },
@@ -46,7 +44,7 @@
     {
       "name": "北洋銀行",
       "url": "https://www.hokuyobank.co.jp/announcement/",
-      "use_claude": true,
+      "encoding": "cp932",
       "include_keywords": ["キャンペーン", "金利", "お知らせ"],
       "exclude_rules": [
         { "keyword": "採用" },
@@ -59,7 +57,7 @@
     {
       "name": "JAおとふけ",
       "url": "https://www.ja-otofuke.jp/newslist/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "共済", "営業"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "営業"],
       "exclude_rules": [
         { "keyword": "燃料" },
         { "keyword": "入札" },

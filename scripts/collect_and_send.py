@@ -23,13 +23,13 @@ def load_config():
         return json.load(f)
 
 
-def fetch_page(url):
+def fetch_page(url, encoding=None):
     """HTMLページを取得"""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
         resp = requests.get(url, headers=headers, timeout=30)
         resp.raise_for_status()
-        resp.encoding = resp.apparent_encoding
+        resp.encoding = encoding if encoding else resp.apparent_encoding
         return resp.text
     except Exception as e:
         print(f"  取得失敗 ({url}): {e}")
@@ -47,6 +47,15 @@ def extract_date_from_text(text):
         if m:
             y, mo, d = m.group(1), m.group(2), m.group(3)
             return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+    return ""
+
+
+def extract_date_from_url(url):
+    """URL 内の YYYYMMDD パターンから日付を抽出（例: /detail/20260528_xxx.html）"""
+    m = re.search(r'/(\d{8})[_/]', url)
+    if m:
+        d = m.group(1)
+        return f"{d[:4]}-{d[4:6]}-{d[6:8]}"
     return ""
 
 
@@ -87,6 +96,8 @@ def scrape_news_programmatic(html, base_url):
                 date = extract_date_from_text(candidate.get_text())
                 if date:
                     break
+        if not date:
+            date = extract_date_from_url(url)
 
         items.append({"date": date, "title": title, "url": url})
 
@@ -260,7 +271,7 @@ if __name__ == "__main__":
         method = "Claude API" if use_claude else "プログラム"
         print(f"\n▶ {name}（{method}）")
 
-        html = fetch_page(url)
+        html = fetch_page(url, encoding=institution.get("encoding"))
         if not html:
             results.append((name, [], [], method))
             continue
