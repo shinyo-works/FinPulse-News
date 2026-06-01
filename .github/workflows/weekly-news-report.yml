@@ -23,7 +23,7 @@ jobs:
           python-version: '3.11'
 
       - name: 必要パッケージをインストール
-        run: pip install anthropic requests beautifulsoup4
+        run: pip install anthropic requests beautifulsoup4 defusedxml
 
       - name: 収集・レポート生成・送信
         env:

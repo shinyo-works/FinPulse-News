@@ -9,6 +9,11 @@ GitHub Actions で週次実行される
 import os
 import json
 import re
+try:
+    # XXE・billion-laughs 対策。本番(GitHub Actions)では defusedxml をインストール済み
+    from defusedxml import ElementTree as ET
+except ImportError:  # ローカルにdefusedxml未導入の場合のフォールバック
+    import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urljoin
@@ -102,6 +107,41 @@ def scrape_news_programmatic(html, base_url):
         items.append({"date": date, "title": title, "url": url})
 
     return items[:60]
+
+
+def scrape_hokuyo_xml(base_url):
+    """北洋銀行: 新着情報は JS で年別XMLフィード（announcement/{year}.xml）から描画される。
+    静的HTMLには記事タイトルが無いため、XMLを直接取得して解析する。
+    年またぎの lookback に備えて今年と前年の2ファイルを取得する。"""
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    items = []
+    this_year = datetime.now().year
+    for year in (this_year, this_year - 1):
+        xml_url = urljoin(base_url, f"{year}.xml")
+        try:
+            resp = requests.get(xml_url, headers=headers, timeout=30)
+            if resp.status_code != 200:
+                print(f"  XML取得スキップ ({xml_url}): status {resp.status_code}")
+                continue
+            root = ET.fromstring(resp.content)
+        except Exception as e:
+            print(f"  XML取得失敗 ({xml_url}): {e}")
+            continue
+        for art in root.findall("article"):
+            title_el = art.find("title")
+            if title_el is None:
+                continue
+            title = (title_el.text or "").strip()
+            title = re.sub(r"\s*\(PDF[^)]*\)\s*$", "", title)  # 「 (PDF 2.4MB)」を除去
+            if not title:
+                continue
+            href = title_el.get("href", "")
+            url = urljoin(base_url, href) if href else ""
+            date = extract_date_from_text(art.findtext("viewdate", ""))
+            if not date:
+                date = extract_date_from_url(url)
+            items.append({"date": date, "title": title, "url": url})
+    return items
 
 
 def extract_news_with_claude(client, name, url, html, lookback_days):
@@ -299,19 +339,26 @@ if __name__ == "__main__":
         name = institution["name"]
         url = institution["url"]
         use_claude = institution.get("use_claude", False)
-        method = "Claude API" if use_claude else "プログラム"
+        scraper = institution.get("scraper", "programmatic")
+        method = "Claude API" if use_claude else ("XML" if scraper == "hokuyo_xml" else "プログラム")
         print(f"\n▶ {name}（{method}）")
 
-        html = fetch_page(url, encoding=institution.get("encoding"))
-        if not html:
-            results.append((name, [], [], method))
-            continue
-
         if use_claude:
+            html = fetch_page(url, encoding=institution.get("encoding"))
+            if not html:
+                results.append((name, [], [], method))
+                continue
             items = extract_news_with_claude(claude_client, name, url, html, lookback_days)
             passed, excluded = apply_filters(items, institution)
         else:
-            items = scrape_news_programmatic(html, url)
+            if scraper == "hokuyo_xml":
+                items = scrape_hokuyo_xml(url)
+            else:
+                html = fetch_page(url, encoding=institution.get("encoding"))
+                if not html:
+                    results.append((name, [], [], method))
+                    continue
+                items = scrape_news_programmatic(html, url)
             passed_all, excluded = apply_filters(items, institution)
             passed = filter_by_lookback(passed_all, lookback_days)
             if not passed:
