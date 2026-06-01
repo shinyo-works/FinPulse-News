@@ -14,13 +14,22 @@ try:
     from defusedxml import ElementTree as ET
 except ImportError:  # ローカルにdefusedxml未導入の場合のフォールバック
     import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 import anthropic
+
+# 実行環境(GitHub Actions)はUTCで動くため、日付の基準は日本時間(JST)に固定する。
+# cron は日曜20:00 UTC = 月曜05:00 JST 実行なので、JST化しないとレポートが日曜日付になる。
+JST = timezone(timedelta(hours=9))
+
+
+def now_jst():
+    """JST基準の現在時刻（tz-aware）"""
+    return datetime.now(JST)
 
 
 def load_config():
@@ -116,7 +125,7 @@ def scrape_hokuyo_xml(base_url):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     items = []
     seen = set()  # 同一記事が複数カテゴリで重複登録されるため除去
-    this_year = datetime.now().year
+    this_year = now_jst().year
     for year in (this_year, this_year - 1):
         xml_url = urljoin(base_url, f"{year}.xml")
         try:
@@ -152,7 +161,7 @@ def scrape_hokuyo_xml(base_url):
 def extract_news_with_claude(client, name, url, html, lookback_days):
     """Claude APIでHTMLからニュース一覧を抽出（複雑サイト用）"""
     cutoff_note = f"過去{lookback_days}日以内の記事のみ抽出してください。" if lookback_days else "すべての記事を抽出してください。"
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = now_jst().strftime("%Y-%m-%d")
     html_truncated = html[:15000]
 
     prompt = f"""以下は「{name}」（{url}）の新着情報ページのHTMLです。
@@ -190,7 +199,7 @@ def filter_by_lookback(items, lookback_days):
     """lookback_days日以内の記事のみ通過（0=全件）"""
     if not lookback_days:
         return items
-    cutoff = datetime.now() - timedelta(days=lookback_days)
+    cutoff = (now_jst() - timedelta(days=lookback_days)).date()
     result = []
     for item in items:
         date_str = item.get("date", "")
@@ -198,7 +207,7 @@ def filter_by_lookback(items, lookback_days):
             result.append(item)
             continue
         try:
-            if datetime.strptime(date_str, "%Y-%m-%d") >= cutoff:
+            if datetime.strptime(date_str, "%Y-%m-%d").date() >= cutoff:
                 result.append(item)
         except ValueError:
             result.append(item)
@@ -209,14 +218,14 @@ def get_fallback_item(passed_all, lookback_days):
     """期間内に通過記事がない場合、期間外で最も新しい通過記事を返す"""
     if not lookback_days:
         return None
-    cutoff = datetime.now() - timedelta(days=lookback_days)
+    cutoff = (now_jst() - timedelta(days=lookback_days)).date()
     older = []
     for item in passed_all:
         date_str = item.get("date", "")
         if not date_str:
             continue
         try:
-            if datetime.strptime(date_str, "%Y-%m-%d") < cutoff:
+            if datetime.strptime(date_str, "%Y-%m-%d").date() < cutoff:
                 older.append(item)
         except ValueError:
             pass
@@ -331,13 +340,13 @@ def send_email(subject, body):
 
 
 if __name__ == "__main__":
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = now_jst().strftime("%Y-%m-%d")
     config = load_config()
     lookback_days = config.get("lookback_days", 30)
 
     print(f"=== 金融機関新着情報収集 ({today} / 過去{lookback_days}日) ===")
 
-    claude_client = anthropic.Anthropic()
+    claude_client = None  # use_claude機関がある時だけ遅延生成（現configでは未使用）
     results = []
 
     for institution in config["institutions"]:
@@ -353,6 +362,8 @@ if __name__ == "__main__":
             if not html:
                 results.append((name, [], [], method))
                 continue
+            if claude_client is None:
+                claude_client = anthropic.Anthropic()
             items = extract_news_with_claude(claude_client, name, url, html, lookback_days)
             passed, excluded = apply_filters(items, institution)
         else:
