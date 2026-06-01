@@ -1,6 +1,6 @@
 {
   "_comment": "lookback_days: 収集対象とする過去日数（0=全件取得）",
-  "lookback_days": 30,
+  "lookback_days": 90,
 
   "institutions": [
     {

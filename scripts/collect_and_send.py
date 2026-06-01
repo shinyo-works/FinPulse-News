@@ -115,6 +115,7 @@ def scrape_hokuyo_xml(base_url):
     年またぎの lookback に備えて今年と前年の2ファイルを取得する。"""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     items = []
+    seen = set()  # 同一記事が複数カテゴリで重複登録されるため除去
     this_year = datetime.now().year
     for year in (this_year, this_year - 1):
         xml_url = urljoin(base_url, f"{year}.xml")
@@ -140,6 +141,10 @@ def scrape_hokuyo_xml(base_url):
             date = extract_date_from_text(art.findtext("viewdate", ""))
             if not date:
                 date = extract_date_from_url(url)
+            key = (title, date)  # 同一告知が複数カテゴリ・別IDで登録されるため
+            if key in seen:
+                continue
+            seen.add(key)
             items.append({"date": date, "title": title, "url": url})
     return items
 
