@@ -73,6 +73,20 @@ def extract_date_from_url(url):
     return ""
 
 
+# 「今月のローン金利」のように、日付がどこにも無い常設ページを表す相対表現。
+# これらは常に当月時点の情報なので、無日付のまま素通りさせず現在月の日付を補う。
+_CURRENT_MONTH_WORDS = ["今月", "当月", "本月"]
+
+
+def infer_date_from_relative_text(title):
+    """タイトルに「今月」等の相対表現があれば、現在月の初日(YYYY-MM-01)を補う。
+    十勝信組「今月のローン金利」など、ページ本体にも日付が無い常設項目が
+    日付空欄のまま lookback を素通りするのを防ぎ、当月の項目として正しく扱う。"""
+    if any(w in title for w in _CURRENT_MONTH_WORDS):
+        return now_jst().replace(day=1).strftime("%Y-%m-%d")
+    return ""
+
+
 # ナビゲーションや不要リンクのキーワード
 _SKIP_WORDS = [
     "ホーム", "トップ", "サイトマップ", "お問い合わせ", "アクセス", "採用",
@@ -112,8 +126,12 @@ def scrape_news_programmatic(html, base_url):
                     break
         if not date:
             date = extract_date_from_url(url)
+        date_inferred = False
+        if not date:
+            date = infer_date_from_relative_text(title)
+            date_inferred = bool(date)
 
-        items.append({"date": date, "title": title, "url": url})
+        items.append({"date": date, "title": title, "url": url, "date_inferred": date_inferred})
 
     return items[:60]
 
@@ -289,6 +307,8 @@ def format_report(results, today, lookback_days):
             for item in passed:
                 star = " ⭐金利・キャンペーン" if item.get("star") else ""
                 note = " ※1ヵ月超・最新" if item.get("fallback") else ""
+                if item.get("date_inferred"):
+                    note += " ※当月分（日付はページに記載なし・当月初で補完）"
                 lines.append(f"| {item.get('date','')} | {item['title']}{star}{note} | {item.get('url','')} |")
         else:
             lines.append("（該当なし）")
