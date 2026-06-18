@@ -1,0 +1,21 @@
+#!/bin/sh
+# pre-commit ゲート: ステージした Python ファイルの構文を検査する。
+# どの CLI(Codex / Claude Code)がコミットしても、壊れて起動しないスクリプトの
+# 混入を防ぐ機械的な関門。core.hooksPath=.githooks で有効化（git管理され共有される）。
+#
+# 有効化（クローン直後に1回だけ）:
+#   git config core.hooksPath .githooks
+
+files=$(git diff --cached --name-only --diff-filter=ACM -- '*.py')
+
+if [ -z "$files" ]; then
+  exit 0
+fi
+
+echo "[pre-commit] Python 構文チェック中..."
+if ! python -m py_compile $files; then
+  echo "[pre-commit] 構文エラーがあります。修正してから再コミットしてください。" >&2
+  exit 1
+fi
+echo "[pre-commit] OK"
+exit 0
