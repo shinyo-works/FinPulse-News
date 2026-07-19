@@ -1,5 +1,5 @@
 """
-send_resend.py — Resend SDK経由でメール送信
+send_resend.py — Resend API経由でメール送信
 
 使い方:
   python send_resend.py "件名" "本文"
@@ -7,51 +7,14 @@ send_resend.py — Resend SDK経由でメール送信
 """
 
 import sys
-import os
 
+from scripts.emailer import load_dotenv, send_resend_email
 
-def _load_dotenv():
-    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-    if not os.path.exists(env_path):
-        return
-    with open(env_path, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                key, _, val = line.partition("=")
-                os.environ.setdefault(key.strip(), val.strip())
-
-_load_dotenv()
+load_dotenv()
 
 
 def send_via_resend(subject: str, body: str) -> bool:
-    api_key = os.environ.get("RESEND_API_KEY", "").strip()
-    if not api_key:
-        print("エラー: RESEND_API_KEY が設定されていません（.env を確認してください）")
-        return False
-    to_addr = os.environ.get("REPORT_TO", "").strip()
-    if not to_addr:
-        print("エラー: REPORT_TO が設定されていません（.env を確認してください）")
-        return False
-
-    try:
-        import resend
-        resend.api_key = api_key
-        r = resend.Emails.send({
-            "from": "onboarding@resend.dev",
-            "to": to_addr,
-            "subject": subject,
-            "html": f"<pre style='font-family:sans-serif;white-space:pre-wrap'>{body}</pre>"
-        })
-        print(f"Resendメール送信成功: ID={r.get('id', '不明')}")
-        return True
-    except ImportError:
-        print("エラー: resend パッケージが未インストールです。以下を実行してください:")
-        print("  pip install resend")
-        return False
-    except Exception as e:
-        print(f"Resend エラー: {e}")
-        return False
+    return send_resend_email(subject, body, html_body=True)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ GitHub Actions で週次実行される
 import os
 import json
 import re
+import calendar
 try:
     # XXE・billion-laughs 対策。本番(GitHub Actions)では defusedxml をインストール済み
     from defusedxml import ElementTree as ET
@@ -22,6 +23,11 @@ import requests
 from bs4 import BeautifulSoup
 import anthropic
 
+try:
+    from .emailer import send_resend_email
+except ImportError:
+    from emailer import send_resend_email
+
 # 実行環境(GitHub Actions)はUTCで動くため、日付の基準は日本時間(JST)に固定する。
 # cron は日曜20:00 UTC = 月曜05:00 JST 実行なので、JST化しないとレポートが日曜日付になる。
 JST = timezone(timedelta(hours=9))
@@ -29,6 +35,7 @@ JST = timezone(timedelta(hours=9))
 # 機関別ヴューアー用の全期間集約は、この月数までに制限してサイズを頭打ちにする。
 # 日付別レポートは対象外のため、過去分も従来どおりすべて閲覧できる。
 INSTITUTION_WINDOW_MONTHS = 24
+DEFAULT_STAR_KEYWORDS = ("金利", "キャンペーン")
 
 
 def now_jst():
@@ -71,7 +78,6 @@ def extract_date_from_text(text):
 def date_n_months_ago(n, base=None):
     """base（未指定ならJST今日）から n ヶ月前の同日を返す。
     月末日はその月の最終日にクランプ（例: 5/31 の3ヶ月前 → 2/28）。"""
-    import calendar
     d = (base or now_jst().date())
     month = d.month - n
     year = d.year
@@ -80,6 +86,21 @@ def date_n_months_ago(n, base=None):
         year -= 1
     day = min(d.day, calendar.monthrange(year, month)[1])
     return d.replace(year=year, month=month, day=day)
+
+
+def parse_ymd(value):
+    """YYYY-MM-DD形式の日付をdateへ変換し、不正値はNoneを返す。"""
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return None
+
+
+def is_recent_excluded(item, today):
+    """除外項目が配信日から3ヶ月以内かを判定する。不明・不正な日付は残す。"""
+    today_date = parse_ymd(today) or now_jst().date()
+    item_date = parse_ymd(item.get("date", ""))
+    return item_date is None or item_date >= date_n_months_ago(3, today_date)
 
 
 def extract_date_from_url(url):
@@ -273,10 +294,12 @@ def get_fallback_item(passed_all, lookback_days):
     return best
 
 
-def apply_filters(items, institution):
+def apply_filters(items, institution, star_keywords=None):
     """include_keywords・exclude_rules でフィルタ適用"""
     include_kw = institution.get("include_keywords", [])
     exclude_rules = institution.get("exclude_rules", [])
+    if star_keywords is None:
+        star_keywords = DEFAULT_STAR_KEYWORDS
     passed = []
     excluded = []
 
@@ -299,7 +322,7 @@ def apply_filters(items, institution):
             continue
 
         if not include_kw or any(kw in title for kw in include_kw):
-            if any(k in title for k in ["金利", "キャンペーン"]):
+            if any(k in title for k in star_keywords):
                 item["star"] = True
             passed.append(item)
         else:
@@ -313,22 +336,6 @@ def format_report(results, today, lookback_days):
     lines = [f"# 金融機関新着情報レポート — {today}", ""]
     total_passed = 0
     total_excluded = 0
-
-    # 配信日から3ヶ月以上経過した除外項目は古すぎるため列挙しない（無日付は fail-open で残す）。
-    try:
-        today_date = datetime.strptime(today, "%Y-%m-%d").date()
-    except ValueError:
-        today_date = now_jst().date()
-    excl_cutoff = date_n_months_ago(3, today_date)
-
-    def is_recent_excluded(item):
-        date_str = item.get("date", "")
-        if not date_str:
-            return True  # 日付不明は経過判定できないため残す
-        try:
-            return datetime.strptime(date_str, "%Y-%m-%d").date() >= excl_cutoff
-        except ValueError:
-            return True
 
     # 通過セクション（全機関）
     for name, passed, excluded, method in results:
@@ -355,7 +362,7 @@ def format_report(results, today, lookback_days):
     lines.append("# 除外一覧")
     lines.append("")
     for name, passed, excluded, method in results:
-        excluded_recent = [it for it in excluded if is_recent_excluded(it)]
+        excluded_recent = [it for it in excluded if is_recent_excluded(it, today)]
         total_excluded += len(excluded_recent)
         lines.append(f"## {name}　❌ 除外（{len(excluded_recent)}件）")
         if excluded_recent:
@@ -391,21 +398,6 @@ def clean_report_title(title):
 
 def build_report_data(results, today, lookback_days):
     """収集結果から、ヴューアーで使う1レポート分のデータを組み立てる。"""
-    try:
-        today_date = datetime.strptime(today, "%Y-%m-%d").date()
-    except ValueError:
-        today_date = now_jst().date()
-    excluded_cutoff = date_n_months_ago(3, today_date)
-
-    def is_recent_excluded(item):
-        date_str = item.get("date", "")
-        if not date_str:
-            return True
-        try:
-            return datetime.strptime(date_str, "%Y-%m-%d").date() >= excluded_cutoff
-        except ValueError:
-            return True
-
     institutions = []
     for name, passed, excluded, method in results:
         passed_data = []
@@ -421,7 +413,7 @@ def build_report_data(results, today, lookback_days):
 
         excluded_data = []
         for item in excluded:
-            if not is_recent_excluded(item):
+            if not is_recent_excluded(item, today):
                 continue
             excluded_data.append({
                 "date": item.get("date", ""),
@@ -543,32 +535,25 @@ def write_json_viewer_data(results, today, lookback_days, data_dir="output/data"
 
 def send_email(subject, body):
     """Resend APIでメールを送信"""
-    api_key = os.environ["RESEND_API_KEY"].strip()
-    to_addr = os.environ["REPORT_TO"].strip()
-    response = requests.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "from": "onboarding@resend.dev",
-            "to": [to_addr],
-            "subject": subject,
-            "text": body,
-        },
-        timeout=30,
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    to_addr = os.environ.get("REPORT_TO", "").strip()
+    if not api_key or not to_addr:
+        print("送信設定が不足しているため、メール送信をスキップします")
+        return False
+    return send_resend_email(
+        subject,
+        body,
+        api_key=api_key,
+        to_addr=to_addr,
+        raise_on_error=True,
     )
-    if not response.ok:
-        print(f"Resendエラー {response.status_code}: {response.text}")
-        response.raise_for_status()
-    print(f"メール送信成功: ID={response.json().get('id')}")
 
 
 if __name__ == "__main__":
     today = now_jst().strftime("%Y-%m-%d")
     config = load_config()
     lookback_days = config.get("lookback_days", 30)
+    star_keywords = config.get("star_keywords", DEFAULT_STAR_KEYWORDS)
 
     print(f"=== 金融機関新着情報収集 ({today} / 過去{lookback_days}日) ===")
 
@@ -591,7 +576,7 @@ if __name__ == "__main__":
             if claude_client is None:
                 claude_client = anthropic.Anthropic()
             items = extract_news_with_claude(claude_client, name, url, html, lookback_days)
-            passed, excluded = apply_filters(items, institution)
+            passed, excluded = apply_filters(items, institution, star_keywords)
         else:
             if scraper == "hokuyo_xml":
                 items = scrape_hokuyo_xml(url)
@@ -601,7 +586,7 @@ if __name__ == "__main__":
                     results.append((name, [], [], method))
                     continue
                 items = scrape_news_programmatic(html, url)
-            passed_all, excluded = apply_filters(items, institution)
+            passed_all, excluded = apply_filters(items, institution, star_keywords)
             passed = filter_by_lookback(passed_all, lookback_days)
             if not passed:
                 fallback = get_fallback_item(passed_all, lookback_days)

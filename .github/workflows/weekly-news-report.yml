@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
@@ -33,6 +30,7 @@ jobs:
         run: python scripts/collect_and_send.py
 
       - name: レポートをGitにコミット
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
