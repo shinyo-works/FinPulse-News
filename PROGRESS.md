@@ -8,7 +8,7 @@
 ## 2026-05-24 — Phase 2 準備完了
 
 - AI-trend-weather-News の実績ある Resend 送信方式を採用 ✅
-- `send_resend.py` 作成（Resend SDK経由・redacted@example.com 宛） ✅
+- `send_resend.py` 作成（Resend SDK経由・送信先メールは `REPORT_TO` で設定） ✅
 - `docs/routine-prompt-template.md` 作成（Phase 3 ルーティン用） ✅
 - `.env.example` 作成（RESEND_API_KEY テンプレ） ✅
 - 次の一手: `.env` に RESEND_API_KEY を設定 → Phase 2 実行テスト

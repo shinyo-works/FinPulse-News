@@ -7,7 +7,7 @@
 - 節目（意味のあるコミット）ごとに本ファイルを更新し、**コードと同じコミットに含める**。
 - 更新時は下の「最終更新」を必ず書き換える（古さを検知できるように）。
 
-**最終更新**: 2026-07-19 / 機関別集約に24ヶ月の保持窓を追加（更新者: Codex）
+**最終更新**: 2026-07-19 / public公開前の送信先Secret化とPages用ファイルを追加（更新者: Codex）
 
 ---
 
@@ -22,13 +22,14 @@
   - `scripts/backfill_json.py` で既存Markdownレポート12件を `output/data/` へ変換。初期の旧形式レポートにも対応。
   - `docs/index.html` に日付モード・機関モード・検索・機関絞り込み・除外表示・スマホ表示を実装（外部ライブラリなし）。
 - 機関別集約に24ヶ月の保持窓を追加: `build_institution_index` が直近24ヶ月だけを集約し、日付別JSON・index.json・ヴューアーの形式は不変。
-- 未コミットの変更: なし。
+- public公開前の準備を実装（未コミット）: 送信先を `REPORT_TO` Secretへ移し、リポジトリ直下にPages用リダイレクトと`.nojekyll`を追加。
+- 未コミットの変更: `scripts/collect_and_send.py`、`send_report.py`、`send_resend.py`、`.github/workflows/weekly-news-report.yml`、`.env.example`、`PROGRESS.md`、`docs/routine-prompt-template.md`、`docs/publish-prep-codex-instructions.md`、`index.html`、`.nojekyll`、`HANDOFF.md`。
 - 検証: `python -m py_compile`（対象4スクリプト構文OK）、バックフィル12件成功、JavaScript構文OK。ローカルブラウザで日付・機関切替、検索、絞り込み、除外、スマホ表示を確認済み。lint/型/test 基盤は未導入。
 
 ## 残課題（優先度順）
 
-1. **ヴューアー第2弾**: `.github/workflows/weekly-news-report.yml` の自動コミット対象に `output/data/` を加える（今回の指示では対象外）。
-2. **GitHub Pages 有効化**: リポジトリの公開設定を行い、`docs/index.html` を公開する（ユーザー操作・今回の指示では対象外）。
+1. **公開の手動設定**: ユーザーがGitHub Secret `REPORT_TO` を登録してから、リポジトリをpublic化し、GitHub Pagesを `main` ブランチの `/(root)` から有効化する。
+2. **ヴューアー自動公開の確認**: Pages公開後、週次ワークフローで更新された `output/data/` が公開画面にも反映されることを確認する。
 3. **北洋の通過率が低い**（優先度低）: 投稿が企業向け中心で 金利/キャンペーン/お知らせ に当たりにくい。取得自体は正常。必要なら include キーワード調整（別タスク・先に「北洋で何を拾いたいか」の方針決めが必要）。
 4. **将来の年次アーカイブ**: `output/` が数百本規模になったら、古い年のレポートを `output/archive/YYYY/` に移す。将来は `list_report_dates` とindex.json生成をarchive配下も走査するよう拡張する（現時点では未実装）。
 

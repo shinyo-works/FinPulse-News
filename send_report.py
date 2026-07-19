@@ -47,12 +47,16 @@ def send_via_resend(subject, body):
     if not api_key:
         print("エラー: RESEND_API_KEY が設定されていません")
         return False
+    to_addr = os.environ.get("REPORT_TO", "").strip()
+    if not to_addr:
+        print("エラー: REPORT_TO が設定されていません")
+        return False
     try:
         import resend
         resend.api_key = api_key
         r = resend.Emails.send({
             "from": "onboarding@resend.dev",
-            "to": "redacted@example.com",
+            "to": to_addr,
             "subject": subject,
             "html": f"<pre style='font-family:sans-serif;white-space:pre-wrap'>{body}</pre>"
         })

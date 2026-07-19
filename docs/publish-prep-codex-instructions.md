@@ -12,7 +12,7 @@ public にすると全ファイルが世界に見えるため、(1) 送信先メ
 
 ## 背景（なぜやるか）
 
-- 監査の結果、API キー等の秘密情報はリポジトリ・履歴に無く安全。**ただし個人 Gmail `redacted@example.com` が複数ファイルにベタ書き**されており、public 化すると自動収集され迷惑メールの温床になり得る。
+- 監査の結果、API キー等の秘密情報はリポジトリ・履歴に無く安全。**ただし個人 Gmail の実アドレスが複数ファイルにベタ書き**されており、public 化すると自動収集され迷惑メールの温床になり得る。
 - 方針: 送信先を GitHub Secret `REPORT_TO` に移し、コードは環境変数から読む。現行コード・現行ドキュメントからアドレスを消す。
 - 注意: **過去の git 履歴にはアドレスが残る**（履歴書き換えはしない）。今回は「現行ファイルから消す」までが目的。
 
@@ -21,9 +21,9 @@ public にすると全ファイルが世界に見えるため、(1) 送信先メ
 ## 1. メール送信先を Secret 化する
 
 ### 対象と現状（ベタ書き箇所）
-- `scripts/collect_and_send.py`（`send_email` 内）… `"to": ["redacted@example.com"]`
-- `send_report.py` … `"to": "redacted@example.com"`
-- `send_resend.py` … `"to": "redacted@example.com"`
+- `scripts/collect_and_send.py`（`send_email` 内）… `"to": ["<REPORT_TO>"]`
+- `send_report.py` … `"to": "<REPORT_TO>"`
+- `send_resend.py` … `"to": "<REPORT_TO>"`
 
 ### やること
 3ファイルすべて、宛先を環境変数 `REPORT_TO` から読むよう修正する。
@@ -59,8 +59,8 @@ REPORT_TO=送信先メールアドレス（例: name@example.com）
 
 ### 現行ドキュメントからアドレスを消す
 public で見えるドキュメントのベタ書きも placeholder に置換（履歴は残るが現行ファイルからは消す）:
-- `PROGRESS.md`（`redacted@example.com 宛` の記述）→ 「送信先メール（`REPORT_TO` Secret）宛」等に置換。
-- `docs/routine-prompt-template.md`（`Resend でメール送信（redacted@example.com）`）→ 「Resend でメール送信（送信先は `REPORT_TO` Secret）」等に置換。
+- `PROGRESS.md`（個人メールアドレス宛の記述）→ 「送信先メール（`REPORT_TO` Secret）宛」等に置換。
+- `docs/routine-prompt-template.md`（個人メールアドレスを含む送信先記述）→ 「Resend でメール送信（送信先は `REPORT_TO` Secret）」等に置換。
 
 ---
 
@@ -109,7 +109,7 @@ python -m py_compile scripts/collect_and_send.py send_report.py send_resend.py s
 ```
 - ソース全文検索で、現行の追跡ファイルに実アドレスが残っていないこと:
   ```bash
-  git grep -n "redacted@example.com"
+  git grep -n '<送信先メールアドレス>'
   ```
   → **ヒット0件**であること（履歴は対象外。現行ファイルのみ確認）。
 - ローカルで送信を試す場合は `.env` に `REPORT_TO` を設定してから。未設定なら分かりやすいエラーで落ちることを確認。
@@ -132,7 +132,7 @@ python -m py_compile scripts/collect_and_send.py send_report.py send_resend.py s
 - [ ] ワークフローの送信ステップに `REPORT_TO: ${{ secrets.REPORT_TO }}` を追加。
 - [ ] `.env.example` に `REPORT_TO` を追記。
 - [ ] `PROGRESS.md` / `docs/routine-prompt-template.md` の実アドレスを placeholder に置換。
-- [ ] `git grep "redacted@example.com"` が現行ファイルで0件。
+- [ ] 実際の送信先メールアドレスを指定した `git grep` が現行ファイルで0件。
 - [ ] リポジトリ直下に `index.html`（`docs/index.html` へリダイレクト）と空の `.nojekyll` を追加。
 - [ ] `python -m py_compile` 全対象OK。pre-commit を通してコミットできる。
 - [ ] `HANDOFF.md` 更新済み。

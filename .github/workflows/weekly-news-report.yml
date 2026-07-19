@@ -29,6 +29,7 @@ jobs:
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REPORT_TO: ${{ secrets.REPORT_TO }}
         run: python scripts/collect_and_send.py
 
       - name: レポートをGitにコミット

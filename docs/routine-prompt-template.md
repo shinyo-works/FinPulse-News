@@ -150,5 +150,5 @@ Claude ルーティン（月曜 05:00 JST）
 
 GitHub Actions（dispatch イベント受信）
   → GITHUB_EVENT_PATH からレポートを読み込み
-  → Resend でメール送信（redacted@example.com）
+  → Resend でメール送信（送信先は `REPORT_TO` Secret）
 ```

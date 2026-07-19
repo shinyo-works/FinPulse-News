@@ -544,6 +544,7 @@ def write_json_viewer_data(results, today, lookback_days, data_dir="output/data"
 def send_email(subject, body):
     """Resend APIでメールを送信"""
     api_key = os.environ["RESEND_API_KEY"].strip()
+    to_addr = os.environ["REPORT_TO"].strip()
     response = requests.post(
         "https://api.resend.com/emails",
         headers={
@@ -552,7 +553,7 @@ def send_email(subject, body):
         },
         json={
             "from": "onboarding@resend.dev",
-            "to": ["redacted@example.com"],
+            "to": [to_addr],
             "subject": subject,
             "text": body,
         },
