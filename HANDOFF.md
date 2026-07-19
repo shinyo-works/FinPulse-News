@@ -22,9 +22,9 @@
   - `scripts/backfill_json.py` で既存Markdownレポート12件を `output/data/` へ変換。初期の旧形式レポートにも対応。
   - `docs/index.html` に日付モード・機関モード・検索・機関絞り込み・除外表示・スマホ表示を実装（外部ライブラリなし）。
 - 機関別集約に24ヶ月の保持窓を追加: `build_institution_index` が直近24ヶ月だけを集約し、日付別JSON・index.json・ヴューアーの形式は不変。
-- public公開前の準備を実装（未コミット）: 送信先を `REPORT_TO` Secretへ移し、リポジトリ直下にPages用リダイレクトと`.nojekyll`を追加。
-- 未コミットの変更: `scripts/collect_and_send.py`、`send_report.py`、`send_resend.py`、`.github/workflows/weekly-news-report.yml`、`.env.example`、`PROGRESS.md`、`docs/routine-prompt-template.md`、`docs/publish-prep-codex-instructions.md`、`index.html`、`.nojekyll`、`HANDOFF.md`。
-- 検証: `python -m py_compile`（対象4スクリプト構文OK）、バックフィル12件成功、JavaScript構文OK。ローカルブラウザで日付・機関切替、検索、絞り込み、除外、スマホ表示を確認済み。lint/型/test 基盤は未導入。
+- public公開前の準備を実装・コミット済み（`ad3133b`）: 送信先を `REPORT_TO` Secretへ移し、リポジトリ直下にPages用リダイレクトと`.nojekyll`を追加。
+- 未コミットの変更: なし。
+- 検証: `python -m py_compile`（対象4スクリプト構文OK）、`REPORT_TO` 未設定時の送信停止、個人メール実値の `git grep` 0件、バックフィル12件成功、JavaScript構文OK。ローカルブラウザで日付・機関切替、検索、絞り込み、除外、スマホ表示を確認済み。lint/型/test 基盤は未導入。
 
 ## 残課題（優先度順）
 
