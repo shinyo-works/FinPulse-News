@@ -7,7 +7,7 @@
 - 節目（意味のあるコミット）ごとに本ファイルを更新し、**コードと同じコミットに含める**。
 - 更新時は下の「最終更新」を必ず書き換える（古さを検知できるように）。
 
-**最終更新**: 2026-07-19 / 履歴書き換えでGmail除去→リポジトリをpublic化（更新者: Claude Code）
+**最終更新**: 2026-07-19 / ヴューアー左サイドバーのUI微修正を追加（更新者: Codex）
 
 ---
 
@@ -25,7 +25,8 @@
 - public公開前の準備を実装・コミット済み: 送信先を `REPORT_TO` Secretへ移し、リポジトリ直下にPages用リダイレクト(`index.html`)と`.nojekyll`を追加。
 - **git履歴を書き換えてGmailを完全除去（2026-07-19・git-filter-repo）**: (a) 全履歴のファイル内容の個人Gmail実値を `redacted@example.com` に置換、(b) コミット作者/コミッターのGmailを noreply(`maintainer@finpulse-news.invalid`) に置換。**全コミットのSHAが変わったため、過去のHANDOFF記載やコミットメッセージ中の旧ハッシュ（例 `ad3133b` 等）は無効**。旧履歴を持つstaleブランチ `claude/bold-planck-rxVHX` はリモートから削除済み。旧履歴のバックアップは `../FinPulse-News-backup-pre-rewrite.bundle`。
 - **リポジトリを public 化済み（2026-07-19）**。`REPORT_TO` Secret 登録済み。現行ファイル・全リモート履歴ともに個人Gmailの実値は0件。
-- 未コミットの変更: 本ファイル（HANDOFF.md）の更新のみ。
+- ヴューアー左サイドバーを微修正: 機関リストを日付リストより上に移し、日付リストだけを高密度化。JavaScript・ID・データ形式は不変。
+- 未コミットの変更: なし。
 - 検証: `python -m py_compile`（対象4スクリプト構文OK）、`REPORT_TO` 未設定時の送信停止、個人メール実値の `git grep` 0件、バックフィル12件成功、JavaScript構文OK。ローカルブラウザで日付・機関切替、検索、絞り込み、除外、スマホ表示を確認済み。lint/型/test 基盤は未導入。
 
 ## 残課題（優先度順）
