@@ -64,6 +64,20 @@ def extract_date_from_text(text):
     return ""
 
 
+def date_n_months_ago(n, base=None):
+    """base（未指定ならJST今日）から n ヶ月前の同日を返す。
+    月末日はその月の最終日にクランプ（例: 5/31 の3ヶ月前 → 2/28）。"""
+    import calendar
+    d = (base or now_jst().date())
+    month = d.month - n
+    year = d.year
+    while month <= 0:
+        month += 12
+        year -= 1
+    day = min(d.day, calendar.monthrange(year, month)[1])
+    return d.replace(year=year, month=month, day=day)
+
+
 def extract_date_from_url(url):
     """URL 内の YYYYMMDD パターンから日付を抽出（例: /detail/20260528_xxx.html）"""
     m = re.search(r'/(\d{8})[_/]', url)
@@ -296,6 +310,22 @@ def format_report(results, today, lookback_days):
     total_passed = 0
     total_excluded = 0
 
+    # 配信日から3ヶ月以上経過した除外項目は古すぎるため列挙しない（無日付は fail-open で残す）。
+    try:
+        today_date = datetime.strptime(today, "%Y-%m-%d").date()
+    except ValueError:
+        today_date = now_jst().date()
+    excl_cutoff = date_n_months_ago(3, today_date)
+
+    def is_recent_excluded(item):
+        date_str = item.get("date", "")
+        if not date_str:
+            return True  # 日付不明は経過判定できないため残す
+        try:
+            return datetime.strptime(date_str, "%Y-%m-%d").date() >= excl_cutoff
+        except ValueError:
+            return True
+
     # 通過セクション（全機関）
     for name, passed, excluded, method in results:
         lines.append(f"## {name}　*（収集: {method}）*")
@@ -316,17 +346,18 @@ def format_report(results, today, lookback_days):
         lines.append("---")
         lines.append("")
         total_passed += len(passed)
-        total_excluded += len(excluded)
 
     # 除外セクション（全機関まとめて末尾）
     lines.append("# 除外一覧")
     lines.append("")
     for name, passed, excluded, method in results:
-        lines.append(f"## {name}　❌ 除外（{len(excluded)}件）")
-        if excluded:
+        excluded_recent = [it for it in excluded if is_recent_excluded(it)]
+        total_excluded += len(excluded_recent)
+        lines.append(f"## {name}　❌ 除外（{len(excluded_recent)}件）")
+        if excluded_recent:
             lines.append("| 日付 | タイトル | 除外キーワード |")
             lines.append("|---|---|---|")
-            for item in excluded:
+            for item in excluded_recent:
                 lines.append(f"| {item.get('date','')} | {item['title']} | {item.get('exclude_keyword','')} |")
         lines.append("")
 
