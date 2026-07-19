@@ -11,6 +11,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13"
           ]
         },
@@ -22,6 +23,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06"
           ]
@@ -34,6 +36,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06"
           ]
@@ -85,6 +88,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -293,6 +297,7 @@
           "fallback": true,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -332,6 +337,17 @@
       "name": "北洋銀行",
       "items": [
         {
+          "date": "2026-07-16",
+          "title": "キャリアバンク株式会社の完全子会社化に関するお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260716_076725.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-20"
+          ]
+        },
+        {
           "date": "2026-07-08",
           "title": "口座不正譲渡等の罰則強化および『送金犯罪』の罰則創設のお知らせ",
           "url": "https://www.hokuyobank.co.jp/announcement/detail/20260708_076701.html",
@@ -339,6 +355,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13"
           ]
         },
@@ -350,6 +367,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13"
           ]
         },
@@ -372,6 +390,7 @@
           "fallback": true,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -454,6 +473,17 @@
       "name": "JAおとふけ",
       "items": [
         {
+          "date": "2026-07-13",
+          "title": "第1スタンド日曜日営業のお知らせ",
+          "url": "https://www.ja-otofuke.jp/hokurennews/13006/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-20"
+          ]
+        },
+        {
           "date": "2026-06-23",
           "title": "【イベント】ウェルカムキャンペーンのお知らせ",
           "url": "https://www.ja-otofuke.jp/2023/12965/",
@@ -473,6 +503,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -489,6 +520,7 @@
           "fallback": true,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -586,6 +618,17 @@
       "name": "十勝信用組合",
       "items": [
         {
+          "date": "2026-07-17",
+          "title": "オリコ提携各種ローンWeb申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_orico_maintenance.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-20"
+          ]
+        },
+        {
           "date": "2026-07-01",
           "title": "今月のローン金利",
           "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
@@ -593,6 +636,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -613,6 +657,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -834,6 +879,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13"
           ]
         },
@@ -856,6 +902,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
@@ -1044,6 +1091,7 @@
           "fallback": true,
           "date_inferred": false,
           "reports": [
+            "2026-07-20",
             "2026-07-13",
             "2026-07-06",
             "2026-06-29",
