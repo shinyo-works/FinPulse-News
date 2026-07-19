@@ -7,7 +7,7 @@
 - 節目（意味のあるコミット）ごとに本ファイルを更新し、**コードと同じコミットに含める**。
 - 更新時は下の「最終更新」を必ず書き換える（古さを検知できるように）。
 
-**最終更新**: 2026-07-19 / public公開前の送信先Secret化とPages用ファイルを追加（更新者: Codex）
+**最終更新**: 2026-07-19 / 履歴書き換えでGmail除去→リポジトリをpublic化（更新者: Claude Code）
 
 ---
 
@@ -22,13 +22,15 @@
   - `scripts/backfill_json.py` で既存Markdownレポート12件を `output/data/` へ変換。初期の旧形式レポートにも対応。
   - `docs/index.html` に日付モード・機関モード・検索・機関絞り込み・除外表示・スマホ表示を実装（外部ライブラリなし）。
 - 機関別集約に24ヶ月の保持窓を追加: `build_institution_index` が直近24ヶ月だけを集約し、日付別JSON・index.json・ヴューアーの形式は不変。
-- public公開前の準備を実装・コミット済み（`ad3133b`）: 送信先を `REPORT_TO` Secretへ移し、リポジトリ直下にPages用リダイレクトと`.nojekyll`を追加。
-- 未コミットの変更: なし。
+- public公開前の準備を実装・コミット済み: 送信先を `REPORT_TO` Secretへ移し、リポジトリ直下にPages用リダイレクト(`index.html`)と`.nojekyll`を追加。
+- **git履歴を書き換えてGmailを完全除去（2026-07-19・git-filter-repo）**: (a) 全履歴のファイル内容の個人Gmail実値を `redacted@example.com` に置換、(b) コミット作者/コミッターのGmailを noreply(`maintainer@finpulse-news.invalid`) に置換。**全コミットのSHAが変わったため、過去のHANDOFF記載やコミットメッセージ中の旧ハッシュ（例 `ad3133b` 等）は無効**。旧履歴を持つstaleブランチ `claude/bold-planck-rxVHX` はリモートから削除済み。旧履歴のバックアップは `../FinPulse-News-backup-pre-rewrite.bundle`。
+- **リポジトリを public 化済み（2026-07-19）**。`REPORT_TO` Secret 登録済み。現行ファイル・全リモート履歴ともに個人Gmailの実値は0件。
+- 未コミットの変更: 本ファイル（HANDOFF.md）の更新のみ。
 - 検証: `python -m py_compile`（対象4スクリプト構文OK）、`REPORT_TO` 未設定時の送信停止、個人メール実値の `git grep` 0件、バックフィル12件成功、JavaScript構文OK。ローカルブラウザで日付・機関切替、検索、絞り込み、除外、スマホ表示を確認済み。lint/型/test 基盤は未導入。
 
 ## 残課題（優先度順）
 
-1. **公開の手動設定**: ユーザーがGitHub Secret `REPORT_TO` を登録してから、リポジトリをpublic化し、GitHub Pagesを `main` ブランチの `/(root)` から有効化する。
+1. **GitHub Pages 有効化と表示確認**: `REPORT_TO` 登録・public化は完了済み。残るは Settings → Pages で Source: Deploy from a branch / Branch `main` / Folder `/(root)` を有効化し、`https://旧個人アカウント側の github.io/FinPulse-News/`（root `index.html` がヴューアーへリダイレクト）と `…/output/data/index.json` の表示を確認する。公開ルートは必ず `/(root)`（`/docs` 不可＝ヴューアーが `../output/data` を読むため）。
 2. **ヴューアー自動公開の確認**: Pages公開後、週次ワークフローで更新された `output/data/` が公開画面にも反映されることを確認する。
 3. **北洋の通過率が低い**（優先度低）: 投稿が企業向け中心で 金利/キャンペーン/お知らせ に当たりにくい。取得自体は正常。必要なら include キーワード調整（別タスク・先に「北洋で何を拾いたいか」の方針決めが必要）。
 4. **将来の年次アーカイブ**: `output/` が数百本規模になったら、古い年のレポートを `output/archive/YYYY/` に移す。将来は `list_report_dates` とindex.json生成をarchive配下も走査するよう拡張する（現時点では未実装）。
@@ -40,6 +42,9 @@
 
 - 秘密情報は `.env`（Git管理外）と GitHub Secrets に置く。チャットに貼らない。`RESEND_API_KEY`（送信用）、`ANTHROPIC_API_KEY`（Claude遅延生成・現状未消費）。
 - 本番実行は GitHub Actions（`.github/workflows/weekly-news-report.yml`）。依存は workflow 内で `pip install anthropic requests beautifulsoup4 defusedxml`。手動実行は workflow_dispatch ボタン。
+- **リポジトリは public**。秘密情報・個人情報をコミットに含めない。送信先メールは `REPORT_TO` Secret（コード・ドキュメントに実値を書かない）。
+- コミット用の `user.email` はこのリポジトリで noreply(`maintainer@finpulse-news.invalid`)に設定済み。Gmail等の個人メールで再コミットしないこと。別環境で作業する場合も同様に設定する。
+- **履歴は書き換え済み（2026-07-19）。旧clone・旧ブランチを復活させない**。別の場所にclone があれば作り直す（`git reset --hard origin/main` かクローンし直し）。
 - push 先は **origin/main** のみ。
 - pre-commit フックを**スキップしない**（`--no-verify` 禁止）。クローン直後に1回 `git config core.hooksPath .githooks` で有効化する。
 - 参照専用プロジェクト `../AI-trend-weather-News` は**変更禁止**（Read のみ）。
