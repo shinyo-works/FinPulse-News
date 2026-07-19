@@ -26,6 +26,10 @@ import anthropic
 # cron は日曜20:00 UTC = 月曜05:00 JST 実行なので、JST化しないとレポートが日曜日付になる。
 JST = timezone(timedelta(hours=9))
 
+# 機関別ヴューアー用の全期間集約は、この月数までに制限してサイズを頭打ちにする。
+# 日付別レポートは対象外のため、過去分も従来どおりすべて閲覧できる。
+INSTITUTION_WINDOW_MONTHS = 24
+
 
 def now_jst():
     """JST基準の現在時刻（tz-aware）"""
@@ -450,12 +454,24 @@ def list_report_dates(data_dir):
     return sorted(dates, reverse=True)
 
 
-def build_institution_index(data_dir):
-    """全日付のJSONを読み、通過記事を機関別に重複なくまとめる。"""
+def build_institution_index(data_dir, window_months=INSTITUTION_WINDOW_MONTHS, today=None):
+    """全日付のJSONを読み、通過記事を機関別に重複なくまとめる。
+    window_months を指定すると、その月数より古いレポートを集約から除外する。"""
     data_path = Path(data_dir)
     institutions = {}
 
+    cutoff = ""
+    if window_months:
+        base = today or now_jst().strftime("%Y-%m-%d")
+        try:
+            base_date = datetime.strptime(base, "%Y-%m-%d").date()
+        except ValueError:
+            base_date = now_jst().date()
+        cutoff = date_n_months_ago(window_months, base_date).strftime("%Y-%m-%d")
+
     for report_date in list_report_dates(data_path):
+        if cutoff and report_date < cutoff:
+            continue
         report_path = data_path / f"{report_date}.json"
         with report_path.open(encoding="utf-8") as file:
             report = json.load(file)
