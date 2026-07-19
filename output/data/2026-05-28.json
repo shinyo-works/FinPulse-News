@@ -1,0 +1,1537 @@
+{
+  "date": "2026-05-28",
+  "lookback_days": 30,
+  "institutions": [
+    {
+      "name": "帯広信用金庫",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-05-20",
+          "title": "しんきん（個人）（法人）ワンタイムパスワードアプリバージョンアップのお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.05.20-onetimeverup-2026.07.20.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "帯広信用金庫アプリ窓口に行かなくても、かんたんにお手続きいただけます。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ローンシミュレーション",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "預金商品一覧を見る",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "投信インターネットサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "個人型確定拠出年金（iDeCo）外部リンク",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "しんきん相続信託「こころのバトン」外部リンク",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "しんきん暦年信託「こころのリボン」外部リンク",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "おびしんローンプラザ暮らしに役立つ様々なローンのご相談を承ります。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "資産運用のご相談資産運用に関するご相談を受付します。無料となっております。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "相続手続のご案内当金庫でのご相続のお手続きについてご案内させていただきます。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "結婚相談所おびしんキューピット帯広信用金庫は、十勝管内で結婚を望む方々に、お相手のご紹介・お見合いのお手伝いを行うことにより、良きパートナーとの出逢いと結婚へのサポートを行っております。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "相談する（地域サポート部）",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "創業支援皆さまの夢や目標の実現と地域産業の発展のために、創業・起業を志す方を積極的に応援します。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "事業承継支援（M&A）経営者や事業主の皆さまが後継者へ円滑に事業を引き継ぎできるようお手伝いします。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "販路開拓・拡大支援展示商談会や個別商談会などの開催や協力等による参画を通して、事業者の販路開拓・拡大等を積極的に支援します。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "オフィス内田相談会東武百貨店の北海道展を百貨店業界NO.1の物産展に育て上げ、カリスマバイヤーと呼ばれた内田勝規氏による定期的な相談会を実施しています。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "WEB-FB法人・個人事業主向け法人及び個人事業主の方向けに、パソコンや携帯電話から振込・残高照会・入出金明細照会等がご利用できるサービスです。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "WEBバンキングご自宅で口座照会や振込・振替などのお取引ができる便利なサービスです。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "事業者WebサービスS-AGORA(通称：サゴラ)預金・融資取引や電子帳票の閲覧、インボイス管理表発行等が行えるWEBサービスです。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "貸金庫のご案内当金庫の貸金庫がお客さまの大切な財産を安全確実に守ります。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "帯広しんきんケイエール法人及び個人事業主の方向けのデジタルサービスで、資金繰り把握や電子請求書対応、電子ファイル共有・保存などが行えます。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "でんさいサービス電子記録債権法に基づきでんさいネットを利用して提供する新しい決済サービスです。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "外国為替お客さまの海外ビジネスなどをサポートする外国為替取引をお取扱いしています。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "OLTAクラウドファクタリングオンライン完結のファクタリングサービスです。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "帯広しんきんについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "社会貢献活動・CSR",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-21",
+          "title": "特殊詐欺被害防止動画のご案内",
+          "exclude_keyword": "詐欺"
+        },
+        {
+          "date": "2026-05-20",
+          "title": "インターネットバンキング",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-11",
+          "title": "おびしんローンプラザの臨時休業について",
+          "exclude_keyword": "休業"
+        },
+        {
+          "date": "2026-05-08",
+          "title": "事業者様向け「おびしんINFO 2026年5月号」のご案内",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-30",
+          "title": "毎月の十勝管内主要経済指標を掲載しました",
+          "exclude_keyword": "十勝管内主要経済指標"
+        },
+        {
+          "date": "2026-04-28",
+          "title": "長期間所在が不明である会員の除名手続きについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-17",
+          "title": "2026年1～3月期 地域企業景気動向調査レポートおよび特別調査レポート「中小企業経営者のライフデザイン」を掲載しました",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-26",
+          "title": "創業110 周年記念事業「おびしんの森づくりプロジェクト」に係る協定締結について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-18",
+          "title": "「 Bank Pay取引規定 」改定のお知らせ",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "2026-03-13",
+          "title": "「定期性預金の自動解約」および「定期積金の自動定期振替」の取扱開始 ならびに関連規定の改正について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-13",
+          "title": "WEBバンキングサービスにおけるワイズ・ペイメンツ・ジャパンへの振込時の画面表示等に関するご案内",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-02-18",
+          "title": "外国送金（仕向送金）の取扱店変更について",
+          "exclude_keyword": "外国送金"
+        },
+        {
+          "date": "2026-01-29",
+          "title": "ニセ社長詐欺（経営者になりすました詐欺メール）が発生しているのでご注意ください！",
+          "exclude_keyword": "詐欺"
+        },
+        {
+          "date": "2025-12-22",
+          "title": "事業者Ｗｅｂサービス「S-AGORA」の取扱開始について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-12-22",
+          "title": "しんきんテレフォン・ファクシミリサービス（ANSER）のサービス終了について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-12-22",
+          "title": "事業者Ｗｅｂサービス開始に伴う各種⼿数料等の改定について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-12-17",
+          "title": "暗号資産交換業者および資金移動業者へのお振込みについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-11-28",
+          "title": "2025年度半期ディスクロージャーを公開しました",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-11-20",
+          "title": "貸金庫規定の改正について",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "",
+          "title": "セミナー・相談会",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "投信インターネット",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "でんさいサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ふれあいギャラリー",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "帯広信用金庫TOPページ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "帯広信用金庫アプリ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ローンシミュレーション （ご返済額試算）",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "個人型確定拠出年金（iDeCo)（外部）",
+          "exclude_keyword": ""
+        }
+      ]
+    },
+    {
+      "name": "北海道銀行",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-03-18",
+          "title": "2026.03.18個人のお客さま変動金利型ローン商品の基準金利改定について",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161.pdf",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "北海道銀行について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "お取引きをはじめる（口座開設） TOP",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "Web専用口座「スマートLeaf」",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "道銀取引優遇サービス「ステップDo」",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "若者応援サービスDo DEBUT（ドゥ デビュー）",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "道銀Visaデビット",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターネットバンキング TOP",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "電子交付サービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターネット投信",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "セキュリティについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "Web照会サービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "リフォームローン",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "フリーローングレードアップ型",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "各種ローンシミュレーション",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "預金・資産運用 TOP",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "個人型確定拠出年金(iDeCo)",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "1分でできる！あなたのライフシミュレーション",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "介護・認知症保険",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターネット保険",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "どうぎん保険プラザ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "外為業務 TOP",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "外国為替相場情報",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "外国為替関係手数料一覧",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "相続・贈与・信託関連 TOP",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ライフプラン TOP",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "その他・便利なサービス TOP",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ネット決済・電子マネーチャージサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "Web口振受付サービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "外部連携サービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "WEB照会サービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "経営・事業コンサルティング",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "海外ビジネスコンサルティング",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "決済・経理業務効率化",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "お取引きをはじめる（口座開設）",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターネットバンキング",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "介護保険・認知症保険",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "相続・贈与・信託関連",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "その他・便利なサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-22",
+          "title": "2026.05.22個人のお客さまどうぎんアプリ内の一部サービス休止について（5/28 午前9:00～6/1 午前9:00)",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-11",
+          "title": "2026.05.11個人のお客さま個人のお客さま向け「道銀VISAカード」新規申込受付終了及び「北陸Visaカード」の取扱開始について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-10",
+          "title": "2026.04.10個人のお客さま法人のお客さま「投資信託に関する注意事項」等の一部変更について",
+          "exclude_keyword": "投資信託"
+        },
+        {
+          "date": "2026-03-19",
+          "title": "2026.03.19個人のお客さま遠軽信用金庫 中湧別支店「共同窓口」の営業終了について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-19",
+          "title": "2026.03.19個人のお客さま投資信託「ファンド・基準価額一覧」の機能追加について",
+          "exclude_keyword": "投資信託"
+        },
+        {
+          "date": "2026-03-12",
+          "title": "2026.03.12個人のお客さま「Bank Pay取引規定」の改定について",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "2026-03-06",
+          "title": "2026.03.06個人のお客さま「ことら送金サービス」における寄附の取扱開始および関連規定の改定について",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "2026-03-05",
+          "title": "2026.03.05個人のお客さま道銀ダイレクトサービス「債券口座開設」機能の障害復旧について【3/5(木)20:10現在】",
+          "exclude_keyword": "債券"
+        },
+        {
+          "date": "2026-02-25",
+          "title": "2026.02.25個人のお客さま道銀ダイレクトサービスにおける「住宅ローン取引」の一部不具合解消について【2/25 5:00現在】",
+          "exclude_keyword": "不具合"
+        },
+        {
+          "date": "2026-02-18",
+          "title": "2026.02.18個人のお客さま＜どうぎん＞学びのパスポート（教育資金贈与専用預金）追加贈与の受付終了について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-12-12",
+          "title": "2025.12.12個人のお客さま電子交付サービス対象書類の追加について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-10-23",
+          "title": "2025.10.23個人のお客さま「どうぎんアプリご利用規定」および関連規定の改定について",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "2025-10-22",
+          "title": "2025.10.22個人のお客さま「どうぎんアプリ」「道銀ダイレクトサービス」における不正検知システムの導入について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-10-22",
+          "title": "2025.10.22個人のお客さま「口座開設アプリ」のサービス提供終了について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-10-20",
+          "title": "2025.10.20個人のお客さま投資信託の「運用報告書」の電子交付開始について",
+          "exclude_keyword": "投資信託"
+        },
+        {
+          "date": "2025-10-02",
+          "title": "2025.10.02個人のお客さま法人のお客さまシステムメンテナンス作業に伴う各種サービス臨時休⽌について",
+          "exclude_keyword": "システムメンテナンス"
+        },
+        {
+          "date": "2025-09-26",
+          "title": "2025.09.26個人のお客さまどうぎんアプリの家計簿機能「一生通帳 by Moneytree」のサービス終了について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-09-17",
+          "title": "2025.09.17個人のお客さま法人のお客さま天塩郵便局「共同窓口」の営業終了について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-09-12",
+          "title": "2025.09.12個人のお客さまマイクロソフト社Windows10のサポート終了に伴う、「道銀ダイレクトサービス」「Web照会サービス」のご利用環境の変更について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-09-02",
+          "title": "2025.09.02個人のお客さまどうぎんアプリ「ことら送金」における障害の発生について",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2025-09-01",
+          "title": "2025.09.01個人のお客さま法人のお客さまシステムメンテナンス作業に伴う各種サービス臨時休⽌について",
+          "exclude_keyword": "システムメンテナンス"
+        }
+      ]
+    },
+    {
+      "name": "北洋銀行",
+      "method": "プログラム",
+      "passed": [],
+      "excluded": [
+        {
+          "date": "",
+          "title": "法人・個人事業主のお客さま",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "株主・投資家の皆さま",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "企業情報・サステナビリティ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターネットバンキング北洋ダイレクト",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターネット投資信託北洋投信ダイレクト",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターネットバンキング北洋ビジネスダイレクト",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "でんさいネット北洋でんさいサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "外為インターネットバンキング北洋外為Web",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ほくようビジネスID",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "北洋投信ダイレクト",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "北洋ビジネスダイレクト",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "北洋でんさいサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "企業情報・CSR",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "セキュリティ・金融犯罪",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "セキュリティ・金融犯罪について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "外国為替相場情報",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "休日相談会・キャンペーン情報等",
+          "exclude_keyword": "休日相談会"
+        },
+        {
+          "date": "",
+          "title": "資金面のサポート",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "海外ビジネスサポート",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "J-Coin Biz",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ほくようBig Advance",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "個人投資家の皆さまへ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "株式・株主総会情報",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "決算・IRライブラリ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ディスクロージャー・ポリシー",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "サステナビリティ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "退職行員再雇用制度",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "インターンシップ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "口座開設のご案内",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "法人等のお客さま情報の共同利用について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "お客さま保護等管理方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "グループ利益相反管理方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "お客さまからの現金、通帳等のお預りについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "経営者保証に関するガイドラインの取組方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "安定的な資産形成・資産承継を実現するための取組方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "電子決済等代行業者との連携及び協働について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "北洋銀行グループの反社会的勢力への対応に係る基本方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "マネー・ローンダリング及びテロ資金供与等の対策に係る基本方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "金融取引に関する方針等",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "本サイトのご利用にあたって",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "北洋銀行グループのカスタマーハラスメントに対する考え方",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ウェブアクセシビリティ方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "画面や文字の拡大方法について",
+          "exclude_keyword": ""
+        }
+      ]
+    },
+    {
+      "name": "JAおとふけ",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-05-01",
+          "title": "キャンペーン金利のご案内（貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12882/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "JAおとふけブランド",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "音更町すずらん和牛",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JAおとふけ概要",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "キャッチコピー・シンボルマーク",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "基本理念・基本方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "総耕作面積・販売品取扱高",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "事業紹介施設紹介",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "SDGsへの取り組み",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ニュースクリップ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "食育・農産物PR活動",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ボランティア活動",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "農村絵画コンクール",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "暮らしのサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "その他・アラカルト",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-25",
+          "title": "5月24日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-05-11",
+          "title": "5月9日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-05-07",
+          "title": "5月7日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-05-01",
+          "title": "【JA共済】JA自動車共済お見積りキャンペーンのご案内【キャンペーン】",
+          "exclude_keyword": "共済"
+        },
+        {
+          "date": "2026-04-30",
+          "title": "4月30日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-27",
+          "title": "4月26日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-24",
+          "title": "4月24日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-21",
+          "title": "4月21日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-01",
+          "title": "第23回 音更ふるさと農村絵画コンクール 入賞者を掲載いたしました。",
+          "exclude_keyword": "入賞者"
+        },
+        {
+          "date": "2026-04-01",
+          "title": "自動車共済掛金率の変更について",
+          "exclude_keyword": "共済"
+        },
+        {
+          "date": "2026-03-30",
+          "title": "3月29日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-20",
+          "title": "3月20日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-19",
+          "title": "3月19日から灯油の価格を改定致します",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-13",
+          "title": "3月13日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-12",
+          "title": "燃料価格のお知らせについて",
+          "exclude_keyword": "燃料"
+        },
+        {
+          "date": "2026-03-10",
+          "title": "3月10日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-02",
+          "title": "3月1日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-02-20",
+          "title": "2月24日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-02-09",
+          "title": "2月8日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-02-02",
+          "title": "2月2日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-01-27",
+          "title": "1月27日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-01-22",
+          "title": "1月11日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "",
+          "title": "事業紹介・施設紹介",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "農家のお母さんのレシピ集",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ご利用にあたって",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "コンプライアンス",
+          "exclude_keyword": ""
+        }
+      ]
+    },
+    {
+      "name": "十勝信用組合",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "",
+          "title": "今月のローン金利",
+          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-05-13",
+          "title": "未利用口座管理手数料の取り扱いについて",
+          "url": "https://www.tokachishinkumi.com/common/pdf/miriyou_hagaki_2026.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "Ｗｅｂ口振受付サービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ディスクロージャー",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "",
+          "title": "法人向けネットバンキング",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "十勝信用組合【公式】",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-08",
+          "title": "「十勝信用組合返還不要の給付型奨学金」の抽選会実施のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2026-05-01",
+          "title": "金融円滑化に向けた対応の進捗状況を更新致しました。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-22",
+          "title": "フリーローン「クローバー」WEB申込みについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-02-20",
+          "title": "しんくみはばたき奨学金 令和8年度奨学生募集のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2026-02-03",
+          "title": "当組合におけるシステム障害の原因について",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2026-01-29",
+          "title": "当組合におけるシステム障害復旧のお知らせ",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2026-01-29",
+          "title": "当組合におけるシステム障害に関するお知らせ",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2026-01-23",
+          "title": "短期プライムレートの引き上げについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-11-28",
+          "title": "「半期ディスクロージャー」を公開しました",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "2025-11-27",
+          "title": "「手形・小切手の全面的な電子化」に向けた取組について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-11-14",
+          "title": "当組合職員を名乗る（騙った）キャッシュカード搾取について",
+          "exclude_keyword": "搾取"
+        },
+        {
+          "date": "2025-09-10",
+          "title": "信用組合を騙る詐欺メールにご注意ください",
+          "exclude_keyword": "詐欺"
+        },
+        {
+          "date": "2025-09-02",
+          "title": "日本政策金融公庫および帯広信用金庫との「危機事象発生における業務連携に関する覚書」の締結について",
+          "exclude_keyword": "締結"
+        },
+        {
+          "date": "2025-07-30",
+          "title": "2025年版ディスクロージャー誌を掲載いたしました",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "2025-06-16",
+          "title": "「しんくみアプリ with CRECO」におけるフィッシング詐欺にご注意ください",
+          "exclude_keyword": "詐欺"
+        },
+        {
+          "date": "2025-03-25",
+          "title": "当組合の法人向けネットバンキングサービスに関する、電子決済等代行業者との契約内容について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-03-17",
+          "title": "API利用規定の改定のお知らせ",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "2025-02-20",
+          "title": "しんくみはばたき奨学金 令和7年度奨学生募集のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2024-09-26",
+          "title": "定期性預金規定の改訂について",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "2024-09-09",
+          "title": "当組合を騙ったフィッシングへの注意喚起について",
+          "exclude_keyword": "注意喚起"
+        },
+        {
+          "date": "2024-07-30",
+          "title": "2024年版ディスクロージャー誌を掲載いたしました",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "2024-06-28",
+          "title": "第68期事業のご報告について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2024-06-13",
+          "title": "「金融機関をかたる詐欺」にご注意ください！",
+          "exclude_keyword": "詐欺"
+        },
+        {
+          "date": "2024-02-22",
+          "title": "しんくみはばたき奨学金 令和6年度奨学生募集のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2023-07-28",
+          "title": "2023年版ディスクロージャー誌を掲載いたしました",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "2023-02-24",
+          "title": "しんくみはばたき奨学金 令和5年度奨学生募集のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2022-12-26",
+          "title": "新型コロナウイルス感染者に係る今後の公表について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2022-10-20",
+          "title": "マル専口座（専用約束手形当座勘定）の取扱い終了について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2022-10-19",
+          "title": "電子交換所の設立に伴う手形・小切手の取扱変更について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2022-09-22",
+          "title": "インターネットバンキング ワンタイムパスワードアプリ更新のお願い",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2022-06-28",
+          "title": "PayPayとの口座連携開始について(7月4日開始)",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2022-07-29",
+          "title": "2022年版ディスクロージャー誌を掲載いたしました",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "2022-05-02",
+          "title": "しんくみはばたき奨学金 令和4年度奨学生募集終了のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2022-01-25",
+          "title": "しんくみはばたき奨学金 令和4年度奨学生募集のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2022-01-24",
+          "title": "金融機関のマネロン等対策を騙ったフィッシングメールにご注意ください",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2021-12-22",
+          "title": "子ども食堂応援事業を開始",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2021-11-10",
+          "title": "令和3年11月16日よりWeb口座振替のお申込が可能となります",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2021-07-30",
+          "title": "2021年版ディスクロージャー誌を掲載いたしました",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "2021-07-01",
+          "title": "祝日の移動に伴う営業日（休業日）の変更について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2021-05-25",
+          "title": "懸賞作文「小さな助け合いの物語賞」の募集について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2021-05-13",
+          "title": "インターネットバンキングの画面デザインの変更について",
+          "exclude_keyword": ""
+        }
+      ]
+    },
+    {
+      "name": "JAめむろ",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-03-02",
+          "title": "2026.03.02重要なお知らせ貯金商品一覧「金利表」を更新しました",
+          "url": "https://www.ja-memuro.or.jp/important/2971/",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "金融・JAバンク",
+          "exclude_keyword": "金融・JAバンク"
+        },
+        {
+          "date": "",
+          "title": "苦情対応要領について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JAめむろ青年部",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "安心・安全への取り組み",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "金融（JAバンク）",
+          "exclude_keyword": "金融（JAバンク）"
+        },
+        {
+          "date": "",
+          "title": "共済（JA共済）",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "農作業パート情報",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "乳製品・牛肉・豚肉",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "出荷カレンダー一覧",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "らくらく簡単レシピ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "クイックお弁当レシピ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "レストラン「十勝めむろ」",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "新着情報・職員研修状況",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "職員部会近況報告",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "先輩の声・一日の様子",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "マイナビ2027",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-19",
+          "title": "2026.03.19重要なお知らせ定型約款に係る重要なお知らせ",
+          "exclude_keyword": "定型約款"
+        },
+        {
+          "date": "2026-03-18",
+          "title": "2026.03.18重要なお知らせ「ＪＡバンクアプリプラスに関する規定」の一部改正について",
+          "exclude_keyword": "規定"
+        },
+        {
+          "date": "2026-02-01",
+          "title": "2026.02.01重要なお知らせ定型約款に係る重要なお知らせ",
+          "exclude_keyword": "定型約款"
+        },
+        {
+          "date": "2026-01-30",
+          "title": "2026.01.30重要なお知らせ定型約款に係る重要なお知らせ",
+          "exclude_keyword": "定型約款"
+        },
+        {
+          "date": "2025-12-29",
+          "title": "2025.12.29重要なお知らせマネロン・金融犯罪対策への取組強化について",
+          "exclude_keyword": "犯罪"
+        },
+        {
+          "date": "2025-11-14",
+          "title": "2025.11.14金融・JAバンクお客さま本位の業務運営に関する取組状況およびＫＰＩ実績値の公表について",
+          "exclude_keyword": "金融・JAバンク"
+        },
+        {
+          "date": "2025-11-07",
+          "title": "2025.11.07重要なお知らせ定型約款に係る重要なお知らせ",
+          "exclude_keyword": "定型約款"
+        },
+        {
+          "date": "2025-06-01",
+          "title": "2025.06.01金融・JAバンク定型約款一覧「01カード規定類」を更新しました",
+          "exclude_keyword": "定型約款"
+        },
+        {
+          "date": "2025-04-01",
+          "title": "2025.04.01金融・JAバンク定型約款一覧「02貯金規約類」を更新しました",
+          "exclude_keyword": "定型約款"
+        },
+        {
+          "date": "",
+          "title": "一般・消費者の方",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JAめむろインスタグラムOFFICIAL INSTAGRAM",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JAめむろチャンネルOFFICIAL CHANNEL",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "カスタマーハラスメント対策基本方針",
+          "exclude_keyword": ""
+        }
+      ]
+    },
+    {
+      "name": "JA木野",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-04-06",
+          "title": "2026.04.06JAバンク/借りるJA木野住宅ローンキャンペーン実施中！",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/04/JA木野住宅ローン.pdf",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "JA木野 木野農業協同組合",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JA木野について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "職員インタビュー",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "働いている方の声",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "コンプライアンス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-27",
+          "title": "2026.05.27JAバンク/貯める預貯金等の不正な払戻しへのJAバンクの対応について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-01",
+          "title": "2026.04.01お知らせ組合だよりを更新しました！",
+          "exclude_keyword": "組合だより"
+        },
+        {
+          "date": "2026-04-01",
+          "title": "2026.04.01お知らせ組合長あいさつを更新しました",
+          "exclude_keyword": "組合長あいさつ"
+        },
+        {
+          "date": "2026-02-06",
+          "title": "2026.02.06JAバンク/借りる短期プライムレートの引き上げについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-01-13",
+          "title": "2026.01.13お知らせ組合だよりを更新しました！",
+          "exclude_keyword": "組合だより"
+        },
+        {
+          "date": "2025-12-03",
+          "title": "2025.12.03JA共済自動車共済掛金率の変更について",
+          "exclude_keyword": "共済"
+        },
+        {
+          "date": "",
+          "title": "KINO ストーリー",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JAバンク/貯める",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JAバンク/借りる",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "Googleマップで見る",
+          "exclude_keyword": ""
+        }
+      ]
+    }
+  ]
+}

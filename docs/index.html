@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="帯広エリアの金融機関新着情報を日付・機関別に閲覧するヴューアー">
+  <title>FinPulse News｜金融機関新着情報</title>
+  <style>
+    :root {
+      --navy-950: #0b1f33;
+      --navy-900: #102a43;
+      --navy-800: #173e5e;
+      --teal-700: #0d6e6e;
+      --teal-600: #138484;
+      --teal-100: #dff3f1;
+      --gold-500: #d59b2b;
+      --gold-100: #fff4d8;
+      --ink: #172b3a;
+      --muted: #647684;
+      --line: #d9e2e8;
+      --paper: #ffffff;
+      --canvas: #f4f7f8;
+      --danger-100: #fff0ee;
+      --danger-700: #a54234;
+      --shadow: 0 10px 30px rgba(11, 31, 51, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { color-scheme: light; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+      line-height: 1.55;
+    }
+
+    button, input { font: inherit; }
+
+    button { color: inherit; }
+
+    .mobile-tabs { display: none; }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 292px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      color: #eef7fa;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(32, 144, 139, 0.27), transparent 32%),
+        var(--navy-950);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand {
+      padding: 26px 24px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+      font-weight: 750;
+      letter-spacing: 0.02em;
+    }
+
+    .pulse-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #55d6c9;
+      box-shadow: 0 0 0 5px rgba(85, 214, 201, 0.15);
+    }
+
+    .brand p {
+      margin: 0;
+      color: #a9c0ce;
+      font-size: 0.78rem;
+    }
+
+    .nav-section { padding: 20px 14px 4px; }
+
+    .nav-heading {
+      margin: 0 10px 9px;
+      color: #9db6c5;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 3px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-button {
+      width: 100%;
+      padding: 9px 12px;
+      text-align: left;
+      color: #d7e5ec;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+    }
+
+    .nav-button:hover { background: rgba(255, 255, 255, 0.07); }
+
+    .nav-button.active {
+      color: #ffffff;
+      background: rgba(40, 158, 151, 0.2);
+      border-color: rgba(85, 214, 201, 0.38);
+    }
+
+    .main { min-width: 0; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 15px clamp(20px, 4vw, 54px);
+      background: rgba(244, 247, 248, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
+    .search-wrap { position: relative; flex: 1 1 300px; }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      color: var(--muted);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 11px 14px 11px 42px;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(11, 31, 51, 0.03);
+    }
+
+    #searchInput:focus {
+      border-color: var(--teal-600);
+      box-shadow: 0 0 0 3px rgba(19, 132, 132, 0.13);
+    }
+
+    .filter-menu { position: relative; }
+
+    .control-button,
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 43px;
+      gap: 8px;
+      padding: 9px 13px;
+      white-space: nowrap;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      cursor: pointer;
+    }
+
+    .control-button:hover, .toggle-label:hover { border-color: #a9bbc7; }
+
+    .filter-popover {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      z-index: 30;
+      display: none;
+      width: 260px;
+      padding: 13px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .filter-popover.open { display: block; }
+
+    .filter-popover p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 3px;
+      cursor: pointer;
+    }
+
+    .filter-option input { accent-color: var(--teal-700); }
+
+    .toggle-label input { accent-color: var(--teal-700); }
+
+    .content {
+      max-width: 1358px;
+      margin: 0 auto;
+      padding: 42px clamp(20px, 4vw, 54px) 70px;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 22px;
+      margin-bottom: 25px;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--teal-700);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--navy-950);
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+    }
+
+    .summary {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .institution-section {
+      margin-bottom: 22px;
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 18px rgba(11, 31, 51, 0.045);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-title {
+      margin: 0;
+      color: var(--navy-900);
+      font-size: 1.05rem;
+    }
+
+    .count {
+      display: inline-flex;
+      align-items: center;
+      min-width: 34px;
+      justify-content: center;
+      padding: 3px 9px;
+      color: var(--teal-700);
+      background: var(--teal-100);
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .method {
+      margin-left: 8px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 500;
+    }
+
+    .table-wrap { width: 100%; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      padding: 13px 18px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid #edf1f3;
+    }
+
+    th {
+      color: var(--muted);
+      background: #fbfcfc;
+      font-size: 0.72rem;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+
+    tbody tr:hover td { background: #fbfdfd; }
+
+    .date-column { width: 128px; }
+    .report-column { width: 210px; }
+    .keyword-column { width: 150px; }
+
+    .article-link {
+      color: var(--navy-800);
+      font-weight: 650;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .article-link:hover { color: var(--teal-700); text-decoration: underline; }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      color: var(--muted);
+      background: #edf2f4;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .badge.star { color: #79520c; background: var(--gold-100); }
+    .badge.inferred { color: var(--teal-700); background: var(--teal-100); }
+    .badge.excluded { color: var(--danger-700); background: var(--danger-100); }
+
+    .star-row td:first-child { box-shadow: inset 3px 0 0 var(--gold-500); }
+
+    .report-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .report-tag {
+      padding: 2px 7px;
+      color: var(--navy-800);
+      background: #edf2f4;
+      border-radius: 6px;
+      font-size: 0.7rem;
+    }
+
+    mark {
+      padding: 0 2px;
+      color: inherit;
+      background: #ffe59d;
+      border-radius: 3px;
+    }
+
+    .excluded-block {
+      margin: 12px 14px 14px;
+      overflow: hidden;
+      border: 1px solid #f0d5d0;
+      border-radius: 10px;
+    }
+
+    .excluded-title {
+      margin: 0;
+      padding: 10px 14px;
+      color: var(--danger-700);
+      background: #fff8f7;
+      font-size: 0.83rem;
+      font-weight: 750;
+    }
+
+    .card-list { display: none; }
+
+    .empty-state,
+    .loading-state {
+      padding: 56px 24px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--paper);
+      border: 1px dashed #b9c8d1;
+      border-radius: var(--radius);
+    }
+
+    .empty-state strong,
+    .loading-state strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--navy-900);
+      font-size: 1rem;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 920px) {
+      .app-shell { grid-template-columns: 245px minmax(0, 1fr); }
+      .controls { flex-wrap: wrap; }
+      .search-wrap { flex-basis: 100%; }
+    }
+
+    @media (max-width: 700px) {
+      body { padding-top: 54px; }
+
+      .mobile-tabs {
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 100;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        height: 54px;
+        padding: 6px;
+        background: var(--navy-950);
+      }
+
+      .mobile-tab {
+        color: #c8d9e2;
+        background: transparent;
+        border: 0;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+
+      .mobile-tab.active { color: #fff; background: rgba(85, 214, 201, 0.18); }
+
+      .app-shell { display: block; min-height: calc(100vh - 54px); }
+
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        min-height: calc(100vh - 54px);
+      }
+
+      body[data-mobile-pane="content"] .sidebar { display: none; }
+      body[data-mobile-pane="nav"] .main { display: none; }
+
+      .brand { padding: 22px 20px 18px; }
+      .nav-section { padding-inline: 12px; }
+
+      .topbar { top: 54px; padding: 10px 14px; }
+      .controls { gap: 8px; }
+      .filter-menu, .toggle-label { flex: 1; }
+      .control-button, .toggle-label { width: 100%; justify-content: center; font-size: 0.84rem; }
+      .filter-popover { position: fixed; inset: 118px 14px auto 14px; width: auto; }
+
+      .content { padding: 27px 14px 45px; }
+      .page-head { align-items: start; margin-bottom: 19px; }
+      h1 { font-size: 1.52rem; }
+
+      .institution-section { border-radius: 12px; }
+      .section-head { align-items: start; padding: 15px; }
+      .method { display: block; margin: 3px 0 0; }
+
+      .table-wrap { display: none; }
+      .card-list { display: grid; gap: 0; }
+
+      .article-card {
+        padding: 15px;
+        border-bottom: 1px solid #edf1f3;
+      }
+
+      .article-card:last-child { border-bottom: 0; }
+      .article-card.star-card { border-left: 3px solid var(--gold-500); }
+
+      .card-date {
+        margin: 0 0 6px;
+        color: var(--muted);
+        font-size: 0.74rem;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .card-meta { margin-top: 10px; }
+      .excluded-block { margin: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body data-mobile-pane="nav">
+  <nav class="mobile-tabs" aria-label="スマートフォン表示切替">
+    <button class="mobile-tab active" type="button" data-pane="nav">一覧</button>
+    <button class="mobile-tab" type="button" data-pane="content">記事</button>
+  </nav>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="レポート選択">
+      <div class="brand">
+        <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>FinPulse News</div>
+        <p>帯広エリア 金融機関レポート</p>
+      </div>
+
+      <section class="nav-section">
+        <h2 class="nav-heading">📅 日付で見る</h2>
+        <ul class="nav-list" id="dateList"><li class="nav-button">読み込み中…</li></ul>
+      </section>
+
+      <section class="nav-section">
+        <h2 class="nav-heading">🏦 機関で見る</h2>
+        <ul class="nav-list" id="institutionList"><li class="nav-button">読み込み中…</li></ul>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="controls">
+          <label class="search-wrap">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <span class="hidden">タイトルを検索</span>
+            <input id="searchInput" type="search" placeholder="記事タイトルを検索" aria-label="記事タイトルを検索" autocomplete="off">
+          </label>
+
+          <div class="filter-menu" id="institutionFilterWrap">
+            <button class="control-button" id="filterButton" type="button" aria-expanded="false" aria-controls="filterPopover">
+              機関を絞り込む <span id="filterCount"></span>
+            </button>
+            <div class="filter-popover" id="filterPopover">
+              <p>表示する金融機関</p>
+              <div id="institutionFilters"></div>
+            </div>
+          </div>
+
+          <label class="toggle-label" id="excludedToggleWrap">
+            <input id="excludedToggle" type="checkbox">
+            除外も表示
+          </label>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow" id="modeLabel">REPORT VIEWER</p>
+            <h1 id="pageTitle">レポートを読み込んでいます</h1>
+            <p class="summary" id="pageSummary"></p>
+          </div>
+        </div>
+        <div id="reportContent" aria-live="polite">
+          <div class="loading-state"><strong>データを読み込んでいます</strong>しばらくお待ちください。</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    "use strict";
+
+    const DATA_ROOT = "../output/data";
+    const state = {
+      mode: "date",
+      selectedDate: "",
+      selectedInstitution: "",
+      report: null,
+      manifest: { reports: [] },
+      institutionIndex: { institutions: [] },
+      selectedInstitutions: new Set(),
+      search: "",
+      showExcluded: false,
+    };
+
+    const elements = {
+      dateList: document.getElementById("dateList"),
+      institutionList: document.getElementById("institutionList"),
+      institutionFilters: document.getElementById("institutionFilters"),
+      institutionFilterWrap: document.getElementById("institutionFilterWrap"),
+      filterButton: document.getElementById("filterButton"),
+      filterPopover: document.getElementById("filterPopover"),
+      filterCount: document.getElementById("filterCount"),
+      excludedToggleWrap: document.getElementById("excludedToggleWrap"),
+      excludedToggle: document.getElementById("excludedToggle"),
+      searchInput: document.getElementById("searchInput"),
+      modeLabel: document.getElementById("modeLabel"),
+      pageTitle: document.getElementById("pageTitle"),
+      pageSummary: document.getElementById("pageSummary"),
+      reportContent: document.getElementById("reportContent"),
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      })[char]);
+    }
+
+    function safeUrl(value) {
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol) ? escapeHtml(url.href) : "#";
+      } catch (_error) {
+        return "#";
+      }
+    }
+
+    function highlight(text) {
+      const value = String(text ?? "");
+      const query = state.search.trim();
+      if (!query) return escapeHtml(value);
+      const lowerValue = value.toLocaleLowerCase("ja");
+      const lowerQuery = query.toLocaleLowerCase("ja");
+      let cursor = 0;
+      let output = "";
+      let index = lowerValue.indexOf(lowerQuery);
+      while (index !== -1) {
+        output += escapeHtml(value.slice(cursor, index));
+        output += `<mark>${escapeHtml(value.slice(index, index + query.length))}</mark>`;
+        cursor = index + query.length;
+        index = lowerValue.indexOf(lowerQuery, cursor);
+      }
+      return output + escapeHtml(value.slice(cursor));
+    }
+
+    function matchesSearch(item) {
+      return !state.search.trim() || String(item.title ?? "").toLocaleLowerCase("ja").includes(state.search.trim().toLocaleLowerCase("ja"));
+    }
+
+    function formatDate(date) {
+      if (!date) return "日付不明";
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+      return match ? `${match[1]}年${Number(match[2])}月${Number(match[3])}日` : date;
+    }
+
+    function badges(item) {
+      const list = [];
+      if (item.star) list.push('<span class="badge star">★ 金利・キャンペーン</span>');
+      if (item.fallback) list.push('<span class="badge">期間外の最新記事</span>');
+      if (item.date_inferred) list.push('<span class="badge inferred">日付を当月初で補完</span>');
+      return list.length ? `<div class="badges">${list.join("")}</div>` : "";
+    }
+
+    function articleTable(items, options = {}) {
+      const showReports = Boolean(options.showReports);
+      const rows = items.map((item) => `
+        <tr class="${item.star ? "star-row" : ""}">
+          <td>${escapeHtml(item.date || "—")}</td>
+          <td><a class="article-link" href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${highlight(item.title)}</a>${badges(item)}</td>
+          ${showReports ? `<td><div class="report-tags">${(item.reports || []).map((date) => `<span class="report-tag">${escapeHtml(date)}</span>`).join("")}</div></td>` : ""}
+        </tr>`).join("");
+      const cards = items.map((item) => `
+        <article class="article-card ${item.star ? "star-card" : ""}">
+          <p class="card-date">${escapeHtml(formatDate(item.date))}</p>
+          <a class="article-link" href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${highlight(item.title)}</a>
+          ${badges(item)}
+          ${showReports ? `<div class="card-meta"><div class="report-tags">${(item.reports || []).map((date) => `<span class="report-tag">収録 ${escapeHtml(date)}</span>`).join("")}</div></div>` : ""}
+        </article>`).join("");
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th class="date-column">日付</th><th>タイトル</th>${showReports ? '<th class="report-column">収録レポート</th>' : ""}</tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="card-list">${cards}</div>`;
+    }
+
+    function excludedTable(items) {
+      const rows = items.map((item) => `
+        <tr><td>${escapeHtml(item.date || "—")}</td><td>${highlight(item.title)}</td><td>${escapeHtml(item.exclude_keyword || "—")}</td></tr>`).join("");
+      const cards = items.map((item) => `
+        <article class="article-card">
+          <p class="card-date">${escapeHtml(formatDate(item.date))}</p>
+          <div>${highlight(item.title)}</div>
+          <div class="badges"><span class="badge excluded">除外理由: ${escapeHtml(item.exclude_keyword || "未指定")}</span></div>
+        </article>`).join("");
+      return `
+        <div class="excluded-block">
+          <p class="excluded-title">除外された情報（${items.length}件）</p>
+          <div class="table-wrap"><table><thead><tr><th class="date-column">日付</th><th>タイトル</th><th class="keyword-column">除外キーワード</th></tr></thead><tbody>${rows}</tbody></table></div>
+          <div class="card-list">${cards}</div>
+        </div>`;
+    }
+
+    function emptyState(title, message) {
+      return `<div class="empty-state"><strong>${escapeHtml(title)}</strong>${escapeHtml(message)}</div>`;
+    }
+
+    function renderDateMode() {
+      const report = state.report;
+      if (!report) return;
+      const sections = [];
+      let passedCount = 0;
+      let excludedCount = 0;
+
+      for (const institution of report.institutions || []) {
+        if (!state.selectedInstitutions.has(institution.name)) continue;
+        const passed = (institution.passed || []).filter(matchesSearch);
+        const excluded = (institution.excluded || []).filter(matchesSearch);
+        if (state.search.trim() && !passed.length && !(state.showExcluded && excluded.length)) continue;
+        passedCount += passed.length;
+        excludedCount += state.showExcluded ? excluded.length : 0;
+        sections.push(`
+          <section class="institution-section">
+            <div class="section-head">
+              <h2 class="section-title">${escapeHtml(institution.name)}<span class="method">収集: ${escapeHtml(institution.method)}</span></h2>
+              <span class="count">${passed.length}件</span>
+            </div>
+            ${passed.length ? articleTable(passed) : emptyState("通過記事はありません", "除外情報のみ表示しています。")}
+            ${state.showExcluded && excluded.length ? excludedTable(excluded) : ""}
+          </section>`);
+      }
+
+      elements.modeLabel.textContent = "DATE REPORT";
+      elements.pageTitle.textContent = formatDate(report.date);
+      const period = report.lookback_days ? `対象期間 過去${report.lookback_days}日` : "対象期間 全件";
+      elements.pageSummary.textContent = `${period}・通過 ${passedCount}件${state.showExcluded ? `・除外 ${excludedCount}件` : ""}`;
+      elements.reportContent.innerHTML = sections.length ? sections.join("") : emptyState("該当する記事がありません", "検索語または機関の絞り込みを変更してください。 ");
+    }
+
+    function renderInstitutionMode() {
+      const institution = (state.institutionIndex.institutions || []).find((item) => item.name === state.selectedInstitution);
+      const items = (institution?.items || []).filter(matchesSearch);
+      elements.modeLabel.textContent = "INSTITUTION ARCHIVE";
+      elements.pageTitle.textContent = state.selectedInstitution || "金融機関を選択";
+      elements.pageSummary.textContent = `全レポート横断・重複除去済み・${items.length}件`;
+      elements.reportContent.innerHTML = items.length
+        ? `<section class="institution-section">${articleTable(items, { showReports: true })}</section>`
+        : emptyState("該当する記事がありません", "別の機関または検索語をお試しください。");
+    }
+
+    function render() {
+      const isDateMode = state.mode === "date";
+      elements.institutionFilterWrap.classList.toggle("hidden", !isDateMode);
+      elements.excludedToggleWrap.classList.toggle("hidden", !isDateMode);
+      renderNavigation();
+      if (isDateMode) renderDateMode(); else renderInstitutionMode();
+    }
+
+    function renderNavigation() {
+      elements.dateList.innerHTML = state.manifest.reports.map((date) => `
+        <li><button type="button" class="nav-button ${state.mode === "date" && state.selectedDate === date ? "active" : ""}" data-date="${escapeHtml(date)}">${escapeHtml(formatDate(date))}</button></li>`).join("");
+      elements.institutionList.innerHTML = state.institutionIndex.institutions.map((institution) => `
+        <li><button type="button" class="nav-button ${state.mode === "institution" && state.selectedInstitution === institution.name ? "active" : ""}" data-institution="${escapeHtml(institution.name)}">${escapeHtml(institution.name)}</button></li>`).join("");
+    }
+
+    function buildInstitutionFilters(institutions) {
+      state.selectedInstitutions = new Set(institutions.map((item) => item.name));
+      elements.institutionFilters.innerHTML = institutions.map((institution) => `
+        <label class="filter-option"><input type="checkbox" value="${escapeHtml(institution.name)}" checked> ${escapeHtml(institution.name)}</label>`).join("");
+      updateFilterCount();
+    }
+
+    function updateFilterCount() {
+      const total = state.report?.institutions?.length || 0;
+      elements.filterCount.textContent = total ? `(${state.selectedInstitutions.size}/${total})` : "";
+    }
+
+    async function loadReport(date) {
+      state.mode = "date";
+      state.selectedDate = date;
+      elements.reportContent.innerHTML = '<div class="loading-state"><strong>レポートを読み込んでいます</strong>しばらくお待ちください。</div>';
+      try {
+        const response = await fetch(`${DATA_ROOT}/${date}.json`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        state.report = await response.json();
+        buildInstitutionFilters(state.report.institutions || []);
+        render();
+        showMobilePane("content");
+      } catch (_error) {
+        state.report = null;
+        elements.pageTitle.textContent = formatDate(date);
+        elements.pageSummary.textContent = "";
+        elements.reportContent.innerHTML = emptyState("データを読み込めませんでした", "少し時間を置いてから再度お試しください。");
+      }
+    }
+
+    function selectInstitution(name) {
+      state.mode = "institution";
+      state.selectedInstitution = name;
+      elements.filterPopover.classList.remove("open");
+      elements.filterButton.setAttribute("aria-expanded", "false");
+      render();
+      showMobilePane("content");
+    }
+
+    function showMobilePane(pane) {
+      document.body.dataset.mobilePane = pane;
+      document.querySelectorAll(".mobile-tab").forEach((button) => {
+        button.classList.toggle("active", button.dataset.pane === pane);
+      });
+    }
+
+    async function initialize() {
+      try {
+        const [manifestResponse, institutionResponse] = await Promise.all([
+          fetch(`${DATA_ROOT}/index.json`),
+          fetch(`${DATA_ROOT}/by-institution.json`),
+        ]);
+        if (!manifestResponse.ok || !institutionResponse.ok) throw new Error("データ取得失敗");
+        state.manifest = await manifestResponse.json();
+        state.institutionIndex = await institutionResponse.json();
+        renderNavigation();
+        if (state.manifest.reports.length) {
+          await loadReport(state.manifest.reports[0]);
+        } else {
+          elements.pageTitle.textContent = "レポートがありません";
+          elements.reportContent.innerHTML = emptyState("データがありません", "レポートが生成されると、ここに表示されます。");
+        }
+      } catch (_error) {
+        elements.dateList.innerHTML = "";
+        elements.institutionList.innerHTML = "";
+        elements.pageTitle.textContent = "データを読み込めませんでした";
+        elements.pageSummary.textContent = "";
+        elements.reportContent.innerHTML = emptyState("ヴューアーを開始できません", "HTTPサーバー経由で開いているか、データファイルがあるかをご確認ください。");
+      }
+    }
+
+    elements.dateList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-date]");
+      if (button) loadReport(button.dataset.date);
+    });
+
+    elements.institutionList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-institution]");
+      if (button) selectInstitution(button.dataset.institution);
+    });
+
+    elements.searchInput.addEventListener("input", () => {
+      state.search = elements.searchInput.value;
+      render();
+    });
+
+    elements.excludedToggle.addEventListener("change", () => {
+      state.showExcluded = elements.excludedToggle.checked;
+      renderDateMode();
+    });
+
+    elements.filterButton.addEventListener("click", () => {
+      const isOpen = elements.filterPopover.classList.toggle("open");
+      elements.filterButton.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    elements.institutionFilters.addEventListener("change", (event) => {
+      if (event.target.type !== "checkbox") return;
+      if (event.target.checked) state.selectedInstitutions.add(event.target.value);
+      else state.selectedInstitutions.delete(event.target.value);
+      updateFilterCount();
+      renderDateMode();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".filter-menu")) {
+        elements.filterPopover.classList.remove("open");
+        elements.filterButton.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    document.querySelectorAll(".mobile-tab").forEach((button) => {
+      button.addEventListener("click", () => showMobilePane(button.dataset.pane));
+    });
+
+    initialize();
+  </script>
+</body>
+</html>

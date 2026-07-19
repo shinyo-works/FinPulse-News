@@ -367,6 +367,164 @@ def format_report(results, today, lookback_days):
     return "\n".join(lines)
 
 
+# Markdown表示用の注記。JSONでは文字列ではなく真偽値のフラグとして保持する。
+_TITLE_ANNOTATIONS = [
+    "⭐金利・キャンペーン",
+    "※1ヵ月超・最新",
+    "※当月分（日付はページに記載なし・当月初で補完）",
+]
+
+
+def clean_report_title(title):
+    """タイトルからMarkdown表示用の注記を取り除く。"""
+    cleaned = title or ""
+    for annotation in _TITLE_ANNOTATIONS:
+        cleaned = cleaned.replace(annotation, "")
+    # 初期の手動レポートでは「⭐金利」という短い注記も使っていた。
+    cleaned = re.sub(r"⭐(?:金利(?:・キャンペーン)?|キャンペーン)", "", cleaned)
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
+def build_report_data(results, today, lookback_days):
+    """収集結果から、ヴューアーで使う1レポート分のデータを組み立てる。"""
+    try:
+        today_date = datetime.strptime(today, "%Y-%m-%d").date()
+    except ValueError:
+        today_date = now_jst().date()
+    excluded_cutoff = date_n_months_ago(3, today_date)
+
+    def is_recent_excluded(item):
+        date_str = item.get("date", "")
+        if not date_str:
+            return True
+        try:
+            return datetime.strptime(date_str, "%Y-%m-%d").date() >= excluded_cutoff
+        except ValueError:
+            return True
+
+    institutions = []
+    for name, passed, excluded, method in results:
+        passed_data = []
+        for item in passed:
+            passed_data.append({
+                "date": item.get("date", ""),
+                "title": clean_report_title(item.get("title", "")),
+                "url": item.get("url", ""),
+                "star": bool(item.get("star")),
+                "fallback": bool(item.get("fallback")),
+                "date_inferred": bool(item.get("date_inferred")),
+            })
+
+        excluded_data = []
+        for item in excluded:
+            if not is_recent_excluded(item):
+                continue
+            excluded_data.append({
+                "date": item.get("date", ""),
+                "title": clean_report_title(item.get("title", "")),
+                "exclude_keyword": item.get("exclude_keyword", ""),
+            })
+
+        institutions.append({
+            "name": name,
+            "method": method,
+            "passed": passed_data,
+            "excluded": excluded_data,
+        })
+
+    return {
+        "date": today,
+        "lookback_days": lookback_days,
+        "institutions": institutions,
+    }
+
+
+def list_report_dates(data_dir):
+    """日付別JSONのファイル名から、新しい順の日付一覧を作る。"""
+    data_path = Path(data_dir)
+    dates = [
+        path.stem
+        for path in data_path.glob("*.json")
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.stem)
+    ]
+    return sorted(dates, reverse=True)
+
+
+def build_institution_index(data_dir):
+    """全日付のJSONを読み、通過記事を機関別に重複なくまとめる。"""
+    data_path = Path(data_dir)
+    institutions = {}
+
+    for report_date in list_report_dates(data_path):
+        report_path = data_path / f"{report_date}.json"
+        with report_path.open(encoding="utf-8") as file:
+            report = json.load(file)
+
+        for institution in report.get("institutions", []):
+            name = institution.get("name", "")
+            if not name:
+                continue
+            items_by_key = institutions.setdefault(name, {})
+            for item in institution.get("passed", []):
+                title = clean_report_title(item.get("title", ""))
+                url = item.get("url", "")
+                key = (title, url)
+                if key not in items_by_key:
+                    items_by_key[key] = {
+                        "date": item.get("date", ""),
+                        "title": title,
+                        "url": url,
+                        "star": bool(item.get("star")),
+                        "fallback": bool(item.get("fallback")),
+                        "date_inferred": bool(item.get("date_inferred")),
+                        "reports": [],
+                    }
+                aggregate = items_by_key[key]
+                item_date = item.get("date", "")
+                if item_date and item_date > aggregate["date"]:
+                    aggregate["date"] = item_date
+                aggregate["star"] = aggregate["star"] or bool(item.get("star"))
+                aggregate["fallback"] = aggregate["fallback"] or bool(item.get("fallback"))
+                aggregate["date_inferred"] = aggregate["date_inferred"] or bool(item.get("date_inferred"))
+                if report_date not in aggregate["reports"]:
+                    aggregate["reports"].append(report_date)
+
+    result = []
+    for name, items_by_key in institutions.items():
+        items = list(items_by_key.values())
+        for item in items:
+            item["reports"].sort(reverse=True)
+        items.sort(key=lambda item: (bool(item["date"]), item["date"]), reverse=True)
+        result.append({"name": name, "items": items})
+
+    return {"institutions": result}
+
+
+def write_json_viewer_data(results, today, lookback_days, data_dir="output/data"):
+    """日付別・日付一覧・機関別のJSONをまとめて書き出す。"""
+    data_path = Path(data_dir)
+    data_path.mkdir(parents=True, exist_ok=True)
+
+    report_data = build_report_data(results, today, lookback_days)
+    report_path = data_path / f"{today}.json"
+    report_path.write_text(
+        json.dumps(report_data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    manifest = {"reports": list_report_dates(data_path)}
+    (data_path / "index.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    institution_index = build_institution_index(data_path)
+    (data_path / "by-institution.json").write_text(
+        json.dumps(institution_index, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def send_email(subject, body):
     """Resend APIでメールを送信"""
     api_key = os.environ["RESEND_API_KEY"].strip()
@@ -442,6 +600,13 @@ if __name__ == "__main__":
     output_path.parent.mkdir(exist_ok=True)
     output_path.write_text(report, encoding="utf-8")
     print(f"\nレポート保存: {output_path}")
+
+    # JSONはヴューアー用の追加出力。失敗しても従来のメール送信は続ける。
+    try:
+        write_json_viewer_data(results, today, lookback_days)
+        print("ヴューアー用JSON保存: output/data/")
+    except Exception as e:
+        print(f"ヴューアー用JSON保存失敗（メール送信には影響しません）: {e}")
 
     total_passed = sum(len(p) for _, p, _, _ in results)
     subject = f"【金融機関新着情報】{today}（通過 {total_passed}件）"

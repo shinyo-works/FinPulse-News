@@ -1,0 +1,1152 @@
+{
+  "institutions": [
+    {
+      "name": "帯広信用金庫",
+      "items": [
+        {
+          "date": "2026-07-13",
+          "title": "手形・小切手の全面的な電子化に向けた対応のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.07.13-tegatawaribiki-2027.04.30.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13"
+          ]
+        },
+        {
+          "date": "2026-07-06",
+          "title": "創業110周年記念キャンペーン実施のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.07.06-campaign110-2027.03.31.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06"
+          ]
+        },
+        {
+          "date": "2026-07-03",
+          "title": "「自由金利型定期預金（大口定期）」の新規取扱終了 および「スーパー定期」への一本化に関するお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.07.03-ooguchi-2027.07.31.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06"
+          ]
+        },
+        {
+          "date": "2026-06-19",
+          "title": "「とかち次世代経営ゼミナール 経営管理者養成コース」受講者募集のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.06.19-kachizemi-2026.07.08.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22"
+          ]
+        },
+        {
+          "date": "2026-06-18",
+          "title": "とかち・イノベーション・プログラム2026（TIP12）募集開始のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.06.18-TIP12-2026.07.14.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22"
+          ]
+        },
+        {
+          "date": "2026-06-17",
+          "title": "おびしんふれあいギャラリー「白華個展」開催のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.06.17-hureaigallery-2026.06.30.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-29",
+            "2026-06-22"
+          ]
+        },
+        {
+          "date": "2026-05-20",
+          "title": "しんきん（個人）（法人）ワンタイムパスワードアプリバージョンアップのお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.05.20-onetimeverup-2026.07.20.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-05-08",
+          "title": "事業者様向け「おびしんINFO 2026年5月号」のご案内",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/obishininfo.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-04-17",
+          "title": "2026年1～3月期 地域企業景気動向調査レポートおよび特別調査レポート「中小企業経営者のライフデザイン」を掲載しました",
+          "url": "https://www.shinkin.co.jp/obishin/relationship/tokachi/info/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-04-01",
+          "title": "創業110 周年記念定期預金 「アニバーサリー110」 終了のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.04.01-anniversary110_shuuryou-2026.09.30.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-04-01",
+          "title": "創業110周年記念定期預金「アニバーサリー110」終了のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.04.01-anniversary110_shuuryou-2026.09.30.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-26",
+          "title": "創業110周年記念事業「おびしんの森づくりプロジェクト」に係る協定締結について",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.03.26-obishinnomori-2027.03.31.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-17",
+          "title": "当金庫および日本郵便株式会社による「十勝地域における効率的な金融インフラ維持に関する連携協定」の締結ならびに当金庫鹿追支店の鹿追郵便局内への移転・共同店舗の併設について",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.03.17-japanpost_shikaoi-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-16",
+          "title": "貸金庫サービスの新規受付停止および一部店舗のサービス終了について",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.03.16-kashikinkoservice-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-13",
+          "title": "「定期性預金の自動解約」および「定期積金の自動定期振替」の取扱開始ならびに関連規定の改正について",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.03.13-teiki_jidoukaiyaku-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-05",
+          "title": "WEB バンキングサービス 振込限度額等引き下げのお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.03.05-webbk_hurikomigendo_hikisage-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-03-05",
+          "title": "WEBバンキングサービス 振込限度額等引き下げのお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.03.05-webbk_hurikomigendo_hikisage-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-24",
+          "title": "預金金利の引き上げについて",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.02.24-yokinrate_teiki-muki.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-01-14",
+          "title": "預金金利および短期プライムレートの引き上げについて",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.01.14-yokinrate_tanpurarate-muki.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-01-13",
+          "title": "カーライフプラン110周年特別金利の取り扱い開始について",
+          "url": "https://www.shinkin.co.jp/obishin/personal/loan/carlife/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "WEB-FB サービス、WEB バンキングサービス 障害復旧のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2025.11.28-IB_recovery-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "北海道銀行",
+      "items": [
+        {
+          "date": "2026-05-11",
+          "title": "個人のお客さま向け「道銀VISAカード」新規申込受付終了及び「北陸Visaカード」の取扱開始について",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/524048eea82460fd010148afd2fae2cd.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-19",
+          "title": "遠軽信用金庫 中湧別支店「共同窓口」の営業終了について",
+          "url": "https://www.hokkaidobank.co.jp/info/5578.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-18",
+          "title": "2026.03.18個人のお客さま変動金利型ローン商品の基準金利改定について",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161.pdf",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28"
+          ]
+        },
+        {
+          "date": "2026-03-18",
+          "title": "変動金利型ローン商品の基準金利改定について",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-18",
+          "title": "＜どうぎん＞学びのパスポート（教育資金贈与専用預金）追加贈与の受付終了について",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/39a444f066e96e57487dd4f35a2a2c10.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "北洋銀行",
+      "items": [
+        {
+          "date": "2026-07-08",
+          "title": "口座不正譲渡等の罰則強化および『送金犯罪』の罰則創設のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260708_076701.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13"
+          ]
+        },
+        {
+          "date": "2026-07-06",
+          "title": "コンビニATM利用手数料における優遇条件変更のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260706_076621.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13"
+          ]
+        },
+        {
+          "date": "2026-04-24",
+          "title": "「ほくよう春の定期預金特別金利キャンペーン」の開始について",
+          "url": "https://www.hokuyobank.co.jp/newsrelease/pdf/20260424_076538.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-04-22",
+          "title": "コンサルティングプラザのゴールデンウィーク営業のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260422_076503.html",
+          "star": false,
+          "fallback": true,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01"
+          ]
+        },
+        {
+          "date": "2026-04-20",
+          "title": "システム障害復旧のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260420_076525.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08"
+          ]
+        },
+        {
+          "date": "2026-04-13",
+          "title": "でんさいネット主催「手形・小切手の全面的な電子化セミナー」オンライン開催のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260413_076502.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08"
+          ]
+        },
+        {
+          "date": "2026-04-01",
+          "title": "「ほくようエンゼル口座開設キャンペーン」を実施します",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260401_076478.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08"
+          ]
+        },
+        {
+          "date": "2026-03-02",
+          "title": "北洋ダイレクト（個人向けインターネットバンキング）の新規お申込み受付停止について",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260302_076355.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-16",
+          "title": "クレジットカード（JCB）に関するお知らせについて",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260216_076284.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JAおとふけ",
+      "items": [
+        {
+          "date": "2026-06-23",
+          "title": "【イベント】ウェルカムキャンペーンのお知らせ",
+          "url": "https://www.ja-otofuke.jp/2023/12965/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-06",
+            "2026-06-29"
+          ]
+        },
+        {
+          "date": "2026-06-03",
+          "title": "営業時間変更のお知らせ",
+          "url": "https://www.ja-otofuke.jp/hokurennews/12937/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08"
+          ]
+        },
+        {
+          "date": "2026-05-01",
+          "title": "キャンペーン金利のご案内（貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12882/",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-04-01",
+          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
+          "url": "https://www.ja-otofuke.jp/2023/12715/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-23",
+          "title": "金融店舗における昼休み時間帯（12時～13時）の対応について",
+          "url": "https://www.ja-otofuke.jp/2023/12698/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-24"
+          ]
+        },
+        {
+          "date": "2026-03-23",
+          "title": "金融店舗における昼休み時間帯（12時〜13時）の対応について",
+          "url": "https://www.ja-otofuke.jp/2023/12698/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-26",
+          "title": "金利改定のご案内（貯金）",
+          "url": "https://www.ja-otofuke.jp/2023/12629/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-24",
+          "title": "金融店舗の営業時間変更（お昼休み導入）について",
+          "url": "https://www.ja-otofuke.jp/2023/12618/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-03",
+          "title": "金利改定のご案内（貯金・貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12596/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "十勝信用組合",
+      "items": [
+        {
+          "date": "2026-07-01",
+          "title": "今月のローン金利",
+          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
+          "star": true,
+          "fallback": false,
+          "date_inferred": true,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-05-13",
+          "title": "未利用口座管理手数料の取り扱いについて",
+          "url": "https://www.tokachishinkumi.com/common/pdf/miriyou_hagaki_2026.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-05-13",
+          "title": "未利用口座管理手数料の取り扱いについて",
+          "url": "https://www.shinyo.jp/common/pdf/miriyou_hagaki_2026.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-05-01",
+          "title": "金融円滑化に向けた対応の進捗状況を更新致しました",
+          "url": "https://www.shinyo.jp/common/pdf/shintyoku.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-04-22",
+          "title": "フリーローン「クローバー」WEB申込みについて",
+          "url": "https://www.shinyo.jp/common/pdf/info_clover.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-04-03",
+          "title": "創業70周年記念定期預金・定期積金「プレミアム70」の取扱開始について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/premium70.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-04-03",
+          "title": "創業70周年記念定期預金・定期積金「プレミアム70」の取扱開始について",
+          "url": "https://www.shinyo.jp/common/pdf/premium70.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-27",
+          "title": "預金金利の引き上げについて（定期性）",
+          "url": "https://www.tokachishinkumi.com/common/pdf/202603_yokinkinri.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24"
+          ]
+        },
+        {
+          "date": "2026-02-20",
+          "title": "ビジネスカジュアル導入のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/business_casual.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24"
+          ]
+        },
+        {
+          "date": "2026-01-23",
+          "title": "預金金利の引き上げについて",
+          "url": "https://www.tokachishinkumi.com/common/pdf/20260123_kinri.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24"
+          ]
+        },
+        {
+          "date": "2026-01-19",
+          "title": "融資業務移転のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_2026019_yuushi.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24"
+          ]
+        },
+        {
+          "date": "2026-01-19",
+          "title": "窓口営業時間変更のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_2026019_madoguchi.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "『キャンペーン商品』定期預金・定期積金【エコ2024】について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/eco_cam.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "新しんくみ住宅ローンの取り扱いを開始いたしました",
+          "url": "https://www.tokachishinkumi.com/customer/loan/housing_loan_saison.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "「未利用口座管理手数料」および「口座自動解約」について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/miriyoukouza.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "手数料改訂のお知らせ",
+          "url": "https://www.tokachishinkumi.com/info/info_charge2022.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "【注意】インターネットバンキングをお使いの方へのお知らせ",
+          "url": "https://www.tokachishinkumi.com/info/ib_windows11.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "『キャンペーン商品』しんくみ健康定期預金・定期積金の取扱いの開始について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/kenko_teiki.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "title": "創業70周年記念定期預金「プレ70」の取扱開始について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/pre70.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JAめむろ",
+      "items": [
+        {
+          "date": "2026-07-01",
+          "title": "2026.07.01お知らせ夏の定期貯金キャンペーンの実施について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/07/定期貯金キャンペーン.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13"
+          ]
+        },
+        {
+          "date": "2026-07-01",
+          "title": "2026.07.01お知らせ夏の定期貯金キャンペーンの実施についてNEW",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/07/定期貯金キャンペーン.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-06"
+          ]
+        },
+        {
+          "date": "2026-06-09",
+          "title": "2026.06.09重要なお知らせ預貯金等の不正な払戻しへのJA バンクの対応について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/06/預貯金等の不正な払戻しへのJA-バンクの対応について.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22"
+          ]
+        },
+        {
+          "date": "2026-06-09",
+          "title": "2026.06.09重要なお知らせ預貯金等の不正な払戻しへのJA バンクの対応についてNEW",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/06/預貯金等の不正な払戻しへのJA-バンクの対応について.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-15"
+          ]
+        },
+        {
+          "date": "2026-03-02",
+          "title": "2026.03.02重要なお知らせ貯金商品一覧「金利表」を更新しました",
+          "url": "https://www.ja-memuro.or.jp/important/2971/",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-03-02",
+          "title": "2026.03.02お知らせ貯金金利の改定について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/02/R8.2貯金金利の改定について.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-03-02",
+          "title": "貯金金利の改定について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/02/R8.2貯金金利の改定について.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-02",
+          "title": "貯金商品一覧「金利表」を更新しました",
+          "url": "https://www.ja-memuro.or.jp/important/2971/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2025-11-27",
+          "title": "2025.11.27重要なお知らせ法人のお客様の新規口座開設について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2025/11/さあ法人口座開設の厳格化対応周知文-.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-27",
+          "title": "法人のお客様の新規口座開設について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2025/11/さあ法人口座開設の厳格化対応周知文-.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2025-11-14",
+          "title": "2025.11.14金融・JAバンクお客さま本位の業務運営に関する取組状況およびＫＰＩ実績値の公表について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2025/11/02_組合員・利用者本位の業務運営に関する取組状況およびＫＰＩ実績値の公表について.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-14",
+          "title": "お客さま本位の業務運営に関する取組状況およびＫＰＩ実績値の公表について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2025/11/02_組合員・利用者本位の業務運営に関する取組状況およびＫＰＩ実績値の公表について.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2025-10-06",
+          "title": "2025.10.06重要なお知らせシステム更改に伴うサービス一時休止のお知らせについて",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2025/10/atm_stop_c.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-09-26",
+          "title": "2025.09.26重要なお知らせ手形・小切手の全面的な電子化に向けた対応について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2025/09/手形・小切手の廃止について【JAめむろ】.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-09-26",
+          "title": "手形・小切手の全面的な電子化に向けた対応について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2025/09/手形・小切手の廃止について【JAめむろ】.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2025-04-01",
+          "title": "2025.04.01重要なお知らせ貯金商品一覧「金利表」を更新しました",
+          "url": "https://www.ja-memuro.or.jp/important/2034/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "",
+          "title": "金融・JAバンク",
+          "url": "https://www.ja-memuro.or.jp/category/finance_info/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "",
+          "title": "金融（JAバンク）",
+          "url": "https://www.ja-memuro.or.jp/jabank/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JA木野",
+      "items": [
+        {
+          "date": "2026-04-06",
+          "title": "2026.04.06JAバンク/借りるJA木野住宅ローンキャンペーン実施中！",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/04/JA木野住宅ローン.pdf",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-04-06",
+          "title": "JA木野住宅ローンキャンペーン実施中！",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/04/JA木野住宅ローン.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-19",
+          "title": "2026.03.19お知らせJAネットバンク利用規定について",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/03/新旧対照表_ＪＡネットバンク利用規定.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-15",
+            "2026-06-08"
+          ]
+        },
+        {
+          "date": "2026-02-06",
+          "title": "短期プライムレートの引き上げについて",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/02/ホームページ掲載（R8.2.6）.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-03",
+          "title": "2026.02.03お知らせ貯金金利引き上げについて",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/02/080209金利表.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-02-03",
+          "title": "貯金金利引き上げについて",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/02/080209金利表.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2025-12-11",
+          "title": "2025.12.11お知らせマネー・ローンダリングや金融犯罪対策への取り組み強化について",
+          "url": "https://ja-kino.com/wp-content/uploads/2025/12/マネロン組合長メッセージ.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "2025.11.28お知らせ法人口座開設について",
+          "url": "https://ja-kino.com/wp-content/uploads/2025/11/木野法人口座開設-.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2025-11-28",
+          "title": "法人口座開設について",
+          "url": "https://ja-kino.com/wp-content/uploads/2025/11/木野法人口座開設-.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        }
+      ]
+    }
+  ]
+}
