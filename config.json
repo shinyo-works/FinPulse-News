@@ -57,20 +57,6 @@
       ]
     },
     {
-      "name": "JAおとふけ",
-      "url": "https://www.ja-otofuke.jp/newslist/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "営業"],
-      "exclude_rules": [
-        { "keyword": "燃料" },
-        { "keyword": "入札" },
-        { "keyword": "ガソリン" },
-        { "keyword": "共済" },
-        { "keyword": "ワイパー" },
-        { "keyword": "入賞者" },
-        { "keyword": "採用" }
-      ]
-    },
-    {
       "name": "十勝信用組合",
       "url": "https://www.tokachishinkumi.com/info/",
       "include_keywords": ["キャンペーン", "金利", "お知らせ", "手数料", "取扱開始", "取り扱い", "提携"],
@@ -86,6 +72,20 @@
         { "keyword": "締結" },
         { "keyword": "規定" },
         { "keyword": "注意喚起" }
+      ]
+    },
+    {
+      "name": "JAおとふけ",
+      "url": "https://www.ja-otofuke.jp/newslist/",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "営業"],
+      "exclude_rules": [
+        { "keyword": "燃料" },
+        { "keyword": "入札" },
+        { "keyword": "ガソリン" },
+        { "keyword": "共済" },
+        { "keyword": "ワイパー" },
+        { "keyword": "入賞者" },
+        { "keyword": "採用" }
       ]
     },
     {

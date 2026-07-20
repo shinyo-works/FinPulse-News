@@ -398,7 +398,7 @@
 
     .star-row td:first-child { box-shadow: inset 3px 0 0 var(--gold-500); }
 
-    .report-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .report-tags { display: flex; flex-wrap: nowrap; gap: 5px; }
 
     .report-tag {
       padding: 2px 7px;
@@ -406,6 +406,7 @@
       background: #edf2f4;
       border-radius: 6px;
       font-size: 0.7rem;
+      white-space: nowrap;
     }
 
     mark {
@@ -676,6 +677,24 @@
       return !state.search.trim() || String(item.title ?? "").toLocaleLowerCase("ja").includes(state.search.trim().toLocaleLowerCase("ja"));
     }
 
+    function orderInstitutions(institutions) {
+      const ordered = [...institutions];
+      const tokachiIndex = ordered.findIndex((item) => item.name === "十勝信用組合");
+      const otofukeIndex = ordered.findIndex((item) => item.name === "JAおとふけ");
+      if (tokachiIndex > otofukeIndex && otofukeIndex !== -1) {
+        const [tokachi] = ordered.splice(tokachiIndex, 1);
+        ordered.splice(otofukeIndex, 0, tokachi);
+      }
+      return ordered;
+    }
+
+    function formatReportPeriod(reports) {
+      const dates = [...new Set((reports || []).filter(Boolean))].sort();
+      if (!dates.length) return "—";
+      if (dates.length === 1) return dates[0];
+      return `${dates[0]}～${dates[dates.length - 1]}`;
+    }
+
     function formatDate(date) {
       if (!date) return "日付不明";
       const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
@@ -696,19 +715,19 @@
         <tr class="${item.star ? "star-row" : ""}">
           <td>${escapeHtml(item.date || "—")}</td>
           <td><a class="article-link" href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${highlight(item.title)}</a>${badges(item)}</td>
-          ${showReports ? `<td><div class="report-tags">${(item.reports || []).map((date) => `<span class="report-tag">${escapeHtml(date)}</span>`).join("")}</div></td>` : ""}
+          ${showReports ? `<td><div class="report-tags"><span class="report-tag">${escapeHtml(formatReportPeriod(item.reports))}</span></div></td>` : ""}
         </tr>`).join("");
       const cards = items.map((item) => `
         <article class="article-card ${item.star ? "star-card" : ""}">
           <p class="card-date">${escapeHtml(formatDate(item.date))}</p>
           <a class="article-link" href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${highlight(item.title)}</a>
           ${badges(item)}
-          ${showReports ? `<div class="card-meta"><div class="report-tags">${(item.reports || []).map((date) => `<span class="report-tag">収録 ${escapeHtml(date)}</span>`).join("")}</div></div>` : ""}
+          ${showReports ? `<div class="card-meta"><div class="report-tags"><span class="report-tag">収録期間 ${escapeHtml(formatReportPeriod(item.reports))}</span></div></div>` : ""}
         </article>`).join("");
       return `
         <div class="table-wrap">
           <table>
-            <thead><tr><th class="date-column">日付</th><th>タイトル</th>${showReports ? '<th class="report-column">収録レポート</th>' : ""}</tr></thead>
+            <thead><tr><th class="date-column">日付</th><th>タイトル</th>${showReports ? '<th class="report-column">収録期間</th>' : ""}</tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
@@ -743,7 +762,7 @@
       let passedCount = 0;
       let excludedCount = 0;
 
-      for (const institution of report.institutions || []) {
+      for (const institution of orderInstitutions(report.institutions || [])) {
         if (!state.selectedInstitutions.has(institution.name)) continue;
         const passed = (institution.passed || []).filter(matchesSearch);
         const excluded = (institution.excluded || []).filter(matchesSearch);
@@ -790,13 +809,14 @@
     function renderNavigation() {
       elements.dateList.innerHTML = state.manifest.reports.map((date) => `
         <li><button type="button" class="nav-button ${state.mode === "date" && state.selectedDate === date ? "active" : ""}" data-date="${escapeHtml(date)}">${escapeHtml(formatDate(date))}</button></li>`).join("");
-      elements.institutionList.innerHTML = state.institutionIndex.institutions.map((institution) => `
+      elements.institutionList.innerHTML = orderInstitutions(state.institutionIndex.institutions).map((institution) => `
         <li><button type="button" class="nav-button ${state.mode === "institution" && state.selectedInstitution === institution.name ? "active" : ""}" data-institution="${escapeHtml(institution.name)}">${escapeHtml(institution.name)}</button></li>`).join("");
     }
 
     function buildInstitutionFilters(institutions) {
-      state.selectedInstitutions = new Set(institutions.map((item) => item.name));
-      elements.institutionFilters.innerHTML = institutions.map((institution) => `
+      const orderedInstitutions = orderInstitutions(institutions);
+      state.selectedInstitutions = new Set(orderedInstitutions.map((item) => item.name));
+      elements.institutionFilters.innerHTML = orderedInstitutions.map((institution) => `
         <label class="filter-option"><input type="checkbox" value="${escapeHtml(institution.name)}" checked> ${escapeHtml(institution.name)}</label>`).join("");
       updateFilterCount();
     }
