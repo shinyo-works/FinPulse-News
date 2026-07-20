@@ -1124,6 +1124,78 @@
       ]
     },
     {
+      "name": "十勝信用組合",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-07-01",
+          "title": "今月のローン金利",
+          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
+          "star": true,
+          "fallback": false,
+          "date_inferred": true
+        },
+        {
+          "date": "2026-07-17",
+          "title": "オリコ提携各種ローンWeb申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_orico_maintenance.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-05-13",
+          "title": "未利用口座管理手数料の取り扱いについて",
+          "url": "https://www.tokachishinkumi.com/common/pdf/miriyou_hagaki_2026.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "Ｗｅｂ口振受付サービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ディスクロージャー",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "",
+          "title": "法人向けネットバンキング",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "十勝信用組合【公式】",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-06-12",
+          "title": "ネットバンキングのワンタイムパスワード認証の障害について",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2026-05-08",
+          "title": "「十勝信用組合返還不要の給付型奨学金」の抽選会実施のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2026-05-01",
+          "title": "金融円滑化に向けた対応の進捗状況を更新致しました。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-22",
+          "title": "フリーローン「クローバー」WEB申込みについて",
+          "exclude_keyword": ""
+        }
+      ]
+    },
+    {
       "name": "JAおとふけ",
       "method": "プログラム",
       "passed": [
@@ -1296,78 +1368,6 @@
         {
           "date": "",
           "title": "コンプライアンス",
-          "exclude_keyword": ""
-        }
-      ]
-    },
-    {
-      "name": "十勝信用組合",
-      "method": "プログラム",
-      "passed": [
-        {
-          "date": "2026-07-01",
-          "title": "今月のローン金利",
-          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
-          "star": true,
-          "fallback": false,
-          "date_inferred": true
-        },
-        {
-          "date": "2026-07-17",
-          "title": "オリコ提携各種ローンWeb申込受付サービスのメンテナンスについて",
-          "url": "https://www.tokachishinkumi.com/info/info_orico_maintenance.html",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-05-13",
-          "title": "未利用口座管理手数料の取り扱いについて",
-          "url": "https://www.tokachishinkumi.com/common/pdf/miriyou_hagaki_2026.pdf",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        }
-      ],
-      "excluded": [
-        {
-          "date": "",
-          "title": "Ｗｅｂ口振受付サービス",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "ディスクロージャー",
-          "exclude_keyword": "ディスクロージャー"
-        },
-        {
-          "date": "",
-          "title": "法人向けネットバンキング",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "十勝信用組合【公式】",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-06-12",
-          "title": "ネットバンキングのワンタイムパスワード認証の障害について",
-          "exclude_keyword": "障害"
-        },
-        {
-          "date": "2026-05-08",
-          "title": "「十勝信用組合返還不要の給付型奨学金」の抽選会実施のお知らせ",
-          "exclude_keyword": "奨学金"
-        },
-        {
-          "date": "2026-05-01",
-          "title": "金融円滑化に向けた対応の進捗状況を更新致しました。",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-04-22",
-          "title": "フリーローン「クローバー」WEB申込みについて",
           "exclude_keyword": ""
         }
       ]

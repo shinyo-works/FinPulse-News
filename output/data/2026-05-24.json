@@ -21,6 +21,169 @@
       "excluded": []
     },
     {
+      "name": "十勝信用組合",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-02-27",
+          "title": "預金金利の引き上げについて（定期性）",
+          "url": "https://www.tokachishinkumi.com/common/pdf/202603_yokinkinri.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-02-20",
+          "title": "ビジネスカジュアル導入のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/business_casual.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-01-23",
+          "title": "預金金利の引き上げについて",
+          "url": "https://www.tokachishinkumi.com/common/pdf/20260123_kinri.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-01-19",
+          "title": "融資業務移転のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_2026019_yuushi.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-01-19",
+          "title": "窓口営業時間変更のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_2026019_madoguchi.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "2026-05-13",
+          "title": "未利用口座管理手数料の取り扱いについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-05-08",
+          "title": "「十勝信用組合返還不要の給付型奨学金」の抽選会実施のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2026-05-07",
+          "title": "2027年度の採用情報を更新いたしました",
+          "exclude_keyword": "採用"
+        },
+        {
+          "date": "2026-05-01",
+          "title": "金融円滑化に向けた対応の進捗状況を更新致しました。",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-23",
+          "title": "ゴールデンウィーク期間中のATM稼動スケジュールについて",
+          "exclude_keyword": "ATM稼動スケジュール"
+        },
+        {
+          "date": "2026-04-22",
+          "title": "フリーローン「クローバー」WEB申込みについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-04-03",
+          "title": "創業70周年記念定期預金・定期積金「プレミアム70」の取扱開始について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-12",
+          "title": "2027年度の採用情報を更新いたしました",
+          "exclude_keyword": "採用"
+        },
+        {
+          "date": "2026-02-20",
+          "title": "しんくみはばたき奨学金 令和8年度奨学生募集のお知らせ",
+          "exclude_keyword": "奨学金"
+        },
+        {
+          "date": "2026-02-03",
+          "title": "当組合におけるシステム障害の原因について",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2026-01-29",
+          "title": "当組合におけるシステム障害復旧のお知らせ",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2026-01-29",
+          "title": "当組合におけるシステム障害に関するお知らせ",
+          "exclude_keyword": "障害"
+        },
+        {
+          "date": "2026-01-23",
+          "title": "短期プライムレートの引き上げについて",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-01-15",
+          "title": "北海道銀行とのATM相互無料提携の実施について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-12-05",
+          "title": "年末年始期間中のATM稼動スケジュールについて",
+          "exclude_keyword": "ATM稼動スケジュール"
+        },
+        {
+          "date": "2025-11-28",
+          "title": "「半期ディスクロージャー」を公開しました",
+          "exclude_keyword": "ディスクロージャー"
+        },
+        {
+          "date": "2025-11-27",
+          "title": "「手形・小切手の全面的な電子化」に向けた取組について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-11-14",
+          "title": "当組合職員を名乗る（騙った）キャッシュカード搾取について",
+          "exclude_keyword": "搾取"
+        },
+        {
+          "date": "2025-10-27",
+          "title": "創業70周年記念定期預金「プレ70」の取扱開始について",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2025-10-01",
+          "title": "2026年度の採用情報を更新いたしました",
+          "exclude_keyword": "採用"
+        },
+        {
+          "date": "2025-09-10",
+          "title": "信用組合を騙る詐欺メールにご注意ください",
+          "exclude_keyword": "詐欺"
+        },
+        {
+          "date": "2025-09-02",
+          "title": "日本政策金融公庫および帯広信用金庫との「危機事象発生における業務連携に関する覚書」の締結について",
+          "exclude_keyword": "締結"
+        },
+        {
+          "date": "2025-07-30",
+          "title": "2025年版ディスクロージャー誌を掲載いたしました",
+          "exclude_keyword": "ディスクロージャー"
+        }
+      ]
+    },
+    {
       "name": "JAおとふけ",
       "method": "プログラム",
       "passed": [
@@ -193,169 +356,6 @@
           "date": "2026-01-13",
           "title": "1月11日よりガソリン・軽油の価格を改定致します",
           "exclude_keyword": "ガソリン"
-        }
-      ]
-    },
-    {
-      "name": "十勝信用組合",
-      "method": "プログラム",
-      "passed": [
-        {
-          "date": "2026-02-27",
-          "title": "預金金利の引き上げについて（定期性）",
-          "url": "https://www.tokachishinkumi.com/common/pdf/202603_yokinkinri.pdf",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-02-20",
-          "title": "ビジネスカジュアル導入のお知らせ",
-          "url": "https://www.tokachishinkumi.com/common/pdf/business_casual.pdf",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-01-23",
-          "title": "預金金利の引き上げについて",
-          "url": "https://www.tokachishinkumi.com/common/pdf/20260123_kinri.pdf",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-01-19",
-          "title": "融資業務移転のお知らせ",
-          "url": "https://www.tokachishinkumi.com/common/pdf/info_2026019_yuushi.pdf",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-01-19",
-          "title": "窓口営業時間変更のお知らせ",
-          "url": "https://www.tokachishinkumi.com/common/pdf/info_2026019_madoguchi.pdf",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        }
-      ],
-      "excluded": [
-        {
-          "date": "2026-05-13",
-          "title": "未利用口座管理手数料の取り扱いについて",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-05-08",
-          "title": "「十勝信用組合返還不要の給付型奨学金」の抽選会実施のお知らせ",
-          "exclude_keyword": "奨学金"
-        },
-        {
-          "date": "2026-05-07",
-          "title": "2027年度の採用情報を更新いたしました",
-          "exclude_keyword": "採用"
-        },
-        {
-          "date": "2026-05-01",
-          "title": "金融円滑化に向けた対応の進捗状況を更新致しました。",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-04-23",
-          "title": "ゴールデンウィーク期間中のATM稼動スケジュールについて",
-          "exclude_keyword": "ATM稼動スケジュール"
-        },
-        {
-          "date": "2026-04-22",
-          "title": "フリーローン「クローバー」WEB申込みについて",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-04-03",
-          "title": "創業70周年記念定期預金・定期積金「プレミアム70」の取扱開始について",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-03-12",
-          "title": "2027年度の採用情報を更新いたしました",
-          "exclude_keyword": "採用"
-        },
-        {
-          "date": "2026-02-20",
-          "title": "しんくみはばたき奨学金 令和8年度奨学生募集のお知らせ",
-          "exclude_keyword": "奨学金"
-        },
-        {
-          "date": "2026-02-03",
-          "title": "当組合におけるシステム障害の原因について",
-          "exclude_keyword": "障害"
-        },
-        {
-          "date": "2026-01-29",
-          "title": "当組合におけるシステム障害復旧のお知らせ",
-          "exclude_keyword": "障害"
-        },
-        {
-          "date": "2026-01-29",
-          "title": "当組合におけるシステム障害に関するお知らせ",
-          "exclude_keyword": "障害"
-        },
-        {
-          "date": "2026-01-23",
-          "title": "短期プライムレートの引き上げについて",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-01-15",
-          "title": "北海道銀行とのATM相互無料提携の実施について",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2025-12-05",
-          "title": "年末年始期間中のATM稼動スケジュールについて",
-          "exclude_keyword": "ATM稼動スケジュール"
-        },
-        {
-          "date": "2025-11-28",
-          "title": "「半期ディスクロージャー」を公開しました",
-          "exclude_keyword": "ディスクロージャー"
-        },
-        {
-          "date": "2025-11-27",
-          "title": "「手形・小切手の全面的な電子化」に向けた取組について",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2025-11-14",
-          "title": "当組合職員を名乗る（騙った）キャッシュカード搾取について",
-          "exclude_keyword": "搾取"
-        },
-        {
-          "date": "2025-10-27",
-          "title": "創業70周年記念定期預金「プレ70」の取扱開始について",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2025-10-01",
-          "title": "2026年度の採用情報を更新いたしました",
-          "exclude_keyword": "採用"
-        },
-        {
-          "date": "2025-09-10",
-          "title": "信用組合を騙る詐欺メールにご注意ください",
-          "exclude_keyword": "詐欺"
-        },
-        {
-          "date": "2025-09-02",
-          "title": "日本政策金融公庫および帯広信用金庫との「危機事象発生における業務連携に関する覚書」の締結について",
-          "exclude_keyword": "締結"
-        },
-        {
-          "date": "2025-07-30",
-          "title": "2025年版ディスクロージャー誌を掲載いたしました",
-          "exclude_keyword": "ディスクロージャー"
         }
       ]
     },

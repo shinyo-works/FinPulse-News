@@ -3577,253 +3577,6 @@
       ]
     },
     {
-      "name": "JAおとふけ",
-      "method": "プログラム",
-      "passed": [
-        {
-          "date": "2026-06-03",
-          "title": "営業時間変更のお知らせ",
-          "url": "https://www.ja-otofuke.jp/hokurennews/12937/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-05-01",
-          "title": "キャンペーン金利のご案内（貸付金）",
-          "url": "https://www.ja-otofuke.jp/2023/12882/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-04-01",
-          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
-          "url": "https://www.ja-otofuke.jp/2023/12715/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false
-        }
-      ],
-      "excluded": [
-        {
-          "date": "",
-          "title": "JAおとふけブランド",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "音更町すずらん和牛",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "JAおとふけ概要",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "キャッチコピー・シンボルマーク",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "基本理念・基本方針",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "総耕作面積・販売品取扱高",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "事業紹介施設紹介",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "SDGsへの取り組み",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "ニュースクリップ",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "食育・農産物PR活動",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "ボランティア活動",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "農村絵画コンクール",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "暮らしのサービス",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "その他・アラカルト",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-06-09",
-          "title": "6月9日からガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-06-08",
-          "title": "ガソリン・軽油及びドライブスルー洗車お得なクーポンプレゼントのお知らせ",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-06-02",
-          "title": "6月2日からガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-05-25",
-          "title": "5月24日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-05-11",
-          "title": "5月9日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-05-07",
-          "title": "5月7日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-05-01",
-          "title": "【JA共済】JA自動車共済お見積りキャンペーンのご案内【キャンペーン】",
-          "exclude_keyword": "共済"
-        },
-        {
-          "date": "2026-04-30",
-          "title": "4月30日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-04-27",
-          "title": "4月26日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-04-24",
-          "title": "4月24日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-04-21",
-          "title": "4月21日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-04-01",
-          "title": "第23回 音更ふるさと農村絵画コンクール 入賞者を掲載いたしました。",
-          "exclude_keyword": "入賞者"
-        },
-        {
-          "date": "2026-04-01",
-          "title": "自動車共済掛金率の変更について",
-          "exclude_keyword": "共済"
-        },
-        {
-          "date": "2026-03-30",
-          "title": "3月29日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-03-20",
-          "title": "3月20日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-03-19",
-          "title": "3月19日から灯油の価格を改定致します",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "2026-03-13",
-          "title": "3月13日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-03-12",
-          "title": "燃料価格のお知らせについて",
-          "exclude_keyword": "燃料"
-        },
-        {
-          "date": "2026-03-10",
-          "title": "3月10日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-03-02",
-          "title": "3月1日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-02-20",
-          "title": "2月24日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-02-09",
-          "title": "2月8日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-02-02",
-          "title": "2月2日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-01-27",
-          "title": "1月27日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "2026-01-22",
-          "title": "1月11日よりガソリン・軽油の価格を改定致します",
-          "exclude_keyword": "ガソリン"
-        },
-        {
-          "date": "",
-          "title": "事業紹介・施設紹介",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "農家のお母さんのレシピ集",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "ご利用にあたって",
-          "exclude_keyword": ""
-        },
-        {
-          "date": "",
-          "title": "コンプライアンス",
-          "exclude_keyword": ""
-        }
-      ]
-    },
-    {
       "name": "十勝信用組合",
       "method": "プログラム",
       "passed": [
@@ -4076,6 +3829,253 @@
         {
           "date": "2021-05-25",
           "title": "懸賞作文「小さな助け合いの物語賞」の募集について",
+          "exclude_keyword": ""
+        }
+      ]
+    },
+    {
+      "name": "JAおとふけ",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-06-03",
+          "title": "営業時間変更のお知らせ",
+          "url": "https://www.ja-otofuke.jp/hokurennews/12937/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-05-01",
+          "title": "キャンペーン金利のご案内（貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12882/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-04-01",
+          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
+          "url": "https://www.ja-otofuke.jp/2023/12715/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        }
+      ],
+      "excluded": [
+        {
+          "date": "",
+          "title": "JAおとふけブランド",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "音更町すずらん和牛",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "JAおとふけ概要",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "キャッチコピー・シンボルマーク",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "基本理念・基本方針",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "総耕作面積・販売品取扱高",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "事業紹介施設紹介",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "SDGsへの取り組み",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ニュースクリップ",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "食育・農産物PR活動",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ボランティア活動",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "農村絵画コンクール",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "暮らしのサービス",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "その他・アラカルト",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-06-09",
+          "title": "6月9日からガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-06-08",
+          "title": "ガソリン・軽油及びドライブスルー洗車お得なクーポンプレゼントのお知らせ",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-06-02",
+          "title": "6月2日からガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-05-25",
+          "title": "5月24日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-05-11",
+          "title": "5月9日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-05-07",
+          "title": "5月7日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-05-01",
+          "title": "【JA共済】JA自動車共済お見積りキャンペーンのご案内【キャンペーン】",
+          "exclude_keyword": "共済"
+        },
+        {
+          "date": "2026-04-30",
+          "title": "4月30日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-27",
+          "title": "4月26日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-24",
+          "title": "4月24日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-21",
+          "title": "4月21日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-04-01",
+          "title": "第23回 音更ふるさと農村絵画コンクール 入賞者を掲載いたしました。",
+          "exclude_keyword": "入賞者"
+        },
+        {
+          "date": "2026-04-01",
+          "title": "自動車共済掛金率の変更について",
+          "exclude_keyword": "共済"
+        },
+        {
+          "date": "2026-03-30",
+          "title": "3月29日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-20",
+          "title": "3月20日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-19",
+          "title": "3月19日から灯油の価格を改定致します",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "2026-03-13",
+          "title": "3月13日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-12",
+          "title": "燃料価格のお知らせについて",
+          "exclude_keyword": "燃料"
+        },
+        {
+          "date": "2026-03-10",
+          "title": "3月10日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-03-02",
+          "title": "3月1日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-02-20",
+          "title": "2月24日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-02-09",
+          "title": "2月8日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-02-02",
+          "title": "2月2日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-01-27",
+          "title": "1月27日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "2026-01-22",
+          "title": "1月11日よりガソリン・軽油の価格を改定致します",
+          "exclude_keyword": "ガソリン"
+        },
+        {
+          "date": "",
+          "title": "事業紹介・施設紹介",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "農家のお母さんのレシピ集",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "ご利用にあたって",
+          "exclude_keyword": ""
+        },
+        {
+          "date": "",
+          "title": "コンプライアンス",
           "exclude_keyword": ""
         }
       ]

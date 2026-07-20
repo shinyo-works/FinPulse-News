@@ -15,7 +15,12 @@ REPOSITORY_ROOT = SCRIPT_DIR.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from collect_and_send import build_institution_index, clean_report_title, list_report_dates
+from collect_and_send import (
+    build_institution_index,
+    clean_report_title,
+    list_report_dates,
+    order_institutions,
+)
 
 
 REPORT_FILE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
@@ -153,6 +158,10 @@ def main():
     data_dir.mkdir(parents=True, exist_ok=True)
 
     config = json.loads((REPOSITORY_ROOT / "config.json").read_text(encoding="utf-8"))
+    institution_order = [
+        institution["name"]
+        for institution in config.get("institutions", [])
+    ]
     method_by_name = {}
     for institution in config.get("institutions", []):
         if institution.get("use_claude"):
@@ -170,12 +179,19 @@ def main():
 
     for report_path in report_paths:
         report_data = parse_report(report_path, method_by_name)
+        report_data["institutions"] = order_institutions(
+            report_data["institutions"],
+            institution_order,
+        )
         write_json(data_dir / f"{report_path.stem}.json", report_data)
         print(f"変換: {report_path.name}")
 
     reports = list_report_dates(data_dir)
     write_json(data_dir / "index.json", {"reports": reports})
-    write_json(data_dir / "by-institution.json", build_institution_index(data_dir))
+    write_json(
+        data_dir / "by-institution.json",
+        build_institution_index(data_dir, institution_order=institution_order),
+    )
 
     print(f"完了: 日付別JSON {len(report_paths)}件 + index.json + by-institution.json")
 

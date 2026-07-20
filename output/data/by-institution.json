@@ -470,151 +470,6 @@
       ]
     },
     {
-      "name": "JAおとふけ",
-      "items": [
-        {
-          "date": "2026-07-13",
-          "title": "第1スタンド日曜日営業のお知らせ",
-          "url": "https://www.ja-otofuke.jp/hokurennews/13006/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-07-20"
-          ]
-        },
-        {
-          "date": "2026-06-23",
-          "title": "【イベント】ウェルカムキャンペーンのお知らせ",
-          "url": "https://www.ja-otofuke.jp/2023/12965/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-07-06",
-            "2026-06-29"
-          ]
-        },
-        {
-          "date": "2026-06-03",
-          "title": "営業時間変更のお知らせ",
-          "url": "https://www.ja-otofuke.jp/hokurennews/12937/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-07-20",
-            "2026-07-13",
-            "2026-07-06",
-            "2026-06-29",
-            "2026-06-22",
-            "2026-06-15",
-            "2026-06-08"
-          ]
-        },
-        {
-          "date": "2026-05-01",
-          "title": "キャンペーン金利のご案内（貸付金）",
-          "url": "https://www.ja-otofuke.jp/2023/12882/",
-          "star": true,
-          "fallback": true,
-          "date_inferred": false,
-          "reports": [
-            "2026-07-20",
-            "2026-07-13",
-            "2026-07-06",
-            "2026-06-29",
-            "2026-06-22",
-            "2026-06-15",
-            "2026-06-08",
-            "2026-06-01",
-            "2026-05-31",
-            "2026-05-28",
-            "2026-05-25",
-            "2026-05-24",
-            "2026-05-17"
-          ]
-        },
-        {
-          "date": "2026-04-01",
-          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
-          "url": "https://www.ja-otofuke.jp/2023/12715/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-06-29",
-            "2026-06-22",
-            "2026-06-15",
-            "2026-06-08",
-            "2026-05-25",
-            "2026-05-24",
-            "2026-05-17"
-          ]
-        },
-        {
-          "date": "2026-03-23",
-          "title": "金融店舗における昼休み時間帯（12時～13時）の対応について",
-          "url": "https://www.ja-otofuke.jp/2023/12698/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-05-24"
-          ]
-        },
-        {
-          "date": "2026-03-23",
-          "title": "金融店舗における昼休み時間帯（12時〜13時）の対応について",
-          "url": "https://www.ja-otofuke.jp/2023/12698/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-05-17"
-          ]
-        },
-        {
-          "date": "2026-02-26",
-          "title": "金利改定のご案内（貯金）",
-          "url": "https://www.ja-otofuke.jp/2023/12629/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-05-25",
-            "2026-05-24",
-            "2026-05-17"
-          ]
-        },
-        {
-          "date": "2026-02-24",
-          "title": "金融店舗の営業時間変更（お昼休み導入）について",
-          "url": "https://www.ja-otofuke.jp/2023/12618/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-05-24",
-            "2026-05-17"
-          ]
-        },
-        {
-          "date": "2026-02-03",
-          "title": "金利改定のご案内（貯金・貸付金）",
-          "url": "https://www.ja-otofuke.jp/2023/12596/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-05-25",
-            "2026-05-24",
-            "2026-05-17"
-          ]
-        }
-      ]
-    },
-    {
       "name": "十勝信用組合",
       "items": [
         {
@@ -864,6 +719,151 @@
           "date_inferred": false,
           "reports": [
             "2026-05-25"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JAおとふけ",
+      "items": [
+        {
+          "date": "2026-07-13",
+          "title": "第1スタンド日曜日営業のお知らせ",
+          "url": "https://www.ja-otofuke.jp/hokurennews/13006/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-20"
+          ]
+        },
+        {
+          "date": "2026-06-23",
+          "title": "【イベント】ウェルカムキャンペーンのお知らせ",
+          "url": "https://www.ja-otofuke.jp/2023/12965/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-06",
+            "2026-06-29"
+          ]
+        },
+        {
+          "date": "2026-06-03",
+          "title": "営業時間変更のお知らせ",
+          "url": "https://www.ja-otofuke.jp/hokurennews/12937/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-20",
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08"
+          ]
+        },
+        {
+          "date": "2026-05-01",
+          "title": "キャンペーン金利のご案内（貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12882/",
+          "star": true,
+          "fallback": true,
+          "date_inferred": false,
+          "reports": [
+            "2026-07-20",
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-04-01",
+          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
+          "url": "https://www.ja-otofuke.jp/2023/12715/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-03-23",
+          "title": "金融店舗における昼休み時間帯（12時～13時）の対応について",
+          "url": "https://www.ja-otofuke.jp/2023/12698/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-24"
+          ]
+        },
+        {
+          "date": "2026-03-23",
+          "title": "金融店舗における昼休み時間帯（12時〜13時）の対応について",
+          "url": "https://www.ja-otofuke.jp/2023/12698/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-26",
+          "title": "金利改定のご案内（貯金）",
+          "url": "https://www.ja-otofuke.jp/2023/12629/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-24",
+          "title": "金融店舗の営業時間変更（お昼休み導入）について",
+          "url": "https://www.ja-otofuke.jp/2023/12618/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-24",
+            "2026-05-17"
+          ]
+        },
+        {
+          "date": "2026-02-03",
+          "title": "金利改定のご案内（貯金・貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12596/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-05-25",
+            "2026-05-24",
+            "2026-05-17"
           ]
         }
       ]

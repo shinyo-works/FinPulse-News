@@ -435,6 +435,25 @@ def build_report_data(results, today, lookback_days):
     }
 
 
+def order_institutions(institutions, institution_order):
+    """金融機関を設定順に並べ、設定にない機関は元の順で末尾に残す。"""
+    order_by_name = {
+        name: index
+        for index, name in enumerate(institution_order or [])
+    }
+    fallback_index = len(order_by_name)
+    return [
+        institution
+        for _, institution in sorted(
+            enumerate(institutions),
+            key=lambda pair: (
+                order_by_name.get(pair[1].get("name", ""), fallback_index),
+                pair[0],
+            ),
+        )
+    ]
+
+
 def list_report_dates(data_dir):
     """日付別JSONのファイル名から、新しい順の日付一覧を作る。"""
     data_path = Path(data_dir)
@@ -446,7 +465,12 @@ def list_report_dates(data_dir):
     return sorted(dates, reverse=True)
 
 
-def build_institution_index(data_dir, window_months=INSTITUTION_WINDOW_MONTHS, today=None):
+def build_institution_index(
+    data_dir,
+    window_months=INSTITUTION_WINDOW_MONTHS,
+    today=None,
+    institution_order=None,
+):
     """全日付のJSONを読み、通過記事を機関別に重複なくまとめる。
     window_months を指定すると、その月数より古いレポートを集約から除外する。"""
     data_path = Path(data_dir)
@@ -505,15 +529,27 @@ def build_institution_index(data_dir, window_months=INSTITUTION_WINDOW_MONTHS, t
         items.sort(key=lambda item: (bool(item["date"]), item["date"]), reverse=True)
         result.append({"name": name, "items": items})
 
-    return {"institutions": result}
+    return {
+        "institutions": order_institutions(result, institution_order),
+    }
 
 
-def write_json_viewer_data(results, today, lookback_days, data_dir="output/data"):
+def write_json_viewer_data(
+    results,
+    today,
+    lookback_days,
+    data_dir="output/data",
+    institution_order=None,
+):
     """日付別・日付一覧・機関別のJSONをまとめて書き出す。"""
     data_path = Path(data_dir)
     data_path.mkdir(parents=True, exist_ok=True)
 
     report_data = build_report_data(results, today, lookback_days)
+    report_data["institutions"] = order_institutions(
+        report_data["institutions"],
+        institution_order,
+    )
     report_path = data_path / f"{today}.json"
     report_path.write_text(
         json.dumps(report_data, ensure_ascii=False, indent=2) + "\n",
@@ -526,7 +562,10 @@ def write_json_viewer_data(results, today, lookback_days, data_dir="output/data"
         encoding="utf-8",
     )
 
-    institution_index = build_institution_index(data_path)
+    institution_index = build_institution_index(
+        data_path,
+        institution_order=institution_order,
+    )
     (data_path / "by-institution.json").write_text(
         json.dumps(institution_index, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -554,6 +593,10 @@ if __name__ == "__main__":
     config = load_config()
     lookback_days = config.get("lookback_days", 30)
     star_keywords = config.get("star_keywords", DEFAULT_STAR_KEYWORDS)
+    institution_order = [
+        institution["name"]
+        for institution in config.get("institutions", [])
+    ]
 
     print(f"=== 金融機関新着情報収集 ({today} / 過去{lookback_days}日) ===")
 
@@ -605,7 +648,12 @@ if __name__ == "__main__":
 
     # JSONはヴューアー用の追加出力。失敗しても従来のメール送信は続ける。
     try:
-        write_json_viewer_data(results, today, lookback_days)
+        write_json_viewer_data(
+            results,
+            today,
+            lookback_days,
+            institution_order=institution_order,
+        )
         print("ヴューアー用JSON保存: output/data/")
     except Exception as e:
         print(f"ヴューアー用JSON保存失敗（メール送信には影響しません）: {e}")

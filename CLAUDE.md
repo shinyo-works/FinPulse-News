@@ -50,6 +50,7 @@ FinPulse-News/
 ## 設計決定事項
 
 - メール送信: Resend API（AI-trend-weather-News と同じ実績ある仕組み）
+- 金融機関の収集・JSON・表示順は `config.json` の `institutions` 配列を唯一の正とする。生成処理とバックフィルで順序を正規化し、ヴューアー側では並べ替えない。
 - LINEは Phase 3 候補（REST API 必要）
 - Slack は未採用（ユーザー環境にコネクタなし）
 - スクレイピング: Chrome MCP（puppeteer不要・インストールゼロ）

@@ -210,61 +210,6 @@
       ]
     },
     {
-      "name": "JAおとふけ",
-      "method": "プログラム",
-      "passed": [
-        {
-          "date": "2026-05-01",
-          "title": "キャンペーン金利のご案内（貸付金）",
-          "url": "https://www.ja-otofuke.jp/2023/12882/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-04-01",
-          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
-          "url": "https://www.ja-otofuke.jp/2023/12715/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-03-23",
-          "title": "金融店舗における昼休み時間帯（12時〜13時）の対応について",
-          "url": "https://www.ja-otofuke.jp/2023/12698/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-02-26",
-          "title": "金利改定のご案内（貯金）",
-          "url": "https://www.ja-otofuke.jp/2023/12629/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-02-24",
-          "title": "金融店舗の営業時間変更（お昼休み導入）について",
-          "url": "https://www.ja-otofuke.jp/2023/12618/",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false
-        },
-        {
-          "date": "2026-02-03",
-          "title": "金利改定のご案内（貯金・貸付金）",
-          "url": "https://www.ja-otofuke.jp/2023/12596/",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false
-        }
-      ],
-      "excluded": []
-    },
-    {
       "name": "十勝信用組合",
       "method": "プログラム",
       "passed": [
@@ -318,6 +263,61 @@
           "exclude_keyword": "ATM稼動スケジュール"
         }
       ]
+    },
+    {
+      "name": "JAおとふけ",
+      "method": "プログラム",
+      "passed": [
+        {
+          "date": "2026-05-01",
+          "title": "キャンペーン金利のご案内（貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12882/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-04-01",
+          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
+          "url": "https://www.ja-otofuke.jp/2023/12715/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-03-23",
+          "title": "金融店舗における昼休み時間帯（12時〜13時）の対応について",
+          "url": "https://www.ja-otofuke.jp/2023/12698/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-02-26",
+          "title": "金利改定のご案内（貯金）",
+          "url": "https://www.ja-otofuke.jp/2023/12629/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-02-24",
+          "title": "金融店舗の営業時間変更（お昼休み導入）について",
+          "url": "https://www.ja-otofuke.jp/2023/12618/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false
+        },
+        {
+          "date": "2026-02-03",
+          "title": "金利改定のご案内（貯金・貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/12596/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false
+        }
+      ],
+      "excluded": []
     },
     {
       "name": "JAめむろ",
