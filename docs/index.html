@@ -187,6 +187,15 @@
     .rate-cell.up .arrow { color: var(--up); }
     .rate-cell.down .arrow { color: var(--down); }
     .rate-empty { color: #c2ccd2; }
+    .best-badge {
+      display: inline-block; margin-top: 3px; padding: 1px 7px;
+      background: #d59b2b; color: #fff;
+      border-radius: 999px; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.02em;
+    }
+    .rate-cell.best { background: #fff4d8; box-shadow: inset 0 0 0 1px #e6b84b; }
+
+    /* 機関の変わり目を太い罫線で区切る */
+    tbody tr.bank-start > td { border-top: 2px solid #8aa0af; }
 
     .empty-state, .loading-state {
       padding: 40px 20px; text-align: center; color: var(--muted);
@@ -319,7 +328,7 @@
       });
     }
 
-    function rateCell(entry, older, isCurrent) {
+    function rateCell(entry, older, isCurrent, isBest) {
       if (!entry) return '<td class="rate-cell"><span class="rate-empty">—</span></td>';
       let dir = "";
       let arrow = "";
@@ -327,11 +336,26 @@
         if (Number(entry.rate) > Number(older.rate)) { dir = "up"; arrow = " <span class=\"arrow\">↑</span>"; }
         else if (Number(entry.rate) < Number(older.rate)) { dir = "down"; arrow = " <span class=\"arrow\">↓</span>"; }
       }
-      const cls = ["rate-cell", isCurrent ? "current" : "", dir].filter(Boolean).join(" ");
+      const cls = ["rate-cell", isCurrent ? "current" : "", isBest ? "best" : "", dir].filter(Boolean).join(" ");
+      const badge = isBest ? '<div class="best-badge">最安</div>' : "";
       return `<td class="${cls}">
         <div class="rate-val">${fmtRate(entry.rate)}${arrow}</div>
         <div class="rate-since">${fmtSince(entry.effective_from)}</div>
+        ${badge}
       </td>`;
+    }
+
+    function minRateByType(rows) {
+      // 表示中の行から、金利種別ごとの「現在」列の最安値を求める
+      const min = {};
+      for (const row of rows) {
+        const cur = (row.history || [])[0];
+        if (!cur || !Number.isFinite(Number(cur.rate))) continue;
+        const t = row.rate_type;
+        const v = Number(cur.rate);
+        if (!(t in min) || v < min[t]) min[t] = v;
+      }
+      return min;
     }
 
     function render() {
@@ -346,27 +370,49 @@
         headCols.push(i === 0 ? "現在" : (i === 1 ? "前回" : `${i}回前`));
       }
 
+      const minByType = minRateByType(rows);
+
       const thead = `<tr>
         <th class="col-bank">金融機関・商品</th>
         <th class="col-type">種別</th>
         ${headCols.map((label) => `<th>${escapeHtml(label)}</th>`).join("")}
       </tr>`;
 
-      const body = rows.map((row) => {
+      const body = rows.map((row, idx) => {
+        const prev = rows[idx - 1];
+        // 機関の変わり目（太い罫線を引く行）
+        const isBankStart = Boolean(prev) && prev.bank_id !== row.bank_id;
+        // 機関名セルは(機関×商品)単位で結合する。グループ先頭でのみ出力。
+        const groupStart = !prev || prev.bank_id !== row.bank_id || prev.product_id !== row.product_id;
+
         const history = row.history || [];
-        const url = row.url ? safeUrl(row.url) : "";
-        const bankHtml = url
-          ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(row.bank_name)}</a>`
-          : escapeHtml(row.bank_name);
+        const cur = history[0];
+        const isBest = Boolean(cur) && Number.isFinite(Number(cur.rate)) && Number(cur.rate) === minByType[row.rate_type];
+
         const cells = [];
         for (let i = 0; i < maxLen; i += 1) {
-          cells.push(rateCell(history[i], history[i + 1], i === 0));
+          cells.push(rateCell(history[i], history[i + 1], i === 0, i === 0 && isBest));
         }
-        return `<tr>
-          <td class="col-bank">
+
+        let bankCell = "";
+        if (groupStart) {
+          let span = 1;
+          for (let j = idx + 1; j < rows.length; j += 1) {
+            if (rows[j].bank_id === row.bank_id && rows[j].product_id === row.product_id) span += 1;
+            else break;
+          }
+          const url = row.url ? safeUrl(row.url) : "";
+          const bankHtml = url
+            ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(row.bank_name)}</a>`
+            : escapeHtml(row.bank_name);
+          bankCell = `<td class="col-bank" rowspan="${span}">
             <div class="bank-name">${bankHtml}</div>
             <div class="product-name">${escapeHtml(row.product_name || "")}</div>
-          </td>
+          </td>`;
+        }
+
+        return `<tr${isBankStart ? ' class="bank-start"' : ""}>
+          ${bankCell}
           <td class="col-type"><span class="type-badge">${escapeHtml(typeLabel(row.rate_type))}</span></td>
           ${cells.join("")}
         </tr>`;
