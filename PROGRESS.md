@@ -1,6 +1,23 @@
 # 作業ログ
 
-## 2026-07-23 — ヴューアーに金利調査レポートのタブを追加
+## 2026-07-23 — ヴューアーを金利履歴マトリクス専用に刷新
+
+- 方針転換: 新着ニュース・キャンペーン表示は不要となり、ヴューアーを「住宅ローン金利の履歴表」専用にした
+- `docs/index.html` を全面刷新（新着ニュース用UI・製品タブ・iframe方式を廃止）
+  - 行 = 機関 × 商品 × 金利種別（変動・固定3/5/10年）、列 = 時間（左＝最新・右＝過去）
+  - 各セル＝その時点の金利＋適用開始日（「〜」）。前の列より上昇=↑赤 / 低下=↓ティール
+  - 検索（機関・商品名）・種別チップ・機関絞り込みポップオーバー／左3列は横スクロールで固定
+- `docs/data/rate-history.json` を新設（履歴データの唯一の正）。現状は `is_demo: true` のダミー
+  - スキーマ: `rate_type_order` / `rate_type_labels` / `rows[].history[] = {rate, effective_from}`（先頭が最新）
+- `scripts/update_rate_history.py` を新設（積み上げ機構）
+  - 報告自動化ツールの `report_data_*.json` を入力に、金利が変わった週だけ履歴先頭へ列を追加
+  - 同一週の再実行は冪等（先頭を上書き）。標準ライブラリのみ・依存なし
+  - 使い方: `python scripts/update_rate_history.py path/to/report_data_YYYYMMDD.json`
+- `docs/reports/latest.html`（前案のiframeデモ）は削除
+- 次の一手: 実データ入手後に `update_rate_history.py` で `rate-history.json` を更新（`is_demo` が false になる）。
+  過去は遡れないため今週起点で毎週積み上がる
+
+## 2026-07-23 — ヴューアーに金利調査レポートのタブを追加（後で刷新・下記に置換）
 
 - `docs/index.html` の上部に製品タブ（「新着ニュース」「金利調査レポート」）を追加 ✅
 - 「新着ニュース」= 既存ヴューアーそのまま（レイアウト無変更） ✅

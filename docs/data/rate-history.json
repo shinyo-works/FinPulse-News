@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-21",
+  "is_demo": true,
+  "rate_type_order": ["variable", "fixed_3y", "fixed_5y", "fixed_10y"],
+  "rate_type_labels": {
+    "variable": "変動",
+    "fixed_3y": "固定3年",
+    "fixed_5y": "固定5年",
+    "fixed_10y": "固定10年"
+  },
+  "rows": [
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obishin_std",
+      "product_name": "住宅ローン（標準）",
+      "url": "https://www.shinkin.co.jp/obishin/",
+      "rate_type": "variable",
+      "history": [
+        { "rate": 0.925, "effective_from": "2026-07-21" },
+        { "rate": 0.875, "effective_from": "2026-04-14" },
+        { "rate": 0.85, "effective_from": "2025-11-04" }
+      ]
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obishin_std",
+      "product_name": "住宅ローン（標準）",
+      "url": "https://www.shinkin.co.jp/obishin/",
+      "rate_type": "fixed_3y",
+      "history": [
+        { "rate": 1.15, "effective_from": "2026-05-12" },
+        { "rate": 1.1, "effective_from": "2025-10-07" }
+      ]
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obishin_std",
+      "product_name": "住宅ローン（標準）",
+      "url": "https://www.shinkin.co.jp/obishin/",
+      "rate_type": "fixed_5y",
+      "history": [
+        { "rate": 1.3, "effective_from": "2026-05-12" },
+        { "rate": 1.25, "effective_from": "2025-10-07" }
+      ]
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obishin_std",
+      "product_name": "住宅ローン（標準）",
+      "url": "https://www.shinkin.co.jp/obishin/",
+      "rate_type": "fixed_10y",
+      "history": [
+        { "rate": 1.55, "effective_from": "2026-05-12" },
+        { "rate": 1.5, "effective_from": "2025-10-07" }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "dohgin_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokkaidobank.co.jp/",
+      "rate_type": "variable",
+      "history": [
+        { "rate": 0.85, "effective_from": "2026-01-06" },
+        { "rate": 0.875, "effective_from": "2025-07-01" }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "dohgin_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokkaidobank.co.jp/",
+      "rate_type": "fixed_3y",
+      "history": [
+        { "rate": 1.1, "effective_from": "2026-06-02" }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "dohgin_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokkaidobank.co.jp/",
+      "rate_type": "fixed_5y",
+      "history": [
+        { "rate": 1.25, "effective_from": "2026-06-02" }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "dohgin_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokkaidobank.co.jp/",
+      "rate_type": "fixed_10y",
+      "history": [
+        { "rate": 1.4, "effective_from": "2026-07-21" },
+        { "rate": 1.45, "effective_from": "2025-12-02" }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "hokuyo_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokuyobank.co.jp/",
+      "rate_type": "variable",
+      "history": [
+        { "rate": 0.85, "effective_from": "2026-07-21" }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "hokuyo_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokuyobank.co.jp/",
+      "rate_type": "fixed_3y",
+      "history": [
+        { "rate": 1.05, "effective_from": "2026-07-21" }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "hokuyo_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokuyobank.co.jp/",
+      "rate_type": "fixed_5y",
+      "history": [
+        { "rate": 1.2, "effective_from": "2026-07-21" }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "hokuyo_std",
+      "product_name": "住宅ローン",
+      "url": "https://www.hokuyobank.co.jp/",
+      "rate_type": "fixed_10y",
+      "history": [
+        { "rate": 1.45, "effective_from": "2026-07-21" }
+      ]
+    },
+    {
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_std",
+      "product_name": "住宅ローン（手動入力）",
+      "url": "https://www.mizuhobank.co.jp/",
+      "rate_type": "variable",
+      "history": [
+        { "rate": 0.375, "effective_from": "2026-04-01" }
+      ]
+    },
+    {
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_std",
+      "product_name": "住宅ローン（手動入力）",
+      "url": "https://www.mizuhobank.co.jp/",
+      "rate_type": "fixed_10y",
+      "history": [
+        { "rate": 1.3, "effective_from": "2026-04-01" }
+      ]
+    }
+  ]
+}
