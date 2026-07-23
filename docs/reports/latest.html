@@ -1,48 +1,290 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>金利調査レポート（未配置）</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>金融機関金利調査レポート</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      color: #172b3a;
-      background: #f4f7f8;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
-      line-height: 1.6;
-    }
-    .box {
-      max-width: 560px;
-      padding: 28px 32px;
-      background: #fff;
-      border: 1px solid #d9e2e8;
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(11, 31, 51, 0.08);
-    }
-    h1 { margin: 0 0 12px; font-size: 1.2rem; color: #0b1f33; }
-    p { margin: 8px 0; color: #647684; }
-    code {
-      padding: 2px 6px;
-      background: #eef2f4;
-      border-radius: 6px;
-      font-size: 0.9em;
-      overflow-wrap: anywhere;
-    }
+    .rate-up    { color: #16a34a; font-weight: 700; }
+    .rate-down  { color: #dc2626; font-weight: 700; }
+    .badge-new  { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+    .badge-up   { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .badge-down { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .badge-campaign { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+    .attention-high { border-left: 4px solid #dc2626; }
+    .attention-mid  { border-left: 4px solid #f59e0b; }
+    .attention-low  { border-left: 4px solid #10b981; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px 12px; }
+    th { white-space: nowrap; }
+    td { font-variant-numeric: tabular-nums; }
+    tr:hover td { background-color: #f0f9ff; }
+    .bank-link { color: #1e40af; text-decoration: underline; text-decoration-style: dotted; }
+    .bank-link:hover { color: #1d4ed8; text-decoration-style: solid; }
+    .source-link { color: #6366f1; font-size: 0.75rem; }
+    .source-link:hover { color: #4f46e5; text-decoration: underline; }
+    .rate-best { background-color: #eff6ff; }
+    .best-rate-badge { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; font-weight: 700; }
+    .manual-badge { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+    /* テーブル先頭列固定（モバイルスクロール時に機関名を常に表示） */
+    .col-sticky { position: sticky; left: 0; z-index: 1; background-color: #fff; }
+    thead .col-sticky { background-color: #312e81; color: #fff; } /* indigo-800 */
+    tbody tr[style] .col-sticky { background-color: inherit; }
+    tbody tr .col-sticky { box-shadow: 8px 0 10px -10px rgba(15, 23, 42, 0.18); }
+    tr:hover .col-sticky { background-color: #f0f9ff; }
   </style>
 </head>
-<body>
-  <div class="box">
-    <h1>金利調査レポートはまだ配置されていません</h1>
-    <p>報告自動化ツールで生成した週次レポートHTMLを、このファイル
-       <code>docs/reports/latest.html</code> に上書きコピーしてコミットすると、
-       ここに最新の金利調査レポートが表示されます。</p>
-    <p>コピー元: 報告自動化ツールの GitHub Actions 成果物、または
-       <code>data/report_YYYYMMDD.html</code>。</p>
-  </div>
+<body class="bg-gray-50 text-gray-800" style="font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;">
+
+  <!-- ===================== ヘッダー ===================== -->
+  <header class="bg-indigo-900 text-white px-8 py-5">
+    <div class="max-w-6xl mx-auto" style="max-width:1200px;margin:0 auto;">
+      <div class="flex items-center justify-between flex-wrap gap-3" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <p class="hidden sm:block text-indigo-300 text-xs font-medium tracking-widest uppercase mb-1">Interest Rate Survey Report</p>
+          <h1 class="text-2xl font-bold">金融機関　金利調査レポート</h1>
+        </div>
+        <div class="flex gap-6 text-sm" style="display:flex;gap:24px;font-size:0.875rem;">
+          <div class="text-center" style="text-align:center;">
+            <p class="text-indigo-300 text-xs mb-0.5">調査日</p>
+            <p class="font-bold text-lg">2026/07/21</p>
+          </div>
+          <div class="text-center" style="text-align:center;">
+            <p class="text-indigo-300 text-xs mb-0.5">対象機関</p>
+            <p class="font-bold text-lg">16機関</p>
+          </div>
+          <div class="text-center" style="text-align:center;">
+            <p class="text-indigo-300 text-xs mb-0.5">今週の変化</p>
+            <p class="font-bold text-lg text-emerald-400">3件</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-6xl mx-auto px-4 py-6 space-y-8" style="max-width:1200px;margin:0 auto;padding:24px 16px;">
+
+    <!-- ===================== PAGE 1: 要約・ハイライト ===================== -->
+    <section>
+      <h2 class="text-lg font-bold text-indigo-900 border-b-2 border-indigo-900 pb-1 mb-4">今週のサマリー</h2>
+
+      <!-- AI要約 3枚カード -->
+      <div class="grid grid-cols-3 gap-4 mb-6" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+
+        <!-- カード1: 今週の注目ポイント -->
+        <div class="bg-white rounded-xl shadow-sm border border-indigo-100 p-4" style="min-height:120px;">
+          <div class="flex items-center gap-2 mb-3" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span class="text-xl">🔍</span>
+            <h3 class="font-bold text-indigo-900 text-sm">今週の注目ポイント</h3>
+          </div>
+          <p class="text-sm text-gray-700 leading-relaxed">今週は帯広信用金庫が住宅ローン変動を+0.05%引き上げ、北海道銀行が固定10年を-0.05%引き下げました。<br>北洋銀行の変動0.850%を新規確認しています。</p>
+        </div>
+
+        <!-- カード2: 競合状況 -->
+        <div class="bg-white rounded-xl shadow-sm border border-indigo-100 p-4" style="min-height:120px;">
+          <div class="flex items-center gap-2 mb-3" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span class="text-xl">📊</span>
+            <h3 class="font-bold text-indigo-900 text-sm">競合状況</h3>
+          </div>
+          <p class="text-sm text-gray-700 leading-relaxed">変動金利は北海道銀行・北洋銀行が0.850%で並び、帯広信用金庫が0.925%とやや高め。<br>固定10年は北海道銀行が1.400%で最も低い水準です。</p>
+        </div>
+
+        <!-- カード3: 支店での提案 -->
+        <div class="bg-white rounded-xl shadow-sm border border-emerald-100 p-4" style="min-height:120px;">
+          <div class="flex items-center gap-2 mb-3" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span class="text-xl">💡</span>
+            <h3 class="font-bold text-emerald-800 text-sm">支店での提案</h3>
+          </div>
+          <p class="text-sm text-gray-700 leading-relaxed">変動重視のお客様には北洋銀行・北海道銀行を、固定志向のお客様には北海道銀行の固定10年をご案内できます。<br>手数料改定（振込・ATM）も来店時の説明材料になります。</p>
+        </div>
+
+      </div>
+
+      <!-- 変化ハイライト一覧 -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <h3 class="font-bold text-gray-700 text-sm mb-3">📌 先週からの変化一覧</h3>
+        <div class="space-y-2">
+          <!-- HIGHLIGHT_ROWS_START -->
+          <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+            <span class="badge-up text-xs px-2 py-0.5 rounded-full font-medium">金利変更</span>
+            <span class="text-sm font-medium text-gray-800">帯広信用金庫</span>
+            <span class="text-sm text-gray-500">住宅ローン 変動</span>
+            <span class="rate-up text-sm">↑ 0.875% → 0.925%（+0.05%）</span>
+          </div>
+
+          <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+            <span class="badge-down text-xs px-2 py-0.5 rounded-full font-medium">金利変更</span>
+            <span class="text-sm font-medium text-gray-800">北海道銀行</span>
+            <span class="text-sm text-gray-500">住宅ローン 固定10年</span>
+            <span class="rate-down text-sm">↓ 1.45% → 1.4%（-0.05%）</span>
+          </div>
+
+          <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+            <span class="badge-new text-xs px-2 py-0.5 rounded-full font-medium">新規確認</span>
+            <span class="text-sm font-medium text-gray-800">北洋銀行</span>
+            <span class="text-sm text-gray-500">住宅ローン 変動</span>
+            <span class="text-sm text-indigo-700 font-semibold">→ 0.85%（初回確認）</span>
+          </div><!-- HIGHLIGHT_ROWS_END -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== セクション1: 住宅ローン金利比較表 ===================== -->
+    <section>
+      <h2 class="text-lg font-bold text-indigo-900 border-b-2 border-indigo-900 pb-1 mb-4">
+        住宅ローン金利比較
+        <span class="text-xs font-normal text-gray-500 ml-2">（単位：% / 新規借入・引下げ後の適用金利）</span>
+      </h2>
+      <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+        <table>
+          <thead>
+            <tr class="bg-indigo-900 text-white text-sm">
+              <th scope="col" class="px-4 py-3 text-left font-semibold col-sticky">金融機関</th>
+              <th scope="col" class="px-3 py-3 text-left font-semibold">商品名</th>
+              <th scope="col" class="px-3 py-3 text-center font-semibold">変動金利</th>
+              <th scope="col" class="px-3 py-3 text-center font-semibold">固定特約 3年</th>
+              <th scope="col" class="px-3 py-3 text-center font-semibold">固定特約 5年</th>
+              <th scope="col" class="px-3 py-3 text-center font-semibold">固定特約 10年</th>
+              <th scope="col" class="px-3 py-3 text-left font-semibold">備考</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-gray-100">
+          <!-- LOAN_ROWS_START --><tr style="background-color:#fefce8;"><td class="px-4 py-2.5 font-medium col-sticky"><a href="https://www.shinkin.co.jp/obishin/" target="_blank" rel="noopener noreferrer" class="bank-link">帯広信用金庫</a></td><td class="px-3 py-2.5 text-gray-700">住宅ローン（標準）</td><td class="px-3 py-2.5 text-center"><span class="rate-up">0.925 &uarr;</span><span class="badge-up text-xs px-1 ml-1 rounded">+0.050</span></td><td class="px-3 py-2.5 text-center"><span class="text-gray-700">1.150</span></td><td class="px-3 py-2.5 text-center"><span class="text-gray-700">1.300</span></td><td class="px-3 py-2.5 text-center"><span class="text-gray-700">1.550</span></td><td class="px-3 py-2.5 text-xs text-gray-500">最大引下げ後の適用金利</td></tr>
+<tr style="background-color:#fefce8;"><td class="px-4 py-2.5 font-medium col-sticky"><a href="https://www.hokkaidobank.co.jp/" target="_blank" rel="noopener noreferrer" class="bank-link">北海道銀行</a></td><td class="px-3 py-2.5 text-gray-700">住宅ローン</td><td class="px-3 py-2.5 text-center rate-best"><span class="text-gray-700">0.850</span><span class="best-rate-badge text-xs px-1.5 ml-1 rounded">&#26368;&#23433;</span></td><td class="px-3 py-2.5 text-center"><span class="text-gray-700">1.100</span></td><td class="px-3 py-2.5 text-center"><span class="text-gray-700">1.250</span></td><td class="px-3 py-2.5 text-center rate-best"><span class="rate-down">1.400 &darr;</span><span class="badge-down text-xs px-1 ml-1 rounded">-0.050</span><span class="best-rate-badge text-xs px-1.5 ml-1 rounded">&#26368;&#23433;</span></td><td class="px-3 py-2.5 text-xs text-gray-500"></td></tr>
+<tr><td class="px-4 py-2.5 font-medium col-sticky"><a href="https://www.hokuyobank.co.jp/" target="_blank" rel="noopener noreferrer" class="bank-link">北洋銀行</a></td><td class="px-3 py-2.5 text-gray-700">住宅ローン</td><td class="px-3 py-2.5 text-center rate-best"><span class="text-gray-700">0.850</span><span class="best-rate-badge text-xs px-1.5 ml-1 rounded">&#26368;&#23433;</span></td><td class="px-3 py-2.5 text-center rate-best"><span class="text-gray-700">1.050</span><span class="best-rate-badge text-xs px-1.5 ml-1 rounded">&#26368;&#23433;</span></td><td class="px-3 py-2.5 text-center rate-best"><span class="text-gray-700">1.200</span><span class="best-rate-badge text-xs px-1.5 ml-1 rounded">&#26368;&#23433;</span></td><td class="px-3 py-2.5 text-center"><span class="text-gray-700">1.450</span></td><td class="px-3 py-2.5 text-xs text-gray-500">新規取扱の最優遇金利</td></tr><!-- LOAN_ROWS_END -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    
+    <!-- ===================== セクション2: 手数料改定情報 ===================== -->
+    <section>
+      <h2 class="text-lg font-bold text-indigo-900 border-b-2 border-indigo-900 pb-1 mb-4">手数料・ATM料金改定情報</h2>
+      <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+        <table>
+          <thead>
+            <tr class="bg-indigo-900 text-white text-sm">
+              <th scope="col" class="px-4 py-3 text-left font-semibold col-sticky">金融機関</th>
+              <th scope="col" class="px-4 py-3 text-left font-semibold">対象サービス</th>
+              <th scope="col" class="px-4 py-3 text-center font-semibold">変更前 →</th>
+              <th scope="col" class="px-4 py-3 text-center font-semibold">変更後</th>
+              <th scope="col" class="px-4 py-3 text-center font-semibold">適用日</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-gray-100">
+          <!-- FEE_ROWS_START --><tr>
+          <td class="px-4 py-3 font-medium col-sticky"><a href="https://www.hokkaidobank.co.jp/" target="_blank" rel="noopener noreferrer" class="bank-link">北海道銀行</a></td>
+          <td class="px-4 py-3 text-gray-700">
+            <div class="font-medium">他行あて振込手数料の改定</div>
+            <p class="text-xs text-gray-500 mt-1 leading-relaxed">インターネットバンキング経由の他行あて振込（3万円以上）</p>
+          </td>
+          <td class="px-4 py-3 text-gray-600 leading-relaxed">330円</td>
+          <td class="px-4 py-3 font-bold text-emerald-700 leading-relaxed">→ 無料化: 220円</td>
+          <td class="px-4 py-3 text-center text-gray-500">2026/09/01</td>
+        </tr>
+<tr>
+          <td class="px-4 py-3 font-medium col-sticky"><a href="https://www.hokuyobank.co.jp/" target="_blank" rel="noopener noreferrer" class="bank-link">北洋銀行</a></td>
+          <td class="px-4 py-3 text-gray-700">
+            <div class="font-medium">ATM時間外手数料の無料化</div>
+            <p class="text-xs text-gray-500 mt-1 leading-relaxed">提携ATMでの平日時間外引き出し</p>
+          </td>
+          <td class="px-4 py-3 text-gray-600 leading-relaxed">110円</td>
+          <td class="px-4 py-3 font-bold text-emerald-700 leading-relaxed">→ 無料化: 0円（無料）</td>
+          <td class="px-4 py-3 text-center text-gray-500">2026/08/01</td>
+        </tr><!-- FEE_ROWS_END -->
+          </tbody>
+        </table>
+        <!-- 手数料改定なしの週 -->
+        <!-- <div class="p-6 text-center">
+          <p class="text-gray-500 text-sm">今週は手数料・ATM料金の改定情報はありませんでした</p>
+        </div> -->
+      </div>
+    </section>
+    
+
+
+    <!-- ===================== セクション3: キャンペーン・新商品情報 ===================== -->
+    <section>
+      <h2 class="text-lg font-bold text-indigo-900 border-b-2 border-indigo-900 pb-1 mb-4">キャンペーン・新商品情報</h2>
+      <div class="grid grid-cols-2 gap-4" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+      <!-- CAMPAIGN_CARDS_START -->
+        <div class="bg-white rounded-xl shadow-sm attention-high p-4">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <span class="badge-campaign text-xs px-2 py-0.5 rounded-full font-medium">キャンペーン</span>
+              <span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">注目度 ★★★</span>
+            </div>
+            <div class="text-right leading-5">
+              <span class="text-xs text-gray-500">掲載日：2026/07/15</span><br>
+              <span class="text-xs text-gray-500">期限：2026/08/31</span>
+            </div>
+          </div>
+          <h3 class="font-bold text-gray-800 mt-1">帯広信用金庫</h3>
+          <p class="text-sm text-gray-600 mt-1">夏の定期預金キャンペーン。スーパー定期（1年）に特別金利を上乗せ。窓口・インターネット両対応。</p>
+          <a href="https://www.shinkin.co.jp/obishin/" target="_blank" rel="noopener noreferrer" class="source-link mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>[詳細] 元の情報源を確認する</a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm attention-mid p-4">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <span class="badge-campaign text-xs px-2 py-0.5 rounded-full font-medium">新商品</span>
+              <span class="ml-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">注目度 ★★</span>
+            </div>
+            <div class="text-right leading-5">
+              <span class="text-xs text-gray-500">掲載日：2026/07/18</span><br>
+              <span class="text-xs text-gray-400">期限：不明</span>
+            </div>
+          </div>
+          <h3 class="font-bold text-gray-800 mt-1">北海道銀行</h3>
+          <p class="text-sm text-gray-600 mt-1">住宅ローン Web完結プラン新設。来店不要で申込から契約まで完結。事務手数料を定率型で提供。</p>
+          <a href="https://www.hokkaidobank.co.jp/" target="_blank" rel="noopener noreferrer" class="source-link mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>[詳細] 元の情報源を確認する</a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm attention-low p-4">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <span class="badge-campaign text-xs px-2 py-0.5 rounded-full font-medium">お知らせ</span>
+              <span class="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">注目度 ★</span>
+            </div>
+            <div class="text-right leading-5">
+              <span class="text-xs text-gray-500">掲載日：2026/07/19</span><br>
+              <span class="text-xs text-gray-400">期限：不明</span>
+            </div>
+          </div>
+          <h3 class="font-bold text-gray-800 mt-1">北洋銀行</h3>
+          <p class="text-sm text-gray-600 mt-1">一部店舗の営業時間変更のお知らせ。8月より一部店舗の窓口営業時間を変更します。</p>
+          <a href="https://www.hokuyobank.co.jp/" target="_blank" rel="noopener noreferrer" class="source-link mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>[詳細] 元の情報源を確認する</a>
+        </div><!-- CAMPAIGN_CARDS_END -->
+      </div>
+    </section>
+
+    <!-- ===================== セクション4: 預金金利（公式ページリンク） ===================== -->
+    <section>
+      <h2 class="text-lg font-bold text-indigo-900 border-b-2 border-indigo-900 pb-1 mb-4">
+        預金金利
+        <span class="text-xs font-normal text-gray-500 ml-2">（各行の公式金利ページでご確認ください）</span>
+      </h2>
+      <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+        <table>
+          <thead>
+            <tr class="bg-indigo-900 text-white text-sm">
+              <th scope="col" class="px-4 py-3 text-left font-semibold col-sticky">金融機関</th>
+              <th scope="col" class="px-4 py-3 text-left font-semibold">最新金利の確認先</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-gray-100">
+          <!-- DEPOSIT_ROWS_START --><tr><td class="px-4 py-3 font-medium col-sticky">みずほ銀行</td><td class="px-4 py-3"><a href="https://www.mizuhobank.co.jp/retail/products/deposit/interest/index.html" target="_blank" rel="noopener noreferrer" class="bank-link inline-flex items-center gap-1 font-medium">金利ページを開く <span aria-hidden="true">&#8599;</span></a></td></tr>
+<tr><td class="px-4 py-3 font-medium col-sticky">北海道銀行</td><td class="px-4 py-3"><a href="https://www.hokkaidobank.co.jp/kinri/yokin.html" target="_blank" rel="noopener noreferrer" class="bank-link inline-flex items-center gap-1 font-medium">金利ページを開く <span aria-hidden="true">&#8599;</span></a></td></tr>
+<tr><td class="px-4 py-3 font-medium col-sticky">北洋銀行</td><td class="px-4 py-3"><a href="https://www.hokuyobank.co.jp/rates/" target="_blank" rel="noopener noreferrer" class="bank-link inline-flex items-center gap-1 font-medium">金利ページを開く <span aria-hidden="true">&#8599;</span></a></td></tr>
+<tr><td class="px-4 py-3 font-medium col-sticky">帯広信用金庫</td><td class="px-4 py-3"><a href="https://www.shinkin.co.jp/obishin/rate/deposit/" target="_blank" rel="noopener noreferrer" class="bank-link inline-flex items-center gap-1 font-medium">金利ページを開く <span aria-hidden="true">&#8599;</span></a></td></tr>
+<tr><td class="px-4 py-3 font-medium col-sticky">ゆうちょ銀行</td><td class="px-4 py-3"><a href="https://www.jp-bank.japanpost.jp/kinri/kinri.html" target="_blank" rel="noopener noreferrer" class="bank-link inline-flex items-center gap-1 font-medium">金利ページを開く <span aria-hidden="true">&#8599;</span></a></td></tr><!-- DEPOSIT_ROWS_END -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- /max-w-6xl -->
 </body>
 </html>
