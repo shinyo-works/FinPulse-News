@@ -449,6 +449,61 @@
 
     .hidden { display: none !important; }
 
+    /* 製品タブ（新着ニュース / 金利調査レポート）とビュー切替 */
+    .product-tabs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 44px;
+      padding: 0 16px;
+      background: var(--navy-950);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    .product-tab {
+      padding: 6px 14px;
+      color: #c8d9e2;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .product-tab:hover { background: rgba(255, 255, 255, 0.07); }
+
+    .product-tab.active {
+      color: #ffffff;
+      background: rgba(85, 214, 201, 0.18);
+      border-color: rgba(85, 214, 201, 0.38);
+    }
+
+    /* 製品タブ44pxぶん全体を下げる */
+    body { padding-top: 44px; }
+    .sidebar { top: 44px; height: calc(100vh - 44px); }
+    .topbar { top: 44px; }
+
+    #rateView { display: none; }
+
+    #rateFrame {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 44px);
+      border: 0;
+      background: #ffffff;
+    }
+
+    body[data-view="rate"] #newsView { display: none; }
+    body[data-view="rate"] #rateView { display: block; }
+    /* 金利レポート表示中はニュース用モバイルタブが無いので44pxのみ */
+    body[data-view="rate"] { padding-top: 44px !important; }
+
     @media (max-width: 920px) {
       .app-shell { grid-template-columns: 245px minmax(0, 1fr); }
       .controls { flex-wrap: wrap; }
@@ -456,11 +511,11 @@
     }
 
     @media (max-width: 700px) {
-      body { padding-top: 54px; }
+      body { padding-top: 98px; }
 
       .mobile-tabs {
         position: fixed;
-        inset: 0 0 auto 0;
+        inset: 44px 0 auto 0;
         z-index: 100;
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -480,13 +535,13 @@
 
       .mobile-tab.active { color: #fff; background: rgba(85, 214, 201, 0.18); }
 
-      .app-shell { display: block; min-height: calc(100vh - 54px); }
+      .app-shell { display: block; min-height: calc(100vh - 98px); }
 
       .sidebar {
         position: static;
         width: 100%;
         height: auto;
-        min-height: calc(100vh - 54px);
+        min-height: calc(100vh - 98px);
       }
 
       body[data-mobile-pane="content"] .sidebar { display: none; }
@@ -495,11 +550,11 @@
       .brand { padding: 14px 18px 11px; }
       .nav-section { padding: 9px 12px 2px; }
 
-      .topbar { top: 54px; padding: 6px 10px; }
+      .topbar { top: 98px; padding: 6px 10px; }
       .controls { gap: 5px; }
       .filter-menu, .toggle-label { flex: 1; }
       .control-button, .toggle-label { width: 100%; justify-content: center; font-size: 0.84rem; }
-      .filter-popover { position: fixed; inset: 118px 14px auto 14px; width: auto; }
+      .filter-popover { position: fixed; inset: 162px 14px auto 14px; width: auto; }
 
       .content { padding: 12px 10px 24px; }
       .page-head { align-items: end; gap: 6px; margin-bottom: 8px; }
@@ -536,7 +591,13 @@
     }
   </style>
 </head>
-<body data-mobile-pane="nav">
+<body data-mobile-pane="nav" data-view="news">
+  <nav class="product-tabs" aria-label="表示するレポートの切替">
+    <button class="product-tab active" type="button" data-view="news">新着ニュース</button>
+    <button class="product-tab" type="button" data-view="rate">金利調査レポート</button>
+  </nav>
+
+  <div id="newsView">
   <nav class="mobile-tabs" aria-label="スマートフォン表示切替">
     <button class="mobile-tab active" type="button" data-pane="nav">一覧</button>
     <button class="mobile-tab" type="button" data-pane="content">記事</button>
@@ -599,6 +660,11 @@
         </div>
       </div>
     </main>
+  </div>
+  </div><!-- /newsView -->
+
+  <div id="rateView">
+    <iframe id="rateFrame" title="金利調査レポート" loading="lazy"></iframe>
   </div>
 
   <script>
@@ -912,6 +978,25 @@
 
     document.querySelectorAll(".mobile-tab").forEach((button) => {
       button.addEventListener("click", () => showMobilePane(button.dataset.pane));
+    });
+
+    const RATE_REPORT_SRC = "./reports/latest.html";
+    let rateLoaded = false;
+
+    function switchView(view) {
+      document.body.dataset.view = view;
+      document.querySelectorAll(".product-tab").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === view);
+      });
+      // 金利レポートは初回表示時にだけ読み込む（初期表示を軽くする）
+      if (view === "rate" && !rateLoaded) {
+        document.getElementById("rateFrame").src = RATE_REPORT_SRC;
+        rateLoaded = true;
+      }
+    }
+
+    document.querySelectorAll(".product-tab").forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
     });
 
     initialize();
