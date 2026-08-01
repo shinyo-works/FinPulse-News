@@ -31,6 +31,21 @@ class UpdateRateHistoryTest(unittest.TestCase):
             }]
         }
 
+    def test_manual_products_are_not_stored(self):
+        report = copy.deepcopy(self.report)
+        report["loan_table"].append({
+            "bank_id": "manual-bank",
+            "bank_name": "手動入力銀行",
+            "product_id": "manual-product",
+            "product_name": "手動商品",
+            "manual": True,
+            "loan_variable": 9.99,
+        })
+        update_history(self.history, report, "2026-08-01")
+
+        bank_ids = [row["bank_id"] for row in self.history["rows"]]
+        self.assertEqual(["test-bank"], bank_ids)
+
     def test_same_day_update_is_idempotent(self):
         update_history(self.history, self.report, "2026-08-01")
         update_history(self.history, self.report, "2026-08-01")

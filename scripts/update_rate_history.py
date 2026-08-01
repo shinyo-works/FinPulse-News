@@ -267,6 +267,12 @@ def update_history(
     }
 
     for loan in report_data.get("loan_table", []):
+        # 手動入力の機関（サイトから取得できずconfig/manual_rates.jsonに手書きした値）は
+        # 履歴に入れない。毎週同じ値がコピーされるだけで「その日に確認した金利」ではなく、
+        # 自動取得分と並べると確認済みに見えてしまうため。金利調査レポート本体でも
+        # ローン表から除外しており、それに揃える。
+        if loan.get("manual"):
+            continue
         bank_id = validate_id(loan.get("bank_id"), "bank_id")
         product_id = validate_id(loan.get("product_id"), "product_id")
         for loan_key, rate_type in RATE_KEY_MAP.items():
