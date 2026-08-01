@@ -28,9 +28,14 @@
 
     * { box-sizing: border-box; }
     html { color-scheme: light; }
+    /* 見出し・操作列を常に見えるようにするため、ページ自体はスクロールさせず
+       表の枠だけを縦横にスクロールさせる（縦スクロールしても見出しが残る） */
     body {
       margin: 0;
-      min-height: 100vh;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       color: var(--ink);
       background: var(--canvas);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
@@ -41,6 +46,7 @@
 
     /* index.html のタブ内（iframe）に表示するため、見出しは控えめの高さにする */
     .site-header {
+      flex: none;
       padding: 10px clamp(16px, 4vw, 48px);
       color: #eef7fa;
       background:
@@ -59,22 +65,18 @@
       width: 11px; height: 11px; border-radius: 50%;
       background: #55d6c9; box-shadow: 0 0 0 5px rgba(85, 214, 201, 0.15);
     }
-    .site-header p { margin: 4px 0 0; color: #a9c0ce; font-size: 0.8rem; }
-    .demo-flag {
-      display: inline-block;
-      margin-left: 10px;
-      padding: 2px 9px;
-      color: #7a4b00;
-      background: #ffd98a;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      vertical-align: middle;
+    /* 説明文は折り返さず1行に収める */
+    .site-header p {
+      margin: 4px 0 0;
+      color: #a9c0ce;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .controls {
-      position: sticky;
-      top: 0;
+      flex: none;
       z-index: 20;
       display: flex;
       flex-wrap: wrap;
@@ -85,7 +87,7 @@
       border-bottom: 1px solid var(--line);
       backdrop-filter: blur(10px);
     }
-    .search-wrap { position: relative; flex: 1 1 260px; }
+    .search-wrap { position: relative; flex: 0 1 208px; min-width: 132px; }
     .search-icon {
       position: absolute; left: 13px; top: 50%;
       color: var(--muted); transform: translateY(-50%); pointer-events: none;
@@ -125,6 +127,7 @@
     .filter-option input { accent-color: var(--teal-700); }
 
     .legend {
+      flex: none;
       display: flex; flex-wrap: wrap; gap: 14px;
       padding: 8px clamp(16px, 4vw, 48px) 0;
       color: var(--muted); font-size: 0.78rem;
@@ -133,14 +136,24 @@
     .legend .up { color: var(--up); }
     .legend .down { color: var(--down); }
     .source-note {
+      flex: none;
       padding: 6px clamp(16px, 4vw, 48px) 0;
       color: var(--muted); font-size: 0.74rem; line-height: 1.55;
     }
 
-    .content { padding: 12px clamp(16px, 4vw, 48px) 40px; }
+    /* 残りの高さをすべて表に渡す（表の中だけがスクロールする） */
+    .content {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      padding: 12px clamp(16px, 4vw, 48px) 16px;
+    }
+    #matrix { flex: 1 1 auto; min-width: 0; display: flex; }
 
     .table-scroll {
-      overflow-x: auto;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: auto;
       background: var(--paper);
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -156,9 +169,32 @@
       border-bottom: 1px solid var(--line);
     }
     thead th.col-bank, thead th.col-type { text-align: left; z-index: 7; }
+    /* 最新列は従来どおりの幅、過去列は詰める */
     thead th.col-date { min-width: 102px; }
+    thead th.col-date.past { min-width: 62px; padding: 9px 5px; }
     .date-year { display: block; color: #7b8b96; font-size: 0.65rem; font-weight: 650; }
     .date-day { display: block; margin-top: 1px; color: var(--navy-800); font-size: 0.82rem; }
+    .col-date.past .date-year { font-size: 0.6rem; }
+    .col-date.past .date-day { font-size: 0.74rem; }
+
+    /* 全商品で金利が動かなかった週は、まとめて1本の細い列にする */
+    thead th.col-nochange,
+    tbody td.col-nochange {
+      width: 54px; min-width: 54px; padding: 6px 3px;
+      background: #f6fafb;
+    }
+    tbody td.col-nochange { border-bottom: 1px solid #eef2f4; }
+    tbody tr:hover td.col-nochange { background: #f2f8f9; }
+    .nochange-label { display: block; color: #8595a1; font-size: 0.65rem; font-weight: 800; }
+    .nochange-range {
+      display: block; margin-top: 2px; color: #a3b3bd;
+      font-size: 0.58rem; font-weight: 650; font-variant-numeric: tabular-nums;
+    }
+
+    /* 余った横幅を吸収する空列。これが無いと過去列が引き伸ばされて太くなる */
+    thead th.col-spacer, tbody td.col-spacer {
+      width: 100%; min-width: 0; padding: 0; background: transparent;
+    }
     tbody td {
       padding: 8px 12px; vertical-align: top;
       border-bottom: 1px solid #eef2f4;
@@ -168,30 +204,27 @@
     tbody tr:last-child td { border-bottom: 0; }
     tbody tr:hover td { background: #fbfdfd; }
 
-    /* 左側の固定列（機関・商品・種別） */
-    .col-bank { position: sticky; left: 0; z-index: 4; width: 210px; min-width: 210px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
-    .col-type { position: sticky; left: 210px; z-index: 4; width: 92px; min-width: 92px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
-    thead th.col-bank { left: 0; background: #f7fafa; }
-    thead th.col-type { left: 210px; background: #f7fafa; }
+    /* 左側の固定列（機関・商品・種別）。横スクロールしても残る */
+    .col-bank { position: sticky; left: 0; z-index: 4; width: 142px; min-width: 142px; padding: 8px 8px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    .col-type { position: sticky; left: 142px; z-index: 4; width: 58px; min-width: 58px; padding: 8px 4px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    thead th.col-bank { left: 0; padding: 9px 8px; background: #f7fafa; }
+    thead th.col-type { left: 142px; padding: 9px 4px; background: #f7fafa; }
     tbody tr:hover .col-bank, tbody tr:hover .col-type { background: #fbfdfd; }
 
-    .bank-name { font-weight: 700; color: var(--navy-900); }
+    .bank-name { font-weight: 700; color: var(--navy-900); font-size: 0.82rem; white-space: normal; line-height: 1.25; }
     .bank-name a { color: var(--navy-800); text-decoration: none; }
     .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
-    .product-name { margin-top: 1px; color: var(--muted); font-size: 0.76rem; white-space: normal; }
-    .legacy-badge {
-      display: inline-block; margin-top: 5px; padding: 1px 7px;
-      border: 1px solid #c4ccd2; border-radius: 999px;
-      color: #667784; background: #f5f7f8; font-size: 0.64rem; font-weight: 750;
-    }
+    .product-name { margin-top: 1px; color: var(--muted); font-size: 0.71rem; white-space: normal; line-height: 1.25; }
 
     .type-badge {
-      display: inline-block; padding: 2px 9px; border-radius: 999px;
+      display: inline-block; padding: 2px 6px; border-radius: 999px;
       background: var(--teal-100); color: var(--teal-700);
-      font-size: 0.76rem; font-weight: 750;
+      font-size: 0.71rem; font-weight: 750; white-space: nowrap;
     }
 
     .rate-cell.current { background: var(--teal-100); }
+    tbody td.rate-cell.past { padding: 8px 5px; }
+    .rate-cell.past .rate-val { font-size: 0.82rem; }
     .rate-val { font-size: 0.98rem; font-weight: 750; color: var(--navy-900); }
     .rate-cell.up .rate-val { color: var(--up); }
     .rate-cell.down .rate-val { color: var(--down); }
@@ -210,21 +243,23 @@
     tbody tr.bank-start > td { border-top: 2px solid #8aa0af; }
 
     .empty-state, .loading-state {
+      align-self: flex-start; width: 100%;
       padding: 40px 20px; text-align: center; color: var(--muted);
       background: var(--paper); border: 1px dashed #b9c8d1; border-radius: var(--radius);
     }
     .empty-state strong, .loading-state strong { display: block; margin-bottom: 5px; color: var(--navy-900); font-size: 1rem; }
 
     @media (max-width: 640px) {
-      .col-bank { width: 150px; min-width: 150px; }
-      .col-type { left: 150px; width: 72px; min-width: 72px; }
-      thead th.col-type { left: 150px; }
+      .col-bank { width: 112px; min-width: 112px; }
+      .col-type { left: 112px; width: 50px; min-width: 50px; }
+      thead th.col-type { left: 112px; }
+      .site-header p { font-size: 0.72rem; }
     }
   </style>
 </head>
 <body>
   <header class="site-header">
-    <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>金利履歴ビューアー<span id="demoFlag" class="demo-flag" hidden>デモ表示</span></div>
+    <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>金利履歴ビューアー</div>
     <p id="subtitle">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。</p>
   </header>
 
@@ -233,7 +268,7 @@
       <span class="search-icon" aria-hidden="true">⌕</span>
       <input id="searchInput" type="search" placeholder="金融機関・商品名で検索" aria-label="金融機関・商品名で検索" autocomplete="off">
     </label>
-    <div class="type-chips" id="typeChips" aria-label="金利種別フィルター"></div>
+    <div class="type-chips" id="typeChips" role="group" aria-label="金利種別の切替（1つだけ表示）"></div>
     <div class="filter-menu" id="bankFilterWrap">
       <button class="control-button" id="filterButton" type="button" aria-expanded="false" aria-controls="filterPopover">
         機関を絞り込む <span id="filterCount"></span>
@@ -248,6 +283,7 @@
     <span><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）</span>
     <span class="up"><b>↑</b> 右隣の前回調査より上昇</span>
     <span class="down"><b>↓</b> 右隣の前回調査より低下</span>
+    <span><b>変更なし</b>＝その期間は表示中の全商品で金利が動いていない</span>
     <span id="coverage"></span>
   </div>
   <div id="sourceNote" class="source-note"></div>
@@ -265,7 +301,8 @@
     const state = {
       data: null,
       search: "",
-      selectedTypes: new Set(),
+      // 金利種別は「すべて」または1種別だけを表示する（null = すべて）
+      selectedType: null,
       selectedBanks: new Set(),
     };
 
@@ -277,7 +314,6 @@
       filterButton: document.getElementById("filterButton"),
       filterPopover: document.getElementById("filterPopover"),
       filterCount: document.getElementById("filterCount"),
-      demoFlag: document.getElementById("demoFlag"),
       coverage: document.getElementById("coverage"),
       sourceNote: document.getElementById("sourceNote"),
     };
@@ -348,7 +384,6 @@
       return [...rows].sort((a, b) => {
         const bi = banks.indexOf(a.bank_id) - banks.indexOf(b.bank_id);
         if (bi !== 0) return bi;
-        if (Boolean(a.is_legacy) !== Boolean(b.is_legacy)) return a.is_legacy ? 1 : -1;
         if (a.product_id !== b.product_id) return String(a.product_id).localeCompare(String(b.product_id));
         return typeOrder.indexOf(a.rate_type) - typeOrder.indexOf(b.rate_type);
       });
@@ -357,7 +392,7 @@
     function visibleRows() {
       const q = state.search.trim().toLocaleLowerCase("ja");
       return state.data.rows.filter((row) => {
-        if (!state.selectedTypes.has(row.rate_type)) return false;
+        if (state.selectedType && row.rate_type !== state.selectedType) return false;
         if (!state.selectedBanks.has(row.bank_id)) return false;
         if (!q) return true;
         return (
@@ -368,19 +403,56 @@
     }
 
     function rateCell(entry, older, isCurrent, isBest) {
-      if (!entry) return '<td class="rate-cell"><span class="rate-empty">—</span></td>';
+      const base = isCurrent ? "current" : "past";
+      if (!entry) return `<td class="rate-cell ${base}"><span class="rate-empty">—</span></td>`;
       let dir = "";
       let arrow = "";
       if (older && isFiniteRate(entry.rate) && isFiniteRate(older.rate)) {
         if (entry.rate > older.rate) { dir = "up"; arrow = " <span class=\"arrow\">↑</span>"; }
         else if (entry.rate < older.rate) { dir = "down"; arrow = " <span class=\"arrow\">↓</span>"; }
       }
-      const cls = ["rate-cell", isCurrent ? "current" : "", isBest ? "best" : "", dir].filter(Boolean).join(" ");
+      const cls = ["rate-cell", base, isBest ? "best" : "", dir].filter(Boolean).join(" ");
       const badge = isBest ? '<div class="best-badge">最安</div>' : "";
       return `<td class="${cls}">
         <div class="rate-val">${fmtRate(entry.rate)}${arrow}</div>
         ${badge}
       </td>`;
+    }
+
+    function sameRate(a, b) {
+      const av = a && isFiniteRate(a.rate) ? a.rate : null;
+      const bv = b && isFiniteRate(b.rate) ? b.rate : null;
+      return av === bv;
+    }
+
+    function shortDate(date) {
+      const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(date ?? ""));
+      return m ? `${m[1]}/${m[2]}` : String(date ?? "");
+    }
+
+    function buildColumns(rows, dates) {
+      // 過去列のうち「1つ右（より古い列）と表示中の全行が同値」＝その週は誰も動いていない列を畳む。
+      // 最新列と最古列は基準として必ず残す（最古を消すと比較の起点が無くなる）。
+      const redundant = dates.map(() => false);
+      for (let i = 1; i < dates.length - 1; i += 1) {
+        redundant[i] = rows.every((row) => sameRate(entryAt(row, dates[i]), entryAt(row, dates[i + 1])));
+      }
+      const columns = [];
+      for (let i = 0; i < dates.length; i += 1) {
+        if (!redundant[i]) {
+          columns.push({ kind: "date", date: dates[i], index: i });
+          continue;
+        }
+        let last = i;
+        while (last + 1 < dates.length && redundant[last + 1]) last += 1;
+        columns.push({ kind: "nochange", from: dates[i], to: dates[last], count: last - i + 1 });
+        i = last;
+      }
+      return columns;
+    }
+
+    function nochangeRange(col) {
+      return col.count === 1 ? shortDate(col.from) : `${shortDate(col.from)}〜${shortDate(col.to)}`;
     }
 
     function minRateByType(rows, latestDate) {
@@ -410,11 +482,16 @@
       const latestDate = dates[0];
 
       const minByType = minRateByType(rows, latestDate);
+      const columns = buildColumns(rows, dates);
 
       const thead = `<tr>
         <th class="col-bank">金融機関・商品</th>
         <th class="col-type">種別</th>
-        ${dates.map((date) => `<th class="col-date">${fmtHeaderDate(date)}</th>`).join("")}
+        ${columns.map((col) => col.kind === "date"
+          ? `<th class="col-date${col.index === 0 ? "" : " past"}">${fmtHeaderDate(col.date)}</th>`
+          : `<th class="col-nochange" title="${escapeHtml(nochangeRange(col))} は表示中の全商品で金利変更なし"><span class="nochange-label">変更なし</span><span class="nochange-range">${escapeHtml(nochangeRange(col))}</span></th>`
+        ).join("")}
+        <th class="col-spacer" aria-hidden="true"></th>
       </tr>`;
 
       const body = rows.map((row, idx) => {
@@ -428,12 +505,13 @@
         const cur = entryAt(row, latestDate);
         const isBest = Boolean(cur) && isFiniteRate(cur.rate) && cur.rate === minByType[row.rate_type];
 
-        const cells = [];
-        for (let i = 0; i < dates.length; i += 1) {
+        const cells = columns.map((col) => {
+          if (col.kind === "nochange") return '<td class="col-nochange"></td>';
+          const i = col.index;
           const entry = entryAt(row, dates[i]);
           const older = i + 1 < dates.length ? entryAt(row, dates[i + 1]) : null;
-          cells.push(rateCell(entry, older, i === 0, i === 0 && isBest));
-        }
+          return rateCell(entry, older, i === 0, i === 0 && isBest);
+        });
 
         let bankCell = "";
         if (groupStart) {
@@ -449,7 +527,6 @@
           bankCell = `<td class="col-bank" rowspan="${span}">
             <div class="bank-name">${bankHtml}</div>
             <div class="product-name">${escapeHtml(row.product_name || "")}</div>
-            ${row.is_legacy ? '<span class="legacy-badge">当時基準・商品区分なし</span>' : ""}
           </td>`;
         }
 
@@ -457,22 +534,30 @@
           ${bankCell}
           <td class="col-type"><span class="type-badge">${escapeHtml(typeLabel(row.rate_type))}</span></td>
           ${cells.join("")}
+          <td class="col-spacer"></td>
         </tr>`;
       }).join("");
 
       el.matrix.innerHTML = `<div class="table-scroll"><table><thead>${thead}</thead><tbody>${body}</tbody></table></div>`;
       el.coverage.textContent = `${dates[dates.length - 1].replaceAll("-", "/")}〜${dates[0].replaceAll("-", "/")}（${dates.length}調査日）`;
       const sourceLabels = (state.data.data_sources || []).map((source) => source.description).filter(Boolean);
-      const sourceText = sourceLabels.length ? `出典：${sourceLabels.join("、")}` : "";
-      el.sourceNote.textContent = [sourceText, state.data.legacy_notice || ""].filter(Boolean).join("　");
+      el.sourceNote.textContent = sourceLabels.length ? `出典：${sourceLabels.join("、")}` : "";
     }
 
     function buildTypeChips() {
       const order = state.data.rate_type_order || [];
-      state.selectedTypes = new Set(order);
-      el.typeChips.innerHTML = order.map((t) =>
-        `<button type="button" class="chip active" data-type="${escapeHtml(t)}">${escapeHtml(typeLabel(t))}</button>`
-      ).join("");
+      state.selectedType = null;
+      const chips = [`<button type="button" class="chip active" data-type="">すべて</button>`];
+      for (const t of order) {
+        chips.push(`<button type="button" class="chip" data-type="${escapeHtml(t)}">${escapeHtml(typeLabel(t))}</button>`);
+      }
+      el.typeChips.innerHTML = chips.join("");
+    }
+
+    function syncTypeChips() {
+      el.typeChips.querySelectorAll("[data-type]").forEach((chip) => {
+        chip.classList.toggle("active", (chip.dataset.type || null) === state.selectedType);
+      });
     }
 
     function buildBankFilters() {
@@ -497,10 +582,10 @@
     el.typeChips.addEventListener("click", (event) => {
       const chip = event.target.closest("[data-type]");
       if (!chip) return;
-      const type = chip.dataset.type;
-      if (state.selectedTypes.has(type)) state.selectedTypes.delete(type);
-      else state.selectedTypes.add(type);
-      chip.classList.toggle("active");
+      const type = chip.dataset.type || null;
+      // 選んだ種別だけを表示する。選択中のものをもう一度押すと「すべて」に戻る
+      state.selectedType = state.selectedType === type ? null : type;
+      syncTypeChips();
       render();
     });
 
@@ -533,7 +618,6 @@
           el.matrix.innerHTML = '<div class="empty-state"><strong>金利データがありません</strong>データが蓄積されると、ここに履歴が表示されます。</div>';
           return;
         }
-        el.demoFlag.hidden = !state.data.is_demo;
         buildTypeChips();
         buildBankFilters();
         render();
