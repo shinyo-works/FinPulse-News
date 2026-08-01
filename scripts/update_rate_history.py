@@ -185,6 +185,11 @@ def update_history(history: dict, report_data: dict, survey_date: str) -> dict:
     survey_date = normalize_date(survey_date)
     validate_history(history)
     validate_report_data(report_data)
+    replaced_demo = history.get("is_demo") is True
+    if replaced_demo:
+        # デモ金利を実績として残さない。入力検証後にだけ初期化する。
+        history["rows"] = []
+        history.pop("generated_at", None)
     latest_date = latest_history_date(history)
     if latest_date and survey_date < latest_date:
         raise ValueError(
@@ -195,7 +200,12 @@ def update_history(history: dict, report_data: dict, survey_date: str) -> dict:
         row_key(r.get("bank_id"), r.get("product_id"), r.get("rate_type")): r
         for r in history["rows"]
     }
-    summary = {"added_rows": 0, "changed": 0, "unchanged": 0}
+    summary = {
+        "replaced_demo": replaced_demo,
+        "added_rows": 0,
+        "changed": 0,
+        "unchanged": 0,
+    }
 
     for loan in report_data.get("loan_table", []):
         bank_id = validate_id(loan.get("bank_id"), "bank_id")
@@ -296,6 +306,8 @@ def main() -> None:
     write_history_atomic(history)
 
     print(f"金利履歴を更新しました（調査日 {survey_date}）: {HISTORY_PATH}")
+    if summary["replaced_demo"]:
+        print("  デモ履歴を削除し、実データで初期化しました")
     print(
         f"  新規行 {summary['added_rows']} / 金利変更 {summary['changed']} / "
         f"据え置き {summary['unchanged']}"

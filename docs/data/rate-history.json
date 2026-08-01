@@ -1,8 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-21",
-  "is_demo": true,
-  "rate_type_order": ["variable", "fixed_3y", "fixed_5y", "fixed_10y"],
+  "is_demo": false,
+  "rate_type_order": [
+    "variable",
+    "fixed_3y",
+    "fixed_5y",
+    "fixed_10y"
+  ],
   "rate_type_labels": {
     "variable": "変動",
     "fixed_3y": "固定3年",
@@ -11,165 +15,831 @@
   },
   "rows": [
     {
-      "bank_id": "obihiro_shinkin",
-      "bank_name": "帯広信用金庫",
-      "product_id": "obishin_std",
-      "product_name": "住宅ローン（標準）",
-      "url": "https://www.shinkin.co.jp/obishin/",
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.mizuhobank.co.jp/retail/products/loan/housing/index.html",
       "rate_type": "variable",
       "history": [
-        { "rate": 0.925, "effective_from": "2026-07-21" },
-        { "rate": 0.875, "effective_from": "2026-04-14" },
-        { "rate": 0.85, "effective_from": "2025-11-04" }
-      ]
-    },
-    {
-      "bank_id": "obihiro_shinkin",
-      "bank_name": "帯広信用金庫",
-      "product_id": "obishin_std",
-      "product_name": "住宅ローン（標準）",
-      "url": "https://www.shinkin.co.jp/obishin/",
-      "rate_type": "fixed_3y",
-      "history": [
-        { "rate": 1.15, "effective_from": "2026-05-12" },
-        { "rate": 1.1, "effective_from": "2025-10-07" }
-      ]
-    },
-    {
-      "bank_id": "obihiro_shinkin",
-      "bank_name": "帯広信用金庫",
-      "product_id": "obishin_std",
-      "product_name": "住宅ローン（標準）",
-      "url": "https://www.shinkin.co.jp/obishin/",
-      "rate_type": "fixed_5y",
-      "history": [
-        { "rate": 1.3, "effective_from": "2026-05-12" },
-        { "rate": 1.25, "effective_from": "2025-10-07" }
-      ]
-    },
-    {
-      "bank_id": "obihiro_shinkin",
-      "bank_name": "帯広信用金庫",
-      "product_id": "obishin_std",
-      "product_name": "住宅ローン（標準）",
-      "url": "https://www.shinkin.co.jp/obishin/",
-      "rate_type": "fixed_10y",
-      "history": [
-        { "rate": 1.55, "effective_from": "2026-05-12" },
-        { "rate": 1.5, "effective_from": "2025-10-07" }
-      ]
-    },
-    {
-      "bank_id": "hokkaidobank",
-      "bank_name": "北海道銀行",
-      "product_id": "dohgin_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokkaidobank.co.jp/",
-      "rate_type": "variable",
-      "history": [
-        { "rate": 0.85, "effective_from": "2026-01-06" },
-        { "rate": 0.875, "effective_from": "2025-07-01" }
-      ]
-    },
-    {
-      "bank_id": "hokkaidobank",
-      "bank_name": "北海道銀行",
-      "product_id": "dohgin_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokkaidobank.co.jp/",
-      "rate_type": "fixed_3y",
-      "history": [
-        { "rate": 1.1, "effective_from": "2026-06-02" }
-      ]
-    },
-    {
-      "bank_id": "hokkaidobank",
-      "bank_name": "北海道銀行",
-      "product_id": "dohgin_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokkaidobank.co.jp/",
-      "rate_type": "fixed_5y",
-      "history": [
-        { "rate": 1.25, "effective_from": "2026-06-02" }
-      ]
-    },
-    {
-      "bank_id": "hokkaidobank",
-      "bank_name": "北海道銀行",
-      "product_id": "dohgin_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokkaidobank.co.jp/",
-      "rate_type": "fixed_10y",
-      "history": [
-        { "rate": 1.4, "effective_from": "2026-07-21" },
-        { "rate": 1.45, "effective_from": "2025-12-02" }
-      ]
-    },
-    {
-      "bank_id": "northpacific",
-      "bank_name": "北洋銀行",
-      "product_id": "hokuyo_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokuyobank.co.jp/",
-      "rate_type": "variable",
-      "history": [
-        { "rate": 0.85, "effective_from": "2026-07-21" }
-      ]
-    },
-    {
-      "bank_id": "northpacific",
-      "bank_name": "北洋銀行",
-      "product_id": "hokuyo_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokuyobank.co.jp/",
-      "rate_type": "fixed_3y",
-      "history": [
-        { "rate": 1.05, "effective_from": "2026-07-21" }
-      ]
-    },
-    {
-      "bank_id": "northpacific",
-      "bank_name": "北洋銀行",
-      "product_id": "hokuyo_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokuyobank.co.jp/",
-      "rate_type": "fixed_5y",
-      "history": [
-        { "rate": 1.2, "effective_from": "2026-07-21" }
-      ]
-    },
-    {
-      "bank_id": "northpacific",
-      "bank_name": "北洋銀行",
-      "product_id": "hokuyo_std",
-      "product_name": "住宅ローン",
-      "url": "https://www.hokuyobank.co.jp/",
-      "rate_type": "fixed_10y",
-      "history": [
-        { "rate": 1.45, "effective_from": "2026-07-21" }
+        {
+          "rate": 1.025,
+          "effective_from": "2026-07-27"
+        }
       ]
     },
     {
       "bank_id": "mizuho",
       "bank_name": "みずほ銀行",
-      "product_id": "mizuho_std",
-      "product_name": "住宅ローン（手動入力）",
-      "url": "https://www.mizuhobank.co.jp/",
-      "rate_type": "variable",
+      "product_id": "mizuho_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.mizuhobank.co.jp/retail/products/loan/housing/index.html",
+      "rate_type": "fixed_3y",
       "history": [
-        { "rate": 0.375, "effective_from": "2026-04-01" }
+        {
+          "rate": 2.3,
+          "effective_from": "2026-07-27"
+        }
       ]
     },
     {
       "bank_id": "mizuho",
       "bank_name": "みずほ銀行",
-      "product_id": "mizuho_std",
-      "product_name": "住宅ローン（手動入力）",
-      "url": "https://www.mizuhobank.co.jp/",
+      "product_id": "mizuho_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.mizuhobank.co.jp/retail/products/loan/housing/index.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 2.6,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.mizuhobank.co.jp/retail/products/loan/housing/index.html",
       "rate_type": "fixed_10y",
       "history": [
-        { "rate": 1.3, "effective_from": "2026-04-01" }
+        {
+          "rate": 2.95,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_hyojun",
+      "product_name": "ほくぎん住宅ローン",
+      "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.625,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_hyojun",
+      "product_name": "ほくぎん住宅ローン",
+      "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.95,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_hyojun",
+      "product_name": "ほくぎん住宅ローン",
+      "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.95,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_hyojun",
+      "product_name": "ほくぎん住宅ローン",
+      "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.45,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_teiritsu",
+      "product_name": "ほくぎん手数料定率型住宅ローン",
+      "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_teiritu_hokkaido.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.6,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_teiritsu",
+      "product_name": "ほくぎん手数料定率型住宅ローン",
+      "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_teiritu_hokkaido.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.51,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_sentaku",
+      "product_name": "道銀住宅ローン 固定金利選択型",
+      "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.825,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_sentaku",
+      "product_name": "道銀住宅ローン 固定金利選択型",
+      "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.1,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_sentaku",
+      "product_name": "道銀住宅ローン 固定金利選択型",
+      "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 2.1,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_sentaku",
+      "product_name": "道銀住宅ローン 固定金利選択型",
+      "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.5,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_teiritsu",
+      "product_name": "道銀住宅ローン 手数料定率型",
+      "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.75,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_teiritsu",
+      "product_name": "道銀住宅ローン 手数料定率型",
+      "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.66,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_teigaku",
+      "product_name": "ほくようスペシャル住宅ローンα（定額型）",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.1,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_teigaku",
+      "product_name": "ほくようスペシャル住宅ローンα（定額型）",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 2.1,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_teigaku",
+      "product_name": "ほくようスペシャル住宅ローンα（定額型）",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.5,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_teiritsu",
+      "product_name": "ほくようスペシャル住宅ローンα定率型",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.75,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_teiritsu",
+      "product_name": "ほくようスペシャル住宅ローンα定率型",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.66,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_teiritsu",
+      "product_name": "ほくようスペシャル住宅ローンα定率型",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.07,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_newmyhome",
+      "product_name": "ニュー・マイホームローン",
+      "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.525,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_newmyhome",
+      "product_name": "ニュー・マイホームローン",
+      "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.05,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_newmyhome",
+      "product_name": "ニュー・マイホームローン",
+      "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.85,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_newmyhome",
+      "product_name": "ニュー・マイホームローン",
+      "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.2,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_red",
+      "product_name": "保証基金付住宅ローン RED",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.325,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_red",
+      "product_name": "保証基金付住宅ローン RED",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.15,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_red",
+      "product_name": "保証基金付住宅ローン RED",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 2.05,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_red",
+      "product_name": "保証基金付住宅ローン RED",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.55,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_crystal",
+      "product_name": "クリスタルRED（全疾病保障特約付）",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.375,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_crystal",
+      "product_name": "クリスタルRED（全疾病保障特約付）",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.05,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_crystal",
+      "product_name": "クリスタルRED（全疾病保障特約付）",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.95,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_crystal",
+      "product_name": "クリスタルRED（全疾病保障特約付）",
+      "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.45,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_jutaku",
+      "product_name": "きたしん住宅ローン",
+      "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.05,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_jutaku",
+      "product_name": "きたしん住宅ローン",
+      "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.85,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_jutaku",
+      "product_name": "きたしん住宅ローン",
+      "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.15,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_best",
+      "product_name": "ベスト住いる",
+      "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.85,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_best",
+      "product_name": "ベスト住いる",
+      "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.65,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_best",
+      "product_name": "ベスト住いる",
+      "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.95,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "rokin_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.325,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "rokin_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.1,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "rokin_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 2.1,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "rokin_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.5,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "rokin_smile",
+      "product_name": "すまいる上手",
+      "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.9,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "tokachi_shinso",
+      "bank_name": "十勝信用組合",
+      "product_id": "tokachi_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.tokachishinkumi.com/customer/loan/rate-l.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.8,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "tokachi_shinso",
+      "bank_name": "十勝信用組合",
+      "product_id": "tokachi_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.tokachishinkumi.com/customer/loan/rate-l.html",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.15,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "tokachi_shinso",
+      "bank_name": "十勝信用組合",
+      "product_id": "tokachi_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.tokachishinkumi.com/customer/loan/rate-l.html",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.25,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_kawanishi_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.jaobihirokawanisi.or.jp/service/bank/rate/",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.125,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_kawanishi_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.jaobihirokawanisi.or.jp/service/bank/rate/",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.7,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_kawanishi_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.jaobihirokawanisi.or.jp/service/bank/rate/",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.22,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_kawanishi_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.jaobihirokawanisi.or.jp/service/bank/rate/",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.67,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.ja-memuro.or.jp/",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 2.475,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.ja-memuro.or.jp/",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.75,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.ja-memuro.or.jp/",
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 0.9,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://www.ja-memuro.or.jp/",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 0.95,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_kino",
+      "bank_name": "JA木野",
+      "product_id": "ja_kino_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://ja-kino.com/finance/",
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.425,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_kino",
+      "bank_name": "JA木野",
+      "product_id": "ja_kino_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://ja-kino.com/finance/",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.8,
+          "effective_from": "2026-07-27"
+        }
+      ]
+    },
+    {
+      "bank_id": "ja_kino",
+      "bank_name": "JA木野",
+      "product_id": "ja_kino_jutaku",
+      "product_name": "住宅ローン",
+      "url": "https://ja-kino.com/finance/",
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.8,
+          "effective_from": "2026-07-27"
+        }
       ]
     }
-  ]
+  ],
+  "generated_at": "2026-07-27"
 }
