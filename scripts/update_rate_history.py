@@ -15,7 +15,11 @@
 """
 import argparse
 import json
+import math
+import os
 import re
+import tempfile
+from datetime import datetime
 from pathlib import Path
 
 HISTORY_PATH = Path(__file__).resolve().parent.parent / "docs" / "data" / "rate-history.json"
@@ -35,16 +39,124 @@ DEFAULT_LABELS = {
     "fixed_10y": "固定10年",
 }
 DEFAULT_ORDER = ["variable", "fixed_3y", "fixed_5y", "fixed_10y"]
+MAX_RATE_PERCENT = 100.0
 
 
 def normalize_date(value: str) -> str:
     """'2026/07/21' や '20260721' を 'YYYY-MM-DD' に正規化する。"""
-    if not value:
+    if not isinstance(value, str) or not value.strip():
         raise ValueError("調査日が空です。--date で指定してください。")
     digits = re.sub(r"\D", "", value)
     if len(digits) != 8:
         raise ValueError(f"調査日の形式が不正です: {value}")
-    return f"{digits[0:4]}-{digits[4:6]}-{digits[6:8]}"
+    normalized = f"{digits[0:4]}-{digits[4:6]}-{digits[6:8]}"
+    try:
+        return datetime.strptime(normalized, "%Y-%m-%d").date().isoformat()
+    except ValueError as exc:
+        raise ValueError(f"調査日が実在しません: {value}") from exc
+
+
+def validate_id(value, field_name: str) -> str:
+    """機関ID・商品IDが空でない文字列であることを確認する。"""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field_name} は空でない文字列にしてください。")
+    return value.strip()
+
+
+def validate_rate(value, field_name: str) -> float:
+    """金利が有限の数値かつ現実的な範囲内であることを確認する。"""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{field_name} は数値にしてください: {value!r}")
+    rate = float(value)
+    if not math.isfinite(rate) or not 0 <= rate <= MAX_RATE_PERCENT:
+        raise ValueError(
+            f"{field_name} は 0〜{MAX_RATE_PERCENT:g} の有限数にしてください: {value!r}"
+        )
+    return rate
+
+
+def validate_report_data(report_data: dict) -> None:
+    """入力レポートの住宅ローン行を、履歴変更前に検証する。"""
+    if not isinstance(report_data, dict):
+        raise ValueError("入力JSONのルートはオブジェクトにしてください。")
+    loans = report_data.get("loan_table")
+    if not isinstance(loans, list) or not loans:
+        raise ValueError("loan_table は1件以上の配列にしてください。")
+
+    seen_products = set()
+    for index, loan in enumerate(loans, start=1):
+        if not isinstance(loan, dict):
+            raise ValueError(f"loan_table[{index}] はオブジェクトにしてください。")
+        bank_id = validate_id(loan.get("bank_id"), f"loan_table[{index}].bank_id")
+        product_id = validate_id(loan.get("product_id"), f"loan_table[{index}].product_id")
+        product_key = (bank_id, product_id)
+        if product_key in seen_products:
+            raise ValueError(f"機関IDと商品IDが重複しています: {bank_id}/{product_id}")
+        seen_products.add(product_key)
+
+        for loan_key in RATE_KEY_MAP:
+            value = loan.get(loan_key)
+            if value is not None:
+                validate_rate(value, f"loan_table[{index}].{loan_key}")
+
+
+def validate_history(history: dict) -> None:
+    """履歴の行キー・金利・日付順を検証する。"""
+    if not isinstance(history, dict):
+        raise ValueError("履歴JSONのルートはオブジェクトにしてください。")
+    rows = history.get("rows")
+    if not isinstance(rows, list):
+        raise ValueError("履歴JSONの rows は配列にしてください。")
+
+    seen_rows = set()
+    for index, row in enumerate(rows, start=1):
+        if not isinstance(row, dict):
+            raise ValueError(f"rows[{index}] はオブジェクトにしてください。")
+        bank_id = validate_id(row.get("bank_id"), f"rows[{index}].bank_id")
+        product_id = validate_id(row.get("product_id"), f"rows[{index}].product_id")
+        rate_type = row.get("rate_type")
+        if rate_type not in DEFAULT_ORDER:
+            raise ValueError(f"rows[{index}].rate_type が不正です: {rate_type!r}")
+        key = row_key(bank_id, product_id, rate_type)
+        if key in seen_rows:
+            raise ValueError(f"履歴行が重複しています: {'/'.join(key)}")
+        seen_rows.add(key)
+
+        entries = row.get("history")
+        if not isinstance(entries, list):
+            raise ValueError(f"rows[{index}].history は配列にしてください。")
+        previous_date = None
+        seen_dates = set()
+        for entry_index, entry in enumerate(entries, start=1):
+            if not isinstance(entry, dict):
+                raise ValueError(f"rows[{index}].history[{entry_index}] はオブジェクトにしてください。")
+            effective_from = normalize_date(entry.get("effective_from"))
+            if effective_from != entry.get("effective_from"):
+                raise ValueError(
+                    f"rows[{index}].history[{entry_index}].effective_from は YYYY-MM-DD にしてください。"
+                )
+            if effective_from in seen_dates:
+                raise ValueError(f"rows[{index}] に同じ適用開始日が重複しています: {effective_from}")
+            if previous_date is not None and effective_from > previous_date:
+                raise ValueError(f"rows[{index}].history は新しい日付順にしてください。")
+            seen_dates.add(effective_from)
+            previous_date = effective_from
+            validate_rate(entry.get("rate"), f"rows[{index}].history[{entry_index}].rate")
+
+    generated_at = history.get("generated_at")
+    if generated_at and normalize_date(generated_at) != generated_at:
+        raise ValueError("generated_at は YYYY-MM-DD にしてください。")
+
+
+def latest_history_date(history: dict) -> str:
+    """履歴全体で最も新しい日付を返す。"""
+    dates = []
+    if history.get("generated_at"):
+        dates.append(normalize_date(history["generated_at"]))
+    for row in history.get("rows", []):
+        for entry in row.get("history", []):
+            dates.append(normalize_date(entry.get("effective_from")))
+    return max(dates, default="")
 
 
 def load_history() -> dict:
@@ -70,6 +182,15 @@ def row_key(bank_id: str, product_id: str, rate_type: str) -> tuple:
 
 def update_history(history: dict, report_data: dict, survey_date: str) -> dict:
     """report_data の住宅ローン金利を履歴へ反映する。返り値は変更サマリー。"""
+    survey_date = normalize_date(survey_date)
+    validate_history(history)
+    validate_report_data(report_data)
+    latest_date = latest_history_date(history)
+    if latest_date and survey_date < latest_date:
+        raise ValueError(
+            f"調査日 {survey_date} は既存の最新日 {latest_date} より古いため更新できません。"
+        )
+
     index = {
         row_key(r.get("bank_id"), r.get("product_id"), r.get("rate_type")): r
         for r in history["rows"]
@@ -77,12 +198,13 @@ def update_history(history: dict, report_data: dict, survey_date: str) -> dict:
     summary = {"added_rows": 0, "changed": 0, "unchanged": 0}
 
     for loan in report_data.get("loan_table", []):
-        bank_id = loan.get("bank_id")
-        product_id = loan.get("product_id")
+        bank_id = validate_id(loan.get("bank_id"), "bank_id")
+        product_id = validate_id(loan.get("product_id"), "product_id")
         for loan_key, rate_type in RATE_KEY_MAP.items():
             value = loan.get(loan_key)
             if value is None:
                 continue
+            value = validate_rate(value, loan_key)
             key = row_key(bank_id, product_id, rate_type)
             row = index.get(key)
             if row is None:
@@ -121,7 +243,39 @@ def update_history(history: dict, report_data: dict, survey_date: str) -> dict:
 
     history["generated_at"] = survey_date
     history["is_demo"] = False
+    validate_history(history)
     return summary
+
+
+def write_history_atomic(history: dict, path: Path = HISTORY_PATH) -> None:
+    """完全な一時JSONを検証してから、履歴の正本へ置き換える。"""
+    validate_history(history)
+    serialized = json.dumps(history, ensure_ascii=False, indent=2) + "\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary_file:
+            temporary_file.write(serialized)
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+            temporary_path = Path(temporary_file.name)
+
+        with temporary_path.open(encoding="utf-8") as file:
+            written = json.load(file)
+        validate_history(written)
+        os.replace(temporary_path, path)
+        temporary_path = None
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
 
 
 def main() -> None:
@@ -139,9 +293,7 @@ def main() -> None:
     history = load_history()
     summary = update_history(history, report_data, survey_date)
 
-    with open(HISTORY_PATH, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
-        f.write("\n")
+    write_history_atomic(history)
 
     print(f"金利履歴を更新しました（調査日 {survey_date}）: {HISTORY_PATH}")
     print(

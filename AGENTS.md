@@ -51,7 +51,8 @@
 ## 検証コマンド（コミット前に通す）
 
 ```bash
-python -m py_compile scripts/collect_and_send.py send_report.py send_resend.py
+python -m py_compile scripts/collect_and_send.py scripts/update_rate_history.py scripts/emailer.py send_report.py send_resend.py
+python -m unittest discover -s tests -v
 ```
 
 pre-commit フック（`.githooks/pre-commit`）が、ステージした Python ファイルの構文を自動検査する。フックを**スキップしない**（`--no-verify` 禁止）。クローン直後に1回だけ有効化する:

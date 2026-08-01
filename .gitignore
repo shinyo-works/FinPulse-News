@@ -2,3 +2,4 @@
 .env.local
 __pycache__/
 *.pyc
+output/viewer-json-ready.txt

@@ -6,14 +6,13 @@
 # 有効化（クローン直後に1回だけ）:
 #   git config core.hooksPath .githooks
 
-files=$(git diff --cached --name-only --diff-filter=ACM -- '*.py')
-
-if [ -z "$files" ]; then
+if git diff --cached --quiet --diff-filter=ACM -- '*.py'; then
   exit 0
 fi
 
 echo "[pre-commit] Python 構文チェック中..."
-if ! python -m py_compile $files; then
+if ! git diff --cached --name-only -z --diff-filter=ACM -- '*.py' \
+  | xargs -0 python -m py_compile --; then
   echo "[pre-commit] 構文エラーがあります。修正してから再コミットしてください。" >&2
   exit 1
 fi

@@ -678,6 +678,7 @@
       report: null,
       manifest: { reports: [] },
       institutionIndex: { institutions: [] },
+      reportRequestId: 0,
       selectedInstitutions: new Set(),
       search: "",
       showExcluded: false,
@@ -877,17 +878,21 @@
     }
 
     async function loadReport(date) {
+      const requestId = ++state.reportRequestId;
       state.mode = "date";
       state.selectedDate = date;
       elements.reportContent.innerHTML = '<div class="loading-state"><strong>レポートを読み込んでいます</strong>しばらくお待ちください。</div>';
       try {
         const response = await fetch(`${DATA_ROOT}/${date}.json`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        state.report = await response.json();
+        const report = await response.json();
+        if (requestId !== state.reportRequestId) return;
+        state.report = report;
         buildInstitutionFilters(state.report.institutions || []);
         render();
         showMobilePane("content");
       } catch (_error) {
+        if (requestId !== state.reportRequestId) return;
         state.report = null;
         elements.pageTitle.textContent = formatDate(date);
         elements.pageSummary.textContent = "";
@@ -896,6 +901,7 @@
     }
 
     function selectInstitution(name) {
+      state.reportRequestId += 1;
       state.mode = "institution";
       state.selectedInstitution = name;
       elements.filterPopover.classList.remove("open");
@@ -912,22 +918,34 @@
     }
 
     async function initialize() {
-      try {
-        const [manifestResponse, institutionResponse] = await Promise.all([
-          fetch(`${DATA_ROOT}/index.json`),
-          fetch(`${DATA_ROOT}/by-institution.json`),
-        ]);
-        if (!manifestResponse.ok || !institutionResponse.ok) throw new Error("データ取得失敗");
-        state.manifest = await manifestResponse.json();
-        state.institutionIndex = await institutionResponse.json();
-        renderNavigation();
-        if (state.manifest.reports.length) {
-          await loadReport(state.manifest.reports[0]);
-        } else {
-          elements.pageTitle.textContent = "レポートがありません";
-          elements.reportContent.innerHTML = emptyState("データがありません", "レポートが生成されると、ここに表示されます。");
-        }
-      } catch (_error) {
+      async function fetchJson(path) {
+        const response = await fetch(path);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      }
+
+      const [manifestResult, institutionResult] = await Promise.allSettled([
+        fetchJson(`${DATA_ROOT}/index.json`),
+        fetchJson(`${DATA_ROOT}/by-institution.json`),
+      ]);
+
+      if (manifestResult.status === "fulfilled" && Array.isArray(manifestResult.value?.reports)) {
+        state.manifest = manifestResult.value;
+      }
+      if (institutionResult.status === "fulfilled" && Array.isArray(institutionResult.value?.institutions)) {
+        state.institutionIndex = institutionResult.value;
+      }
+
+      renderNavigation();
+      if (state.manifest.reports.length) {
+        await loadReport(state.manifest.reports[0]);
+      } else if (state.institutionIndex.institutions.length) {
+        selectInstitution(state.institutionIndex.institutions[0].name);
+      } else if (manifestResult.status === "fulfilled" || institutionResult.status === "fulfilled") {
+        elements.pageTitle.textContent = "レポートがありません";
+        elements.pageSummary.textContent = "";
+        elements.reportContent.innerHTML = emptyState("データがありません", "レポートが生成されると、ここに表示されます。");
+      } else {
         elements.dateList.innerHTML = "";
         elements.institutionList.innerHTML = "";
         elements.pageTitle.textContent = "データを読み込めませんでした";

@@ -7,6 +7,7 @@ send_report.py — 最新の収集レポートをResend経由でメール送信
 """
 
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from scripts.emailer import load_dotenv, send_resend_email
@@ -15,13 +16,25 @@ load_dotenv()
 
 
 def find_report(date_str=None):
-    output_dir = Path(__file__).parent / "output"
+    output_dir = (Path(__file__).resolve().parent / "output").resolve()
     if date_str:
-        path = output_dir / f"{date_str}.md"
+        try:
+            normalized_date = datetime.strptime(date_str, "%Y-%m-%d").date().isoformat()
+        except (TypeError, ValueError):
+            print("エラー: 日付は実在する YYYY-MM-DD 形式で指定してください")
+            return None, None
+        if normalized_date != date_str:
+            print("エラー: 日付は YYYY-MM-DD 形式で指定してください")
+            return None, None
+
+        path = (output_dir / f"{normalized_date}.md").resolve()
+        if not path.is_relative_to(output_dir):
+            print("エラー: output/ 外のファイルは指定できません")
+            return None, None
         if not path.exists():
             print(f"エラー: {path} が見つかりません")
             return None, None
-        return path, date_str
+        return path, normalized_date
     files = sorted(output_dir.glob("????-??-??.md"))
     if not files:
         print("エラー: output/ にレポートファイルがありません")
@@ -35,6 +48,9 @@ def send_via_resend(subject, body):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        print("使い方: python send_report.py [YYYY-MM-DD]")
+        sys.exit(2)
     date_arg = sys.argv[1] if len(sys.argv) > 1 else None
     report_path, date_str = find_report(date_arg)
     if not report_path:

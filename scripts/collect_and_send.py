@@ -10,14 +10,24 @@ import os
 import json
 import re
 import calendar
+import shutil
+import sys
+import tempfile
+import warnings
+from dataclasses import dataclass
 try:
     # XXE・billion-laughs 対策。本番(GitHub Actions)では defusedxml をインストール済み
     from defusedxml import ElementTree as ET
 except ImportError:  # ローカルにdefusedxml未導入の場合のフォールバック
     import xml.etree.ElementTree as ET
+    warnings.warn(
+        "defusedxml が未導入のため標準XML解析へ縮退します。本番では必ずdefusedxmlを導入してください。",
+        RuntimeWarning,
+        stacklevel=2,
+    )
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -36,6 +46,31 @@ JST = timezone(timedelta(hours=9))
 # 日付別レポートは対象外のため、過去分も従来どおりすべて閲覧できる。
 INSTITUTION_WINDOW_MONTHS = 24
 DEFAULT_STAR_KEYWORDS = ("金利", "キャンペーン")
+MAX_HTML_BYTES = 5 * 1024 * 1024
+MAX_XML_BYTES = 5 * 1024 * 1024
+VIEWER_READY_MARKER = Path("output") / "viewer-json-ready.txt"
+VALID_SCRAPERS = {"programmatic", "hokuyo_xml"}
+FAILED_STATUSES = {"fetch_failed", "parse_failed", "extract_failed"}
+
+
+class FetchError(RuntimeError):
+    """外部ページを安全に取得できなかった。"""
+
+
+class ExtractionError(RuntimeError):
+    """Claude APIで記事一覧を抽出できなかった。"""
+
+
+@dataclass
+class InstitutionResult:
+    """1金融機関分の収集結果と、正常0件を区別できる状態。"""
+
+    name: str
+    passed: list
+    excluded: list
+    method: str
+    status: str = "ok"
+    error: str = ""
 
 
 def now_jst():
@@ -43,22 +78,123 @@ def now_jst():
     return datetime.now(JST)
 
 
+def validate_config(config):
+    """config.json の必須項目・型・重複・収集方式を検証する。"""
+    if not isinstance(config, dict):
+        raise ValueError("config.json のルートはオブジェクトにしてください。")
+
+    lookback_days = config.get("lookback_days", 30)
+    if isinstance(lookback_days, bool) or not isinstance(lookback_days, int) or lookback_days < 0:
+        raise ValueError("lookback_days は0以上の整数にしてください。")
+
+    star_keywords = config.get("star_keywords", list(DEFAULT_STAR_KEYWORDS))
+    if not isinstance(star_keywords, list) or not all(
+        isinstance(value, str) and value for value in star_keywords
+    ):
+        raise ValueError("star_keywords は空でない文字列の配列にしてください。")
+
+    institutions = config.get("institutions")
+    if not isinstance(institutions, list) or not institutions:
+        raise ValueError("institutions は1件以上の配列にしてください。")
+
+    seen_names = set()
+    for index, institution in enumerate(institutions, start=1):
+        if not isinstance(institution, dict):
+            raise ValueError(f"institutions[{index}] はオブジェクトにしてください。")
+        name = institution.get("name")
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"institutions[{index}].name は空でない文字列にしてください。")
+        if name in seen_names:
+            raise ValueError(f"金融機関名が重複しています: {name}")
+        seen_names.add(name)
+
+        url = institution.get("url")
+        parsed_url = urlparse(url) if isinstance(url, str) else None
+        if not parsed_url or parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+            raise ValueError(f"{name} の url はHTTP(S)の絶対URLにしてください。")
+
+        scraper = institution.get("scraper", "programmatic")
+        if not isinstance(scraper, str) or scraper not in VALID_SCRAPERS:
+            raise ValueError(f"{name} の scraper が未対応です: {scraper}")
+        if not isinstance(institution.get("use_claude", False), bool):
+            raise ValueError(f"{name} の use_claude は真偽値にしてください。")
+
+        include_keywords = institution.get("include_keywords", [])
+        if not isinstance(include_keywords, list) or not all(
+            isinstance(value, str) and value for value in include_keywords
+        ):
+            raise ValueError(f"{name} の include_keywords は文字列の配列にしてください。")
+
+        exclude_rules = institution.get("exclude_rules", [])
+        if not isinstance(exclude_rules, list):
+            raise ValueError(f"{name} の exclude_rules は配列にしてください。")
+        for rule_index, rule in enumerate(exclude_rules, start=1):
+            if not isinstance(rule, dict) or not isinstance(rule.get("keyword"), str) or not rule["keyword"]:
+                raise ValueError(f"{name} の exclude_rules[{rule_index}].keyword が不正です。")
+            unless = rule.get("unless", [])
+            if not isinstance(unless, list) or not all(
+                isinstance(value, str) and value for value in unless
+            ):
+                raise ValueError(f"{name} の exclude_rules[{rule_index}].unless は文字列の配列にしてください。")
+
+
 def load_config():
     with open("config.json", encoding="utf-8") as f:
-        return json.load(f)
+        config = json.load(f)
+    validate_config(config)
+    return config
+
+
+def read_limited_response(response, *, max_bytes, allowed_content_types, url):
+    """外部応答を上限付きで読み、想定外の種類・サイズを拒否する。"""
+    response.raise_for_status()
+    content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+    if content_type and content_type not in allowed_content_types:
+        raise FetchError(f"想定外のContent-Typeです ({content_type}): {url}")
+
+    content_length = response.headers.get("Content-Length")
+    if content_length:
+        try:
+            parsed_length = int(content_length)
+            if parsed_length < 0:
+                raise FetchError(f"Content-Length が不正です: {url}")
+            if parsed_length > max_bytes:
+                raise FetchError(f"応答サイズが上限を超えています: {url}")
+        except ValueError:
+            raise FetchError(f"Content-Length が不正です: {url}") from None
+
+    chunks = []
+    total = 0
+    for chunk in response.iter_content(chunk_size=64 * 1024):
+        if not chunk:
+            continue
+        total += len(chunk)
+        if total > max_bytes:
+            raise FetchError(f"応答サイズが上限を超えています: {url}")
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 def fetch_page(url, encoding=None):
     """HTMLページを取得"""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
-        resp = requests.get(url, headers=headers, timeout=30)
-        resp.raise_for_status()
-        resp.encoding = encoding if encoding else resp.apparent_encoding
-        return resp.text
+        with requests.get(url, headers=headers, timeout=30, stream=True) as resp:
+            content = read_limited_response(
+                resp,
+                max_bytes=MAX_HTML_BYTES,
+                allowed_content_types={"text/html", "application/xhtml+xml"},
+                url=url,
+            )
+            resp._content = content
+            resp._content_consumed = True
+            resp.encoding = encoding if encoding else (resp.apparent_encoding or "utf-8")
+            return resp.text
     except Exception as e:
         print(f"  取得失敗 ({url}): {e}")
-        return None
+        if isinstance(e, FetchError):
+            raise
+        raise FetchError(f"ページ取得に失敗しました: {url}") from e
 
 
 def extract_date_from_text(text):
@@ -94,6 +230,138 @@ def parse_ymd(value):
         return datetime.strptime(value, "%Y-%m-%d").date()
     except (TypeError, ValueError):
         return None
+
+
+def validate_optional_date(value, field_name):
+    """空欄またはYYYY-MM-DDの実在日だけを許可する。"""
+    if value in (None, ""):
+        return
+    if not isinstance(value, str) or parse_ymd(value) is None:
+        raise ValueError(f"{field_name} は YYYY-MM-DD 形式にしてください: {value!r}")
+
+
+def validate_required_date(value, field_name):
+    """YYYY-MM-DDの実在日を必須とする。"""
+    if not isinstance(value, str) or parse_ymd(value) is None:
+        raise ValueError(f"{field_name} は必須の YYYY-MM-DD 形式です: {value!r}")
+
+
+def validate_optional_http_url(value, field_name):
+    """空欄またはHTTP(S)の絶対URLだけを許可する。"""
+    if value in (None, ""):
+        return
+    if not isinstance(value, str):
+        raise ValueError(f"{field_name} は文字列にしてください。")
+    parsed = urlparse(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError(f"{field_name} はHTTP(S)の絶対URLにしてください: {value!r}")
+
+
+def validate_report_document(report, source="レポートJSON"):
+    """日付別ニュースJSONの後方互換を保った最小スキーマ検証。"""
+    if not isinstance(report, dict):
+        raise ValueError(f"{source} のルートはオブジェクトにしてください。")
+    if report.get("schema_version", 1) != 1:
+        raise ValueError(f"{source} の schema_version は未対応です。")
+    validate_required_date(report.get("date"), f"{source}.date")
+    lookback_days = report.get("lookback_days")
+    if isinstance(lookback_days, bool) or not isinstance(lookback_days, int) or lookback_days < 0:
+        raise ValueError(f"{source}.lookback_days は0以上の整数にしてください。")
+
+    institutions = report.get("institutions")
+    if not isinstance(institutions, list):
+        raise ValueError(f"{source}.institutions は配列にしてください。")
+    seen_names = set()
+    for institution_index, institution in enumerate(institutions, start=1):
+        prefix = f"{source}.institutions[{institution_index}]"
+        if not isinstance(institution, dict):
+            raise ValueError(f"{prefix} はオブジェクトにしてください。")
+        name = institution.get("name")
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"{prefix}.name は空でない文字列にしてください。")
+        if name in seen_names:
+            raise ValueError(f"{source} の金融機関名が重複しています: {name}")
+        seen_names.add(name)
+        if not isinstance(institution.get("method", ""), str):
+            raise ValueError(f"{prefix}.method は文字列にしてください。")
+        status = institution.get("status", "ok")
+        if status not in {"ok", "empty", *FAILED_STATUSES}:
+            raise ValueError(f"{prefix}.status が不正です: {status!r}")
+        error = institution.get("error", "")
+        if not isinstance(error, str):
+            raise ValueError(f"{prefix}.error は文字列にしてください。")
+        if status in FAILED_STATUSES and not error:
+            raise ValueError(f"{prefix}.error は失敗時に必須です。")
+
+        for list_name in ("passed", "excluded"):
+            items = institution.get(list_name)
+            if not isinstance(items, list):
+                raise ValueError(f"{prefix}.{list_name} は配列にしてください。")
+            for item_index, item in enumerate(items, start=1):
+                item_prefix = f"{prefix}.{list_name}[{item_index}]"
+                if not isinstance(item, dict):
+                    raise ValueError(f"{item_prefix} はオブジェクトにしてください。")
+                if not isinstance(item.get("title"), str) or not item["title"]:
+                    raise ValueError(f"{item_prefix}.title は空でない文字列にしてください。")
+                validate_optional_date(item.get("date"), f"{item_prefix}.date")
+                if list_name == "passed":
+                    validate_optional_http_url(item.get("url"), f"{item_prefix}.url")
+                    for flag_name in ("star", "fallback", "date_inferred"):
+                        if flag_name in item and not isinstance(item[flag_name], bool):
+                            raise ValueError(f"{item_prefix}.{flag_name} は真偽値にしてください。")
+                elif not isinstance(item.get("exclude_keyword", ""), str):
+                    raise ValueError(f"{item_prefix}.exclude_keyword は文字列にしてください。")
+
+
+def validate_manifest(manifest):
+    """日付一覧JSONを検証する。"""
+    if not isinstance(manifest, dict) or manifest.get("schema_version", 1) != 1:
+        raise ValueError("index.json の形式またはschema_versionが不正です。")
+    reports = manifest.get("reports")
+    if not isinstance(reports, list) or len(reports) != len(set(reports)):
+        raise ValueError("index.json の reports は重複のない配列にしてください。")
+    for index, report_date in enumerate(reports, start=1):
+        validate_required_date(report_date, f"index.json.reports[{index}]")
+    if reports != sorted(reports, reverse=True):
+        raise ValueError("index.json の reports は新しい日付順にしてください。")
+
+
+def validate_institution_index(document):
+    """機関別集約JSONの最低限の構造を検証する。"""
+    if not isinstance(document, dict) or document.get("schema_version", 1) != 1:
+        raise ValueError("by-institution.json の形式またはschema_versionが不正です。")
+    institutions = document.get("institutions")
+    if not isinstance(institutions, list):
+        raise ValueError("by-institution.json の institutions は配列にしてください。")
+    seen_names = set()
+    for institution_index, institution in enumerate(institutions, start=1):
+        prefix = f"by-institution.json.institutions[{institution_index}]"
+        if not isinstance(institution, dict):
+            raise ValueError(f"{prefix} はオブジェクトにしてください。")
+        name = institution.get("name")
+        if not isinstance(name, str) or not name or name in seen_names:
+            raise ValueError(f"{prefix}.name が空または重複しています。")
+        seen_names.add(name)
+        items = institution.get("items")
+        if not isinstance(items, list):
+            raise ValueError(f"{prefix}.items は配列にしてください。")
+        for item_index, item in enumerate(items, start=1):
+            item_prefix = f"{prefix}.items[{item_index}]"
+            if not isinstance(item, dict) or not isinstance(item.get("title"), str) or not item["title"]:
+                raise ValueError(f"{item_prefix} が不正です。")
+            validate_optional_date(item.get("date"), f"{item_prefix}.date")
+            validate_optional_http_url(item.get("url"), f"{item_prefix}.url")
+            reports = item.get("reports")
+            if (
+                not isinstance(reports, list)
+                or not reports
+                or len(reports) != len(set(reports))
+            ):
+                raise ValueError(f"{item_prefix}.reports は重複のない1件以上の配列にしてください。")
+            for report_index, report_date in enumerate(reports, start=1):
+                validate_required_date(report_date, f"{item_prefix}.reports[{report_index}]")
+            if reports != sorted(reports, reverse=True):
+                raise ValueError(f"{item_prefix}.reports は新しい日付順にしてください。")
 
 
 def is_recent_excluded(item, today):
@@ -182,15 +450,24 @@ def scrape_hokuyo_xml(base_url):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     items = []
     seen = set()  # 同一記事が複数カテゴリで重複登録されるため除去
+    successful_feeds = 0
     this_year = now_jst().year
     for year in (this_year, this_year - 1):
         xml_url = urljoin(base_url, f"{year}.xml")
         try:
-            resp = requests.get(xml_url, headers=headers, timeout=30)
-            if resp.status_code != 200:
-                print(f"  XML取得スキップ ({xml_url}): status {resp.status_code}")
-                continue
-            root = ET.fromstring(resp.content)
+            with requests.get(xml_url, headers=headers, timeout=30, stream=True) as resp:
+                content = read_limited_response(
+                    resp,
+                    max_bytes=MAX_XML_BYTES,
+                    allowed_content_types={
+                        "application/xml",
+                        "application/rss+xml",
+                        "text/xml",
+                    },
+                    url=xml_url,
+                )
+            root = ET.fromstring(content)
+            successful_feeds += 1
         except Exception as e:
             print(f"  XML取得失敗 ({xml_url}): {e}")
             continue
@@ -212,6 +489,8 @@ def scrape_hokuyo_xml(base_url):
                 continue
             seen.add(key)
             items.append({"date": date, "title": title, "url": url})
+    if successful_feeds == 0:
+        raise FetchError("北洋銀行のXMLを取得・解析できませんでした。")
     return items
 
 
@@ -249,7 +528,7 @@ HTML:
         return []
     except Exception as e:
         print(f"  Claude抽出失敗: {e}")
-        return []
+        raise ExtractionError("Claude APIで記事一覧を抽出できませんでした。") from e
 
 
 def filter_by_lookback(items, lookback_days):
@@ -336,16 +615,21 @@ def format_report(results, today, lookback_days):
     lines = [f"# 金融機関新着情報レポート — {today}", ""]
     total_passed = 0
     total_excluded = 0
+    failed_count = 0
 
     # 通過セクション（全機関）
-    for name, passed, excluded, method in results:
-        lines.append(f"## {name}　*（収集: {method}）*")
+    for result in results:
+        lines.append(f"## {result.name}　*（収集: {result.method}）*")
         lines.append("")
-        lines.append(f"### ✅ 通過（{len(passed)}件）")
-        if passed:
+        if result.status in FAILED_STATUSES:
+            failed_count += 1
+            lines.append(f"> ⚠️ 収集失敗: {result.error or '原因を確認してください。'}")
+            lines.append("")
+        lines.append(f"### ✅ 通過（{len(result.passed)}件）")
+        if result.passed:
             lines.append("| 日付 | タイトル | URL |")
             lines.append("|---|---|---|")
-            for item in passed:
+            for item in result.passed:
                 star = " ⭐金利・キャンペーン" if item.get("star") else ""
                 note = " ※1ヵ月超・最新" if item.get("fallback") else ""
                 if item.get("date_inferred"):
@@ -356,15 +640,15 @@ def format_report(results, today, lookback_days):
         lines.append("")
         lines.append("---")
         lines.append("")
-        total_passed += len(passed)
+        total_passed += len(result.passed)
 
     # 除外セクション（全機関まとめて末尾）
     lines.append("# 除外一覧")
     lines.append("")
-    for name, passed, excluded, method in results:
-        excluded_recent = [it for it in excluded if is_recent_excluded(it, today)]
+    for result in results:
+        excluded_recent = [it for it in result.excluded if is_recent_excluded(it, today)]
         total_excluded += len(excluded_recent)
-        lines.append(f"## {name}　❌ 除外（{len(excluded_recent)}件）")
+        lines.append(f"## {result.name}　❌ 除外（{len(excluded_recent)}件）")
         if excluded_recent:
             lines.append("| 日付 | タイトル | 除外キーワード |")
             lines.append("|---|---|---|")
@@ -374,7 +658,7 @@ def format_report(results, today, lookback_days):
 
     period = f"過去{lookback_days}日" if lookback_days else "全件"
     lines.append(f"*収集日時: {today} / 対象期間: {period}*")
-    lines.append(f"*合計: 通過 {total_passed}件 / 除外 {total_excluded}件*")
+    lines.append(f"*合計: 通過 {total_passed}件 / 除外 {total_excluded}件 / 収集失敗 {failed_count}機関*")
     return "\n".join(lines)
 
 
@@ -399,9 +683,9 @@ def clean_report_title(title):
 def build_report_data(results, today, lookback_days):
     """収集結果から、ヴューアーで使う1レポート分のデータを組み立てる。"""
     institutions = []
-    for name, passed, excluded, method in results:
+    for result in results:
         passed_data = []
-        for item in passed:
+        for item in result.passed:
             passed_data.append({
                 "date": item.get("date", ""),
                 "title": clean_report_title(item.get("title", "")),
@@ -412,7 +696,7 @@ def build_report_data(results, today, lookback_days):
             })
 
         excluded_data = []
-        for item in excluded:
+        for item in result.excluded:
             if not is_recent_excluded(item, today):
                 continue
             excluded_data.append({
@@ -422,13 +706,16 @@ def build_report_data(results, today, lookback_days):
             })
 
         institutions.append({
-            "name": name,
-            "method": method,
+            "name": result.name,
+            "method": result.method,
+            "status": result.status,
+            "error": result.error,
             "passed": passed_data,
             "excluded": excluded_data,
         })
 
     return {
+        "schema_version": 1,
         "date": today,
         "lookback_days": lookback_days,
         "institutions": institutions,
@@ -491,6 +778,7 @@ def build_institution_index(
         report_path = data_path / f"{report_date}.json"
         with report_path.open(encoding="utf-8") as file:
             report = json.load(file)
+        validate_report_document(report, str(report_path))
 
         for institution in report.get("institutions", []):
             name = institution.get("name", "")
@@ -530,6 +818,7 @@ def build_institution_index(
         result.append({"name": name, "items": items})
 
     return {
+        "schema_version": 1,
         "institutions": order_institutions(result, institution_order),
     }
 
@@ -541,38 +830,84 @@ def write_json_viewer_data(
     data_dir="output/data",
     institution_order=None,
 ):
-    """日付別・日付一覧・機関別のJSONをまとめて書き出す。"""
+    """三点セットを一時領域で全検証し、成功後だけ正本へ反映する。"""
     data_path = Path(data_dir)
     data_path.mkdir(parents=True, exist_ok=True)
+    marker_path = data_path.parent / "viewer-json-ready.txt"
+    marker_path.unlink(missing_ok=True)
 
     report_data = build_report_data(results, today, lookback_days)
     report_data["institutions"] = order_institutions(
         report_data["institutions"],
         institution_order,
     )
-    report_path = data_path / f"{today}.json"
-    report_path.write_text(
-        json.dumps(report_data, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    validate_report_document(report_data)
 
-    manifest = {"reports": list_report_dates(data_path)}
-    (data_path / "index.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    with tempfile.TemporaryDirectory(
+        dir=data_path.parent,
+        prefix=".viewer-json-",
+    ) as temporary_directory:
+        staging_path = Path(temporary_directory)
+        for source in data_path.glob("*.json"):
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", source.stem):
+                shutil.copy2(source, staging_path / source.name)
 
-    institution_index = build_institution_index(
-        data_path,
-        institution_order=institution_order,
-    )
-    (data_path / "by-institution.json").write_text(
-        json.dumps(institution_index, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+        staged_report_path = staging_path / f"{today}.json"
+        staged_report_path.write_text(
+            json.dumps(report_data, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+        manifest = {
+            "schema_version": 1,
+            "reports": list_report_dates(staging_path),
+        }
+        validate_manifest(manifest)
+        staged_manifest_path = staging_path / "index.json"
+        staged_manifest_path.write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+        institution_index = build_institution_index(
+            staging_path,
+            institution_order=institution_order,
+        )
+        validate_institution_index(institution_index)
+        staged_institution_path = staging_path / "by-institution.json"
+        staged_institution_path.write_text(
+            json.dumps(institution_index, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+        # 公開入口のindex.jsonは最後に置換する。
+        replacements = [
+            (staged_report_path, data_path / staged_report_path.name),
+            (staged_institution_path, data_path / "by-institution.json"),
+            (staged_manifest_path, data_path / "index.json"),
+        ]
+        originals = {
+            target: target.read_bytes() if target.exists() else None
+            for _, target in replacements
+        }
+        replaced = []
+        try:
+            for staged, target in replacements:
+                os.replace(staged, target)
+                replaced.append(target)
+        except Exception:
+            for target in reversed(replaced):
+                original = originals[target]
+                if original is None:
+                    target.unlink(missing_ok=True)
+                else:
+                    target.write_bytes(original)
+            raise
+
+    marker_path.write_text(today + "\n", encoding="utf-8")
 
 
-def send_email(subject, body):
+def send_email(subject, body, *, idempotency_key=None):
     """Resend APIでメールを送信"""
     api_key = os.environ.get("RESEND_API_KEY", "").strip()
     to_addr = os.environ.get("REPORT_TO", "").strip()
@@ -585,12 +920,86 @@ def send_email(subject, body):
         api_key=api_key,
         to_addr=to_addr,
         raise_on_error=True,
+        idempotency_key=idempotency_key,
     )
 
 
-if __name__ == "__main__":
-    today = now_jst().strftime("%Y-%m-%d")
-    config = load_config()
+def collect_institution(institution, lookback_days, star_keywords, claude_client=None):
+    """1機関を収集し、正常0件と失敗を区別した結果を返す。"""
+    name = institution["name"]
+    url = institution["url"]
+    use_claude = institution.get("use_claude", False)
+    scraper = institution.get("scraper", "programmatic")
+    method = "Claude API" if use_claude else ("XML" if scraper == "hokuyo_xml" else "プログラム")
+    print(f"\n--- {name}（{method}）")
+
+    try:
+        if use_claude:
+            html = fetch_page(url, encoding=institution.get("encoding"))
+            if claude_client is None:
+                try:
+                    claude_client = anthropic.Anthropic()
+                except Exception as exc:
+                    raise ExtractionError("Claude APIクライアントを初期化できませんでした。") from exc
+            items = extract_news_with_claude(
+                claude_client,
+                name,
+                url,
+                html,
+                lookback_days,
+            )
+            passed, excluded = apply_filters(items, institution, star_keywords)
+        else:
+            if scraper == "hokuyo_xml":
+                items = scrape_hokuyo_xml(url)
+            else:
+                html = fetch_page(url, encoding=institution.get("encoding"))
+                items = scrape_news_programmatic(html, url)
+            passed_all, excluded = apply_filters(items, institution, star_keywords)
+            passed = filter_by_lookback(passed_all, lookback_days)
+            if not passed:
+                fallback = get_fallback_item(passed_all, lookback_days)
+                if fallback:
+                    passed = [fallback]
+    except FetchError as exc:
+        print(f"  収集失敗: {exc}")
+        return InstitutionResult(
+            name,
+            [],
+            [],
+            method,
+            status="fetch_failed",
+            error="ページまたはXMLを取得できませんでした。",
+        ), claude_client
+    except ExtractionError as exc:
+        print(f"  抽出失敗: {exc}")
+        return InstitutionResult(
+            name,
+            [],
+            [],
+            method,
+            status="extract_failed",
+            error="Claude APIで記事を抽出できませんでした。",
+        ), claude_client
+    except Exception as exc:
+        print(f"  解析失敗 ({name}): {type(exc).__name__}: {exc}")
+        return InstitutionResult(
+            name,
+            [],
+            [],
+            method,
+            status="parse_failed",
+            error="取得内容を解析できませんでした。",
+        ), claude_client
+
+    status = "empty" if not items else "ok"
+    print(f"  取得: {len(items)}件")
+    print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
+    return InstitutionResult(name, passed, excluded, method, status=status), claude_client
+
+
+def run_collection(config, today):
+    """収集から保存・送信まで実行し、Actionsへ返す終了コードを返す。"""
     lookback_days = config.get("lookback_days", 30)
     star_keywords = config.get("star_keywords", DEFAULT_STAR_KEYWORDS)
     institution_order = [
@@ -599,46 +1008,19 @@ if __name__ == "__main__":
     ]
 
     print(f"=== 金融機関新着情報収集 ({today} / 過去{lookback_days}日) ===")
+    VIEWER_READY_MARKER.unlink(missing_ok=True)
 
     claude_client = None  # use_claude機関がある時だけ遅延生成（現configでは未使用）
     results = []
 
     for institution in config["institutions"]:
-        name = institution["name"]
-        url = institution["url"]
-        use_claude = institution.get("use_claude", False)
-        scraper = institution.get("scraper", "programmatic")
-        method = "Claude API" if use_claude else ("XML" if scraper == "hokuyo_xml" else "プログラム")
-        print(f"\n▶ {name}（{method}）")
-
-        if use_claude:
-            html = fetch_page(url, encoding=institution.get("encoding"))
-            if not html:
-                results.append((name, [], [], method))
-                continue
-            if claude_client is None:
-                claude_client = anthropic.Anthropic()
-            items = extract_news_with_claude(claude_client, name, url, html, lookback_days)
-            passed, excluded = apply_filters(items, institution, star_keywords)
-        else:
-            if scraper == "hokuyo_xml":
-                items = scrape_hokuyo_xml(url)
-            else:
-                html = fetch_page(url, encoding=institution.get("encoding"))
-                if not html:
-                    results.append((name, [], [], method))
-                    continue
-                items = scrape_news_programmatic(html, url)
-            passed_all, excluded = apply_filters(items, institution, star_keywords)
-            passed = filter_by_lookback(passed_all, lookback_days)
-            if not passed:
-                fallback = get_fallback_item(passed_all, lookback_days)
-                if fallback:
-                    passed = [fallback]
-
-        print(f"  取得: {len(items)}件")
-        print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
-        results.append((name, passed, excluded, method))
+        result, claude_client = collect_institution(
+            institution,
+            lookback_days,
+            star_keywords,
+            claude_client,
+        )
+        results.append(result)
 
     report = format_report(results, today, lookback_days)
     output_path = Path("output") / f"{today}.md"
@@ -646,7 +1028,8 @@ if __name__ == "__main__":
     output_path.write_text(report, encoding="utf-8")
     print(f"\nレポート保存: {output_path}")
 
-    # JSONはヴューアー用の追加出力。失敗しても従来のメール送信は続ける。
+    # JSONはヴューアー用の追加出力。失敗してもメール送信とMarkdown保存は続ける。
+    viewer_json_ok = False
     try:
         write_json_viewer_data(
             results,
@@ -654,13 +1037,47 @@ if __name__ == "__main__":
             lookback_days,
             institution_order=institution_order,
         )
+        viewer_json_ok = True
         print("ヴューアー用JSON保存: output/data/")
     except Exception as e:
         print(f"ヴューアー用JSON保存失敗（メール送信には影響しません）: {e}")
 
-    total_passed = sum(len(p) for _, p, _, _ in results)
-    subject = f"【金融機関新着情報】{today}（通過 {total_passed}件）"
+    failed_results = [result for result in results if result.status in FAILED_STATUSES]
+    total_passed = sum(len(result.passed) for result in results)
+    failure_note = f" / 失敗 {len(failed_results)}機関" if failed_results else ""
+    subject = f"【金融機関新着情報】{today}（通過 {total_passed}件{failure_note}）"
     print(f"送信中: {subject}")
-    send_email(subject, report)
+    email_ok = False
+    try:
+        email_ok = send_email(
+            subject,
+            report,
+            idempotency_key=f"finpulse-news/{today}",
+        )
+    except Exception as exc:
+        print(f"メール送信処理失敗: {type(exc).__name__}")
+
+    issues = []
+    if failed_results:
+        issues.append(f"収集失敗 {len(failed_results)}機関")
+    if not viewer_json_ok:
+        issues.append("ヴューアーJSON生成失敗")
+    if not email_ok:
+        issues.append("メール送信失敗")
+    if issues:
+        print("\n処理は一部失敗しました: " + " / ".join(issues))
+        print("生成済み成果物は保存済みです。")
+        return 1
 
     print("\n完了！")
+    return 0
+
+
+def main():
+    today = now_jst().strftime("%Y-%m-%d")
+    config = load_config()
+    return run_collection(config, today)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
