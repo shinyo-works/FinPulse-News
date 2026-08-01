@@ -5,6 +5,8 @@ import unittest
 from pathlib import Path
 
 from scripts.update_rate_history import (
+    RATE_KEY_MAP,
+    REPORT_RATE_CONTRACT_VERSION,
     SCHEMA_VERSION,
     update_history,
     validate_history,
@@ -22,6 +24,10 @@ class UpdateRateHistoryTest(unittest.TestCase):
             "rows": [],
         }
         self.report = {
+            "rate_contract": {
+                "version": REPORT_RATE_CONTRACT_VERSION,
+                "loan_rate_fields": list(RATE_KEY_MAP),
+            },
             "loan_table": [{
                 "bank_id": "test-bank",
                 "bank_name": "テスト銀行",
@@ -45,6 +51,20 @@ class UpdateRateHistoryTest(unittest.TestCase):
 
         bank_ids = [row["bank_id"] for row in self.history["rows"]]
         self.assertEqual(["test-bank"], bank_ids)
+
+    def test_rejects_missing_or_mismatched_rate_contract(self):
+        missing = copy.deepcopy(self.report)
+        missing.pop("rate_contract")
+        wrong_version = copy.deepcopy(self.report)
+        wrong_version["rate_contract"]["version"] = 2
+        wrong_fields = copy.deepcopy(self.report)
+        wrong_fields["rate_contract"]["loan_rate_fields"] = ["loan_variable"]
+
+        for report in (missing, wrong_version, wrong_fields):
+            with self.subTest(report=report), self.assertRaisesRegex(
+                ValueError, "rate_contract"
+            ):
+                update_history(copy.deepcopy(self.history), report, "2026-08-01")
 
     def test_same_day_update_is_idempotent(self):
         update_history(self.history, self.report, "2026-08-01")

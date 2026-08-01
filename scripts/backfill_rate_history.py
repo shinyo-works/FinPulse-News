@@ -17,6 +17,7 @@ try:
         DEFAULT_ORDER,
         HISTORY_PATH,
         SCHEMA_VERSION,
+        expected_rate_contract_metadata,
         normalize_date,
         update_history,
         write_history_atomic,
@@ -27,6 +28,7 @@ except ImportError:  # ファイルを直接実行した場合
         DEFAULT_ORDER,
         HISTORY_PATH,
         SCHEMA_VERSION,
+        expected_rate_contract_metadata,
         normalize_date,
         update_history,
         write_history_atomic,
@@ -36,6 +38,8 @@ except ImportError:  # ファイルを直接実行した場合
 def normalize_legacy_report(report_data: dict) -> dict:
     """商品IDの無い旧レポートを、推測を伴わない専用商品へ変換する。"""
     normalized = copy.deepcopy(report_data)
+    # 契約情報導入前の保存済みレポートを、旧形式変換の入口で明示的に現行契約へ合わせる。
+    normalized.setdefault("rate_contract", expected_rate_contract_metadata())
     for loan in normalized.get("loan_table", []):
         if loan.get("product_id"):
             continue

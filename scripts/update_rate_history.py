@@ -31,6 +31,15 @@ RATE_KEY_MAP = {
     "loan_fixed_5y": "fixed_5y",
     "loan_fixed_10y": "fixed_10y",
 }
+REPORT_RATE_CONTRACT_VERSION = 1
+
+
+def expected_rate_contract_metadata() -> dict:
+    """報告自動化ツールから受け入れる金利項目契約を返す。"""
+    return {
+        "version": REPORT_RATE_CONTRACT_VERSION,
+        "loan_rate_fields": list(RATE_KEY_MAP),
+    }
 
 DEFAULT_LABELS = {
     "variable": "変動",
@@ -80,6 +89,13 @@ def validate_report_data(report_data: dict) -> None:
     """入力レポートの住宅ローン行を、履歴変更前に検証する。"""
     if not isinstance(report_data, dict):
         raise ValueError("入力JSONのルートはオブジェクトにしてください。")
+    contract = report_data.get("rate_contract")
+    expected_contract = expected_rate_contract_metadata()
+    if contract != expected_contract:
+        raise ValueError(
+            "rate_contract がFinPulseの対応契約と一致しません。"
+            f"期待値={expected_contract!r} / 入力値={contract!r}"
+        )
     loans = report_data.get("loan_table")
     if not isinstance(loans, list) or not loans:
         raise ValueError("loan_table は1件以上の配列にしてください。")
