@@ -132,6 +132,10 @@
     .legend b { font-weight: 700; }
     .legend .up { color: var(--up); }
     .legend .down { color: var(--down); }
+    .source-note {
+      padding: 6px clamp(16px, 4vw, 48px) 0;
+      color: var(--muted); font-size: 0.74rem; line-height: 1.55;
+    }
 
     .content { padding: 12px clamp(16px, 4vw, 48px) 40px; }
 
@@ -142,7 +146,7 @@
       border-radius: var(--radius);
       box-shadow: 0 4px 18px rgba(11, 31, 51, 0.045);
     }
-    table { border-collapse: separate; border-spacing: 0; width: 100%; }
+    table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; }
     thead th {
       position: sticky; top: 0; z-index: 5;
       padding: 9px 12px;
@@ -152,6 +156,9 @@
       border-bottom: 1px solid var(--line);
     }
     thead th.col-bank, thead th.col-type { text-align: left; z-index: 7; }
+    thead th.col-date { min-width: 102px; }
+    .date-year { display: block; color: #7b8b96; font-size: 0.65rem; font-weight: 650; }
+    .date-day { display: block; margin-top: 1px; color: var(--navy-800); font-size: 0.82rem; }
     tbody td {
       padding: 8px 12px; vertical-align: top;
       border-bottom: 1px solid #eef2f4;
@@ -172,6 +179,11 @@
     .bank-name a { color: var(--navy-800); text-decoration: none; }
     .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
     .product-name { margin-top: 1px; color: var(--muted); font-size: 0.76rem; white-space: normal; }
+    .legacy-badge {
+      display: inline-block; margin-top: 5px; padding: 1px 7px;
+      border: 1px solid #c4ccd2; border-radius: 999px;
+      color: #667784; background: #f5f7f8; font-size: 0.64rem; font-weight: 750;
+    }
 
     .type-badge {
       display: inline-block; padding: 2px 9px; border-radius: 999px;
@@ -181,7 +193,6 @@
 
     .rate-cell.current { background: var(--teal-100); }
     .rate-val { font-size: 0.98rem; font-weight: 750; color: var(--navy-900); }
-    .rate-since { margin-top: 2px; color: var(--muted); font-size: 0.7rem; }
     .rate-cell.up .rate-val { color: var(--up); }
     .rate-cell.down .rate-val { color: var(--down); }
     .arrow { font-size: 0.82rem; }
@@ -214,7 +225,7 @@
 <body>
   <header class="site-header">
     <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>金利履歴ビューアー<span id="demoFlag" class="demo-flag" hidden>デモ表示</span></div>
-    <p id="subtitle">帯広エリア 金融機関の住宅ローン金利を、種別ごとに過去まで遡って確認できます。左が最新、右が過去です。</p>
+    <p id="subtitle">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。</p>
   </header>
 
   <div class="controls">
@@ -234,10 +245,12 @@
   </div>
 
   <div class="legend">
-    <span><b>各セル</b>＝その時点の金利と適用開始日（「〜」＝その日以降）</span>
-    <span class="up"><b>↑</b> 前より上昇</span>
-    <span class="down"><b>↓</b> 前より低下</span>
+    <span><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）</span>
+    <span class="up"><b>↑</b> 右隣の前回調査より上昇</span>
+    <span class="down"><b>↓</b> 右隣の前回調査より低下</span>
+    <span id="coverage"></span>
   </div>
+  <div id="sourceNote" class="source-note"></div>
 
   <div class="content">
     <div id="matrix" aria-live="polite">
@@ -265,6 +278,8 @@
       filterPopover: document.getElementById("filterPopover"),
       filterCount: document.getElementById("filterCount"),
       demoFlag: document.getElementById("demoFlag"),
+      coverage: document.getElementById("coverage"),
+      sourceNote: document.getElementById("sourceNote"),
     };
 
     function escapeHtml(value) {
@@ -290,9 +305,28 @@
       return isFiniteRate(rate) ? rate.toFixed(3) + "%" : "—";
     }
 
-    function fmtSince(date) {
+    function fmtHeaderDate(date) {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date ?? ""));
-      return m ? `${m[1]}/${m[2]}/${m[3]}〜` : escapeHtml(String(date ?? ""));
+      if (!m) return escapeHtml(String(date ?? ""));
+      return `<span class="date-year">${m[1]}年</span><span class="date-day">${m[2]}/${m[3]}</span>`;
+    }
+
+    function entryDate(entry) {
+      return entry?.observed_on || entry?.effective_from || "";
+    }
+
+    function observationDates() {
+      const configured = state.data.observation_dates || [];
+      if (configured.length) return [...configured];
+      const dates = new Set();
+      for (const row of state.data.rows || []) {
+        for (const entry of row.history || []) dates.add(entryDate(entry));
+      }
+      return [...dates].filter(Boolean).sort().reverse();
+    }
+
+    function entryAt(row, date) {
+      return (row.history || []).find((entry) => entryDate(entry) === date);
     }
 
     function typeLabel(rateType) {
@@ -314,6 +348,7 @@
       return [...rows].sort((a, b) => {
         const bi = banks.indexOf(a.bank_id) - banks.indexOf(b.bank_id);
         if (bi !== 0) return bi;
+        if (Boolean(a.is_legacy) !== Boolean(b.is_legacy)) return a.is_legacy ? 1 : -1;
         if (a.product_id !== b.product_id) return String(a.product_id).localeCompare(String(b.product_id));
         return typeOrder.indexOf(a.rate_type) - typeOrder.indexOf(b.rate_type);
       });
@@ -344,16 +379,15 @@
       const badge = isBest ? '<div class="best-badge">最安</div>' : "";
       return `<td class="${cls}">
         <div class="rate-val">${fmtRate(entry.rate)}${arrow}</div>
-        <div class="rate-since">${fmtSince(entry.effective_from)}</div>
         ${badge}
       </td>`;
     }
 
-    function minRateByType(rows) {
+    function minRateByType(rows, latestDate) {
       // 表示中の行から、金利種別ごとの「現在」列の最安値を求める
       const min = {};
       for (const row of rows) {
-        const cur = (row.history || [])[0];
+        const cur = entryAt(row, latestDate);
         if (!cur || !isFiniteRate(cur.rate)) continue;
         const t = row.rate_type;
         const v = cur.rate;
@@ -368,18 +402,19 @@
         el.matrix.innerHTML = '<div class="empty-state"><strong>該当する金利がありません</strong>検索語・種別・機関の絞り込みを変えてください。</div>';
         return;
       }
-      const maxLen = rows.reduce((m, r) => Math.max(m, (r.history || []).length), 1);
-      const headCols = [];
-      for (let i = 0; i < maxLen; i += 1) {
-        headCols.push(i === 0 ? "現在" : (i === 1 ? "前回" : `${i}回前`));
+      const dates = observationDates();
+      if (!dates.length) {
+        el.matrix.innerHTML = '<div class="empty-state"><strong>調査日データがありません</strong>金利履歴JSONをご確認ください。</div>';
+        return;
       }
+      const latestDate = dates[0];
 
-      const minByType = minRateByType(rows);
+      const minByType = minRateByType(rows, latestDate);
 
       const thead = `<tr>
         <th class="col-bank">金融機関・商品</th>
         <th class="col-type">種別</th>
-        ${headCols.map((label) => `<th>${escapeHtml(label)}</th>`).join("")}
+        ${dates.map((date) => `<th class="col-date">${fmtHeaderDate(date)}</th>`).join("")}
       </tr>`;
 
       const body = rows.map((row, idx) => {
@@ -390,12 +425,14 @@
         const groupStart = !prev || prev.bank_id !== row.bank_id || prev.product_id !== row.product_id;
 
         const history = row.history || [];
-        const cur = history[0];
+        const cur = entryAt(row, latestDate);
         const isBest = Boolean(cur) && isFiniteRate(cur.rate) && cur.rate === minByType[row.rate_type];
 
         const cells = [];
-        for (let i = 0; i < maxLen; i += 1) {
-          cells.push(rateCell(history[i], history[i + 1], i === 0, i === 0 && isBest));
+        for (let i = 0; i < dates.length; i += 1) {
+          const entry = entryAt(row, dates[i]);
+          const older = i + 1 < dates.length ? entryAt(row, dates[i + 1]) : null;
+          cells.push(rateCell(entry, older, i === 0, i === 0 && isBest));
         }
 
         let bankCell = "";
@@ -412,6 +449,7 @@
           bankCell = `<td class="col-bank" rowspan="${span}">
             <div class="bank-name">${bankHtml}</div>
             <div class="product-name">${escapeHtml(row.product_name || "")}</div>
+            ${row.is_legacy ? '<span class="legacy-badge">当時基準・商品区分なし</span>' : ""}
           </td>`;
         }
 
@@ -423,6 +461,10 @@
       }).join("");
 
       el.matrix.innerHTML = `<div class="table-scroll"><table><thead>${thead}</thead><tbody>${body}</tbody></table></div>`;
+      el.coverage.textContent = `${dates[dates.length - 1].replaceAll("-", "/")}〜${dates[0].replaceAll("-", "/")}（${dates.length}調査日）`;
+      const sourceLabels = (state.data.data_sources || []).map((source) => source.description).filter(Boolean);
+      const sourceText = sourceLabels.length ? `出典：${sourceLabels.join("、")}` : "";
+      el.sourceNote.textContent = [sourceText, state.data.legacy_notice || ""].filter(Boolean).join("　");
     }
 
     function buildTypeChips() {

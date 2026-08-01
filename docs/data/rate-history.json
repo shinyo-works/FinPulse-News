@@ -1,6 +1,5 @@
 {
-  "schema_version": 1,
-  "is_demo": false,
+  "schema_version": 2,
   "rate_type_order": [
     "variable",
     "fixed_3y",
@@ -13,7 +12,1834 @@
     "fixed_5y": "固定5年",
     "fixed_10y": "固定10年"
   },
+  "observation_dates": [
+    "2026-07-27",
+    "2026-07-20",
+    "2026-07-13",
+    "2026-07-06",
+    "2026-06-29",
+    "2026-06-25",
+    "2026-06-23",
+    "2026-06-22",
+    "2026-06-15",
+    "2026-06-08",
+    "2026-06-01",
+    "2026-05-25",
+    "2026-05-18",
+    "2026-05-11",
+    "2026-05-04",
+    "2026-04-25",
+    "2026-04-23",
+    "2026-04-17",
+    "2026-04-12"
+  ],
+  "data_sources": [
+    {
+      "period_start": "2026-04-12",
+      "period_end": "2026-04-25",
+      "kind": "weekly_report_email",
+      "description": "報告自動化ツールから送信された週次レポートメール"
+    },
+    {
+      "period_start": "2026-05-04",
+      "period_end": "2026-07-27",
+      "kind": "financial_report_tool",
+      "repository": "金利調査ツール",
+      "description": "報告自動化ツールの週次JSON（GitHub Actions成功Artifactを含む）"
+    }
+  ],
+  "legacy_notice": "2026-06-15以前は当時の金融機関単位の集計基準で、現在の商品別データとは直接比較できません。",
   "rows": [
+    {
+      "bank_id": "ja_kino",
+      "bank_name": "JA木野",
+      "product_id": "ja_kino_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.425,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-04-25"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-04-23"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-04-17"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-04-12"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_kino",
+      "bank_name": "JA木野",
+      "product_id": "ja_kino_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-04-25"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-04-23"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-04-17"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-04-12"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_kino",
+      "bank_name": "JA木野",
+      "product_id": "ja_kino_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-04-25"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-04-23"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-04-17"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-04-12"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.025,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 2.3,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 2.6,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "mizuho",
+      "bank_name": "みずほ銀行",
+      "product_id": "mizuho_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.95,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.85,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.85,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.85,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.85,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.625,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokugin",
+      "bank_name": "北陸銀行",
+      "product_id": "hokugin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.75,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.825,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.5,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.55,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 0.55,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 0.55,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.55,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.55,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.65,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.65,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.65,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.48,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.48,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.48,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.48,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.48,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.48,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.48,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.48,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaidobank",
+      "bank_name": "北海道銀行",
+      "product_id": "hokkaidobank_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.33,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 2.33,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 2.33,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.33,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.33,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.33,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.33,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.33,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.325,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.41,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "northpacific",
+      "bank_name": "北洋銀行",
+      "product_id": "northpacific_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.82,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 1.525,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "obihiro_shinkin",
+      "bank_name": "帯広信用金庫",
+      "product_id": "obihiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.2,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.0,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 3.075,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.0,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 2.05,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.7,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kushiro_shinkin",
+      "bank_name": "釧路信用金庫",
+      "product_id": "kushiro_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.55,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.075,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 3.175,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.65,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 3.925,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "kitami_shinkin",
+      "bank_name": "北見信用金庫",
+      "product_id": "kitami_shinkin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 3.85,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "hokkaido_rokin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "hokkaido_rokin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 4.5,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "hokkaido_rokin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "hokkaido_rokin_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "tokachi_shinso",
+      "bank_name": "十勝信用組合",
+      "product_id": "tokachi_shinso_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "tokachi_shinso",
+      "bank_name": "十勝信用組合",
+      "product_id": "tokachi_shinso_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "tokachi_shinso",
+      "bank_name": "十勝信用組合",
+      "product_id": "tokachi_shinso_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.25,
+          "observed_on": "2026-06-15"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_obihiro_kawanishi_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 3.125,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_obihiro_kawanishi_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.7,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_obihiro_kawanishi_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 1.22,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_obihiro_kawanishi",
+      "bank_name": "JA帯広かわにし",
+      "product_id": "ja_obihiro_kawanishi_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 1.67,
+          "observed_on": "2026-06-08"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "variable",
+      "history": [
+        {
+          "rate": 2.475,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_5y",
+      "history": [
+        {
+          "rate": 0.9,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
+    {
+      "bank_id": "ja_memuro",
+      "bank_name": "JAめむろ",
+      "product_id": "ja_memuro_legacy",
+      "product_name": "旧集計（商品区分なし）",
+      "url": null,
+      "rate_type": "fixed_10y",
+      "history": [
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-01"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-05-25"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-05-18"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-05-11"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-05-04"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-04-25"
+        }
+      ],
+      "is_legacy": true
+    },
     {
       "bank_id": "mizuho",
       "bank_name": "みずほ銀行",
@@ -24,7 +1850,35 @@
       "history": [
         {
           "rate": 1.025,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.025,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -38,7 +1892,35 @@
       "history": [
         {
           "rate": 2.3,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.3,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -52,7 +1934,35 @@
       "history": [
         {
           "rate": 2.6,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -66,7 +1976,35 @@
       "history": [
         {
           "rate": 2.95,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -80,7 +2018,35 @@
       "history": [
         {
           "rate": 1.625,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.625,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.625,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.625,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.625,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.625,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.625,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.625,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -94,7 +2060,35 @@
       "history": [
         {
           "rate": 0.95,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -108,7 +2102,35 @@
       "history": [
         {
           "rate": 1.95,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -122,7 +2144,35 @@
       "history": [
         {
           "rate": 2.45,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -136,7 +2186,35 @@
       "history": [
         {
           "rate": 0.6,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -150,7 +2228,35 @@
       "history": [
         {
           "rate": 1.51,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -164,7 +2270,35 @@
       "history": [
         {
           "rate": 1.825,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.825,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -178,7 +2312,35 @@
       "history": [
         {
           "rate": 1.1,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -192,7 +2354,35 @@
       "history": [
         {
           "rate": 2.1,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -206,7 +2396,35 @@
       "history": [
         {
           "rate": 2.5,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.5,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.5,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -220,7 +2438,35 @@
       "history": [
         {
           "rate": 0.75,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -234,7 +2480,35 @@
       "history": [
         {
           "rate": 1.66,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.66,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.66,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.51,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -248,7 +2522,35 @@
       "history": [
         {
           "rate": 1.1,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -262,7 +2564,35 @@
       "history": [
         {
           "rate": 2.1,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -276,7 +2606,35 @@
       "history": [
         {
           "rate": 2.5,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.5,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.5,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.5,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -290,7 +2648,35 @@
       "history": [
         {
           "rate": 0.75,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.6,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -304,7 +2690,35 @@
       "history": [
         {
           "rate": 1.66,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.66,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.66,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.66,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.41,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -318,7 +2732,35 @@
       "history": [
         {
           "rate": 2.07,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.07,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.07,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.07,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.82,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -332,7 +2774,35 @@
       "history": [
         {
           "rate": 1.525,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.525,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -346,7 +2816,35 @@
       "history": [
         {
           "rate": 1.05,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -360,7 +2858,35 @@
       "history": [
         {
           "rate": 1.85,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -374,7 +2900,35 @@
       "history": [
         {
           "rate": 2.2,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -388,7 +2942,35 @@
       "history": [
         {
           "rate": 3.325,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -402,7 +2984,35 @@
       "history": [
         {
           "rate": 1.15,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -416,7 +3026,35 @@
       "history": [
         {
           "rate": 2.05,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.05,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -430,7 +3068,35 @@
       "history": [
         {
           "rate": 2.55,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.55,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -444,7 +3110,35 @@
       "history": [
         {
           "rate": 1.375,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.375,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.375,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.375,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.375,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.375,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.375,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.375,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -458,7 +3152,35 @@
       "history": [
         {
           "rate": 1.05,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -472,7 +3194,35 @@
       "history": [
         {
           "rate": 1.95,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -486,7 +3236,35 @@
       "history": [
         {
           "rate": 2.45,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.45,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -500,7 +3278,35 @@
       "history": [
         {
           "rate": 1.05,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.05,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -514,7 +3320,35 @@
       "history": [
         {
           "rate": 1.85,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -528,7 +3362,35 @@
       "history": [
         {
           "rate": 2.15,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.15,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.15,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.15,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -542,7 +3404,35 @@
       "history": [
         {
           "rate": 0.85,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.85,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.85,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.85,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -556,7 +3446,35 @@
       "history": [
         {
           "rate": 1.65,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.65,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.45,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -570,7 +3488,35 @@
       "history": [
         {
           "rate": 1.95,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.6,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -584,7 +3530,35 @@
       "history": [
         {
           "rate": 3.325,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -598,7 +3572,35 @@
       "history": [
         {
           "rate": 1.1,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.1,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -612,7 +3614,35 @@
       "history": [
         {
           "rate": 2.1,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.1,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.85,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -626,21 +3656,35 @@
       "history": [
         {
           "rate": 2.5,
-          "effective_from": "2026-07-27"
-        }
-      ]
-    },
-    {
-      "bank_id": "hokkaido_rokin",
-      "bank_name": "北海道労働金庫",
-      "product_id": "rokin_smile",
-      "product_name": "すまいる上手",
-      "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
-      "rate_type": "fixed_3y",
-      "history": [
+          "observed_on": "2026-07-27"
+        },
         {
-          "rate": 0.9,
-          "effective_from": "2026-07-27"
+          "rate": 2.5,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.5,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.5,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.25,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -654,7 +3698,35 @@
       "history": [
         {
           "rate": 0.8,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -668,7 +3740,35 @@
       "history": [
         {
           "rate": 1.15,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.15,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -682,7 +3782,35 @@
       "history": [
         {
           "rate": 1.25,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.25,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -696,7 +3824,35 @@
       "history": [
         {
           "rate": 3.125,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 3.125,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -710,7 +3866,35 @@
       "history": [
         {
           "rate": 0.7,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.7,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -724,7 +3908,35 @@
       "history": [
         {
           "rate": 1.22,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.22,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -738,7 +3950,35 @@
       "history": [
         {
           "rate": 1.67,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.67,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -752,7 +3992,35 @@
       "history": [
         {
           "rate": 2.475,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 2.475,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -766,7 +4034,35 @@
       "history": [
         {
           "rate": 0.75,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -780,7 +4076,35 @@
       "history": [
         {
           "rate": 0.9,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -794,7 +4118,35 @@
       "history": [
         {
           "rate": 0.95,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.95,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -808,7 +4160,35 @@
       "history": [
         {
           "rate": 1.425,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.425,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -822,7 +4202,35 @@
       "history": [
         {
           "rate": 0.8,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 0.8,
+          "observed_on": "2026-06-22"
         }
       ]
     },
@@ -836,10 +4244,73 @@
       "history": [
         {
           "rate": 1.8,
-          "effective_from": "2026-07-27"
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-25"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-23"
+        },
+        {
+          "rate": 1.8,
+          "observed_on": "2026-06-22"
+        }
+      ]
+    },
+    {
+      "bank_id": "hokkaido_rokin",
+      "bank_name": "北海道労働金庫",
+      "product_id": "rokin_smile",
+      "product_name": "すまいる上手",
+      "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
+      "rate_type": "fixed_3y",
+      "history": [
+        {
+          "rate": 0.9,
+          "observed_on": "2026-07-27"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-07-20"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-07-13"
+        },
+        {
+          "rate": 0.9,
+          "observed_on": "2026-07-06"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-29"
+        },
+        {
+          "rate": 0.75,
+          "observed_on": "2026-06-25"
         }
       ]
     }
   ],
-  "generated_at": "2026-07-27"
+  "generated_at": "2026-07-27",
+  "is_demo": false
 }

@@ -5,10 +5,12 @@ import unittest
 from pathlib import Path
 
 from scripts.update_rate_history import (
+    SCHEMA_VERSION,
     update_history,
     validate_history,
     write_history_atomic,
 )
+from scripts.backfill_rate_history import normalize_legacy_report, rebuild_history
 
 
 class UpdateRateHistoryTest(unittest.TestCase):
@@ -45,15 +47,20 @@ class UpdateRateHistoryTest(unittest.TestCase):
         update_history(self.history, changed_report, "2026-08-15")
 
         entries = self.history["rows"][0]["history"]
-        self.assertEqual(2, len(entries))
+        self.assertEqual(3, len(entries))
         self.assertEqual(
             [
-                {"rate": 1.35, "effective_from": "2026-08-08"},
-                {"rate": 1.25, "effective_from": "2026-08-01"},
+                {"rate": 1.35, "observed_on": "2026-08-15"},
+                {"rate": 1.35, "observed_on": "2026-08-08"},
+                {"rate": 1.25, "observed_on": "2026-08-01"},
             ],
             entries,
         )
         self.assertEqual("2026-08-15", self.history["generated_at"])
+        self.assertEqual(
+            ["2026-08-15", "2026-08-08", "2026-08-01"],
+            self.history["observation_dates"],
+        )
 
     def test_demo_history_is_replaced_by_real_data(self):
         demo_history = copy.deepcopy(self.history)
@@ -81,6 +88,57 @@ class UpdateRateHistoryTest(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "より古いため"):
             update_history(self.history, self.report, "2026-07-01")
+
+    def test_allows_explicit_backfill_and_sorts_dates(self):
+        update_history(self.history, self.report, "2026-08-08")
+        older_report = copy.deepcopy(self.report)
+        older_report["loan_table"][0]["loan_variable"] = 1.15
+
+        update_history(
+            self.history,
+            older_report,
+            "2026-08-01",
+            allow_backfill=True,
+        )
+
+        self.assertEqual(
+            ["2026-08-08", "2026-08-01"],
+            self.history["observation_dates"],
+        )
+        self.assertEqual(
+            ["2026-08-08", "2026-08-01"],
+            [entry["observed_on"] for entry in self.history["rows"][0]["history"]],
+        )
+
+    def test_missing_rate_keeps_the_date_without_copying_previous_value(self):
+        update_history(self.history, self.report, "2026-08-01")
+        missing_report = copy.deepcopy(self.report)
+        missing_report["loan_table"][0]["loan_variable"] = None
+
+        update_history(self.history, missing_report, "2026-08-08")
+
+        self.assertEqual(
+            ["2026-08-08", "2026-08-01"],
+            self.history["observation_dates"],
+        )
+        self.assertEqual(
+            [{"rate": 1.25, "observed_on": "2026-08-01"}],
+            self.history["rows"][0]["history"],
+        )
+
+    def test_weekly_update_extends_automated_source_period(self):
+        self.history["data_sources"] = [{
+            "kind": "financial_report_tool",
+            "period_start": "2026-05-04",
+            "period_end": "2026-07-27",
+        }]
+
+        update_history(self.history, self.report, "2026-08-03")
+
+        self.assertEqual(
+            "2026-08-03",
+            self.history["data_sources"][0]["period_end"],
+        )
 
     def test_rejects_invalid_ids_and_rates(self):
         invalid_reports = [
@@ -119,8 +177,54 @@ class UpdateRateHistoryTest(unittest.TestCase):
         )
 
         validate_history(history)
+        self.assertEqual(SCHEMA_VERSION, history["schema_version"])
         self.assertFalse(history.get("is_demo"))
         self.assertGreater(len(history["rows"]), 0)
+        self.assertGreater(len(history["observation_dates"]), 1)
+
+    def test_legacy_report_is_kept_separate_from_current_products(self):
+        legacy = normalize_legacy_report({
+            "loan_table": [{
+                "bank_id": "test-bank",
+                "bank_name": "テスト銀行",
+                "loan_variable": 1.0,
+            }]
+        })
+
+        self.assertEqual("test-bank_legacy", legacy["loan_table"][0]["product_id"])
+        self.assertEqual("旧集計（商品区分なし）", legacy["loan_table"][0]["product_name"])
+        self.assertTrue(legacy["loan_table"][0]["is_legacy"])
+
+    def test_rebuild_history_uses_report_dates(self):
+        reports = [
+            {
+                "survey_date": "2026/08/01",
+                "loan_table": [{
+                    "bank_id": "test-bank",
+                    "bank_name": "テスト銀行",
+                    "loan_variable": 1.0,
+                }],
+            },
+            {
+                "survey_date": "2026/08/08",
+                "loan_table": [{
+                    "bank_id": "test-bank",
+                    "bank_name": "テスト銀行",
+                    "loan_variable": 1.1,
+                }],
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            paths = []
+            for index, report in enumerate(reports):
+                path = Path(directory) / f"report_{index}.json"
+                path.write_text(json.dumps(report, ensure_ascii=False), encoding="utf-8")
+                paths.append(path)
+
+            history = rebuild_history(paths)
+
+        self.assertEqual(["2026-08-08", "2026-08-01"], history["observation_dates"])
+        self.assertTrue(history["rows"][0]["is_legacy"])
 
 
 if __name__ == "__main__":

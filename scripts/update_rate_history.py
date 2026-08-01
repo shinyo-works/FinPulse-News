@@ -2,9 +2,9 @@
 """金利履歴データ（docs/data/rate-history.json）を更新するスクリプト。
 
 報告自動化ツールが毎週出力する report_data_YYYYMMDD.json を入力に取り、
-各(機関×商品×金利種別)について「金利が前回と変わったときだけ」履歴の先頭に
-{ rate, effective_from } を1件追加する。金利が同じ週は何も足さない
-（＝列はいたずらに増えず、金利が動いたタイミングだけが残る）。
+各(機関×商品×金利種別)について、調査日ごとの確認値を
+{ rate, observed_on } として保存する。値を取得できなかった項目は保存しないため、
+画面側で「据え置き」と「未確認」を混同せずに表示できる。
 
 依存: 標準ライブラリのみ（json）。スクレイピングやGeminiは不要。
 
@@ -40,6 +40,7 @@ DEFAULT_LABELS = {
 }
 DEFAULT_ORDER = ["variable", "fixed_3y", "fixed_5y", "fixed_10y"]
 MAX_RATE_PERCENT = 100.0
+SCHEMA_VERSION = 2
 
 
 def normalize_date(value: str) -> str:
@@ -100,10 +101,48 @@ def validate_report_data(report_data: dict) -> None:
                 validate_rate(value, f"loan_table[{index}].{loan_key}")
 
 
+def migrate_history(history: dict) -> None:
+    """旧形式の変更時点履歴を、調査日ごとの観測形式へ移行する。"""
+    history.setdefault("rate_type_order", DEFAULT_ORDER)
+    history.setdefault("rate_type_labels", DEFAULT_LABELS)
+    history.setdefault("rows", [])
+
+    raw_observation_dates = history.get("observation_dates", [])
+    if not isinstance(raw_observation_dates, list):
+        raise ValueError("履歴JSONの observation_dates は配列にしてください。")
+    observed_dates = set(raw_observation_dates)
+    for row in history.get("rows", []):
+        for entry in row.get("history", []):
+            if "observed_on" not in entry and "effective_from" in entry:
+                entry["observed_on"] = entry.pop("effective_from")
+            if entry.get("observed_on"):
+                observed_dates.add(entry["observed_on"])
+    if history.get("generated_at"):
+        observed_dates.add(history["generated_at"])
+
+    history["observation_dates"] = sorted(observed_dates, reverse=True)
+    history["schema_version"] = SCHEMA_VERSION
+
+
 def validate_history(history: dict) -> None:
     """履歴の行キー・金利・日付順を検証する。"""
     if not isinstance(history, dict):
         raise ValueError("履歴JSONのルートはオブジェクトにしてください。")
+    if history.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError(f"履歴JSONの schema_version は {SCHEMA_VERSION} にしてください。")
+
+    observation_dates = history.get("observation_dates")
+    if not isinstance(observation_dates, list):
+        raise ValueError("履歴JSONの observation_dates は配列にしてください。")
+    normalized_dates = [normalize_date(value) for value in observation_dates]
+    if normalized_dates != observation_dates:
+        raise ValueError("observation_dates は YYYY-MM-DD にしてください。")
+    if len(set(observation_dates)) != len(observation_dates):
+        raise ValueError("observation_dates に重複があります。")
+    if observation_dates != sorted(observation_dates, reverse=True):
+        raise ValueError("observation_dates は新しい日付順にしてください。")
+    observation_date_set = set(observation_dates)
+
     rows = history.get("rows")
     if not isinstance(rows, list):
         raise ValueError("履歴JSONの rows は配列にしてください。")
@@ -130,48 +169,46 @@ def validate_history(history: dict) -> None:
         for entry_index, entry in enumerate(entries, start=1):
             if not isinstance(entry, dict):
                 raise ValueError(f"rows[{index}].history[{entry_index}] はオブジェクトにしてください。")
-            effective_from = normalize_date(entry.get("effective_from"))
-            if effective_from != entry.get("effective_from"):
+            observed_on = normalize_date(entry.get("observed_on"))
+            if observed_on != entry.get("observed_on"):
                 raise ValueError(
-                    f"rows[{index}].history[{entry_index}].effective_from は YYYY-MM-DD にしてください。"
+                    f"rows[{index}].history[{entry_index}].observed_on は YYYY-MM-DD にしてください。"
                 )
-            if effective_from in seen_dates:
-                raise ValueError(f"rows[{index}] に同じ適用開始日が重複しています: {effective_from}")
-            if previous_date is not None and effective_from > previous_date:
+            if observed_on not in observation_date_set:
+                raise ValueError(f"rows[{index}] の調査日が observation_dates にありません: {observed_on}")
+            if observed_on in seen_dates:
+                raise ValueError(f"rows[{index}] に同じ調査日が重複しています: {observed_on}")
+            if previous_date is not None and observed_on > previous_date:
                 raise ValueError(f"rows[{index}].history は新しい日付順にしてください。")
-            seen_dates.add(effective_from)
-            previous_date = effective_from
+            seen_dates.add(observed_on)
+            previous_date = observed_on
             validate_rate(entry.get("rate"), f"rows[{index}].history[{entry_index}].rate")
 
     generated_at = history.get("generated_at")
     if generated_at and normalize_date(generated_at) != generated_at:
         raise ValueError("generated_at は YYYY-MM-DD にしてください。")
+    if generated_at and not observation_dates:
+        raise ValueError("generated_at がある場合は observation_dates も必要です。")
+    if observation_dates and generated_at != observation_dates[0]:
+        raise ValueError("generated_at は最新の observation_dates と一致させてください。")
 
 
 def latest_history_date(history: dict) -> str:
     """履歴全体で最も新しい日付を返す。"""
-    dates = []
-    if history.get("generated_at"):
-        dates.append(normalize_date(history["generated_at"]))
-    for row in history.get("rows", []):
-        for entry in row.get("history", []):
-            dates.append(normalize_date(entry.get("effective_from")))
-    return max(dates, default="")
+    return max(history.get("observation_dates", []), default="")
 
 
 def load_history() -> dict:
     if HISTORY_PATH.exists():
         with open(HISTORY_PATH, encoding="utf-8") as f:
             data = json.load(f)
-        data.setdefault("schema_version", 1)
-        data.setdefault("rate_type_order", DEFAULT_ORDER)
-        data.setdefault("rate_type_labels", DEFAULT_LABELS)
-        data.setdefault("rows", [])
+        migrate_history(data)
         return data
     return {
-        "schema_version": 1,
+        "schema_version": SCHEMA_VERSION,
         "rate_type_order": DEFAULT_ORDER,
         "rate_type_labels": DEFAULT_LABELS,
+        "observation_dates": [],
         "rows": [],
     }
 
@@ -180,21 +217,43 @@ def row_key(bank_id: str, product_id: str, rate_type: str) -> tuple:
     return (bank_id or "", product_id or "", rate_type)
 
 
-def update_history(history: dict, report_data: dict, survey_date: str) -> dict:
+def extend_automated_source_period(history: dict, survey_date: str) -> None:
+    """週次自動化の出典期間を、最新の調査日まで延長する。"""
+    for source in history.get("data_sources", []):
+        if source.get("kind") != "financial_report_tool":
+            continue
+        current_end = source.get("period_end", "")
+        if not current_end or survey_date > current_end:
+            source["period_end"] = survey_date
+
+
+def update_history(
+    history: dict,
+    report_data: dict,
+    survey_date: str,
+    *,
+    allow_backfill: bool = False,
+) -> dict:
     """report_data の住宅ローン金利を履歴へ反映する。返り値は変更サマリー。"""
     survey_date = normalize_date(survey_date)
+    migrate_history(history)
     validate_history(history)
     validate_report_data(report_data)
     replaced_demo = history.get("is_demo") is True
     if replaced_demo:
         # デモ金利を実績として残さない。入力検証後にだけ初期化する。
         history["rows"] = []
+        history["observation_dates"] = []
         history.pop("generated_at", None)
     latest_date = latest_history_date(history)
-    if latest_date and survey_date < latest_date:
+    if latest_date and survey_date < latest_date and not allow_backfill:
         raise ValueError(
             f"調査日 {survey_date} は既存の最新日 {latest_date} より古いため更新できません。"
         )
+
+    if survey_date not in history["observation_dates"]:
+        history["observation_dates"].append(survey_date)
+        history["observation_dates"].sort(reverse=True)
 
     index = {
         row_key(r.get("bank_id"), r.get("product_id"), r.get("rate_type")): r
@@ -226,33 +285,50 @@ def update_history(history: dict, report_data: dict, survey_date: str) -> dict:
                     "product_name": loan.get("product_name", ""),
                     "url": loan.get("url"),
                     "rate_type": rate_type,
-                    "history": [{"rate": value, "effective_from": survey_date}],
+                    "history": [{"rate": value, "observed_on": survey_date}],
                 }
+                if loan.get("is_legacy"):
+                    row["is_legacy"] = True
                 history["rows"].append(row)
                 index[key] = row
                 summary["added_rows"] += 1
                 continue
 
-            # 表示名・URLは最新に追従
-            row["bank_name"] = loan.get("bank_name", row.get("bank_name", ""))
-            row["product_name"] = loan.get("product_name", row.get("product_name", ""))
-            if loan.get("url"):
-                row["url"] = loan.get("url")
-
             hist = row.setdefault("history", [])
-            if hist and hist[0].get("effective_from") == survey_date:
-                # 同一週の再実行 → 先頭を上書き（列を重複させない）
-                hist[0]["rate"] = value
-                summary["unchanged"] += 1
-            elif not hist or hist[0].get("rate") != value:
-                # 金利が変わった → 先頭に新しい列を追加
-                hist.insert(0, {"rate": value, "effective_from": survey_date})
-                summary["changed"] += 1
-            else:
-                summary["unchanged"] += 1
+            row_latest_date = hist[0].get("observed_on") if hist else ""
+            if not row_latest_date or survey_date >= row_latest_date:
+                # 過去データの投入で現在の商品名・URLを巻き戻さない。
+                row["bank_name"] = loan.get("bank_name", row.get("bank_name", ""))
+                row["product_name"] = loan.get("product_name", row.get("product_name", ""))
+                if loan.get("url"):
+                    row["url"] = loan.get("url")
 
-    history["generated_at"] = survey_date
+            same_day = next(
+                (entry for entry in hist if entry.get("observed_on") == survey_date),
+                None,
+            )
+            older = next(
+                (entry for entry in hist if entry.get("observed_on", "") < survey_date),
+                None,
+            )
+            if same_day is not None:
+                previous_value = same_day.get("rate")
+                same_day["rate"] = value
+                if previous_value == value:
+                    summary["unchanged"] += 1
+                else:
+                    summary["changed"] += 1
+            else:
+                hist.append({"rate": value, "observed_on": survey_date})
+                hist.sort(key=lambda entry: entry["observed_on"], reverse=True)
+                if older and older.get("rate") == value:
+                    summary["unchanged"] += 1
+                else:
+                    summary["changed"] += 1
+
+    history["generated_at"] = history["observation_dates"][0]
     history["is_demo"] = False
+    extend_automated_source_period(history, survey_date)
     validate_history(history)
     return summary
 
@@ -292,6 +368,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="金利履歴JSONを更新する")
     parser.add_argument("report_data", help="報告自動化ツールの report_data_*.json のパス")
     parser.add_argument("--date", help="調査日(YYYY-MM-DD)。JSONに survey_date が無い場合に指定")
+    parser.add_argument(
+        "--allow-backfill",
+        action="store_true",
+        help="既存の最新日より前の調査日を追加する（過去データ投入専用）",
+    )
     args = parser.parse_args()
 
     with open(args.report_data, encoding="utf-8") as f:
@@ -301,7 +382,12 @@ def main() -> None:
     survey_date = normalize_date(raw_date)
 
     history = load_history()
-    summary = update_history(history, report_data, survey_date)
+    summary = update_history(
+        history,
+        report_data,
+        survey_date,
+        allow_backfill=args.allow_backfill,
+    )
 
     write_history_atomic(history)
 
