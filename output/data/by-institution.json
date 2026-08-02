@@ -1,8 +1,20 @@
 {
+  "schema_version": 1,
   "institutions": [
     {
       "name": "帯広信用金庫",
       "items": [
+        {
+          "date": "2026-08-03",
+          "title": "「当座預金規定（一般当座口用）他15 規定」改定のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.08.03-kogitte_kitei-2027.03.31.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-03"
+          ]
+        },
         {
           "date": "2026-07-22",
           "title": "預金金利および短期プライムレートの引き上げについて",
@@ -11,6 +23,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27"
           ]
         },
@@ -22,6 +35,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27"
           ]
         },
@@ -33,6 +47,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13"
@@ -46,6 +61,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13",
@@ -60,6 +76,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13",
@@ -293,6 +310,17 @@
       "name": "北海道銀行",
       "items": [
         {
+          "date": "2026-07-29",
+          "title": "2026.07.29個人のお客さま法人のお客さまテレホンバンキングサービス終了のお知らせ",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/87de1cdb596f3469c8cd438791d04b7c.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-03"
+          ]
+        },
+        {
           "date": "2026-05-11",
           "title": "個人のお客さま向け「道銀VISAカード」新規申込受付終了及び「北陸Visaカード」の取扱開始について",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/524048eea82460fd010148afd2fae2cd.pdf",
@@ -370,6 +398,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27"
           ]
         },
@@ -381,6 +410,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20"
           ]
@@ -393,6 +423,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13"
@@ -406,6 +437,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13"
@@ -513,6 +545,40 @@
       "name": "十勝信用組合",
       "items": [
         {
+          "date": "2026-08-01",
+          "title": "今月のローン金利",
+          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
+          "star": true,
+          "fallback": false,
+          "date_inferred": true,
+          "reports": [
+            "2026-08-03",
+            "2026-07-27",
+            "2026-07-20",
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25"
+          ]
+        },
+        {
+          "date": "2026-07-27",
+          "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance02.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-03"
+          ]
+        },
+        {
           "date": "2026-07-24",
           "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
           "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance.html",
@@ -531,30 +597,9 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20"
-          ]
-        },
-        {
-          "date": "2026-07-01",
-          "title": "今月のローン金利",
-          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
-          "star": true,
-          "fallback": false,
-          "date_inferred": true,
-          "reports": [
-            "2026-07-27",
-            "2026-07-20",
-            "2026-07-13",
-            "2026-07-06",
-            "2026-06-29",
-            "2026-06-22",
-            "2026-06-15",
-            "2026-06-08",
-            "2026-06-01",
-            "2026-05-31",
-            "2026-05-28",
-            "2026-05-25"
           ]
         },
         {
@@ -565,6 +610,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13",
@@ -788,6 +834,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20"
           ]
@@ -812,6 +859,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13",
@@ -936,6 +984,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13"
@@ -960,6 +1009,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13",
@@ -1150,6 +1200,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-03",
             "2026-07-27"
           ]
         },
