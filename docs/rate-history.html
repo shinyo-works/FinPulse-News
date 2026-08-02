@@ -248,6 +248,14 @@
     .arrow { font-size: 0.82rem; }
     .rate-cell.up .arrow { color: var(--up); }
     .rate-cell.down .arrow { color: var(--down); }
+    /* 過去列の最安値は、行を増やさず文字だけで判別できるようにする。 */
+    .rate-cell.past-best .rate-val {
+      color: #9a6700;
+      font-weight: 900;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
     .rate-empty { color: #c2ccd2; }
     .best-badge {
       display: inline-block; margin-top: 1px; padding: 1px 6px;
@@ -426,10 +434,14 @@
         if (entry.rate > older.rate) { dir = "up"; arrow = " <span class=\"arrow\">↑</span>"; }
         else if (entry.rate < older.rate) { dir = "down"; arrow = " <span class=\"arrow\">↓</span>"; }
       }
-      const cls = ["rate-cell", base, isBest ? "best" : "", dir].filter(Boolean).join(" ");
-      const badge = isBest ? '<div class="best-badge">最安</div>' : "";
+      const bestClass = isBest ? (isCurrent ? "best" : "past-best") : "";
+      const cls = ["rate-cell", base, bestClass, dir].filter(Boolean).join(" ");
+      const badge = isCurrent && isBest ? '<div class="best-badge">最安</div>' : "";
+      const value = isCurrent
+        ? `<div class="rate-val">${fmtRate(entry.rate)}${arrow}</div>`
+        : `<span class="rate-val">${fmtRate(entry.rate)}${arrow}</span>`;
       return `<td class="${cls}">
-        <div class="rate-val">${fmtRate(entry.rate)}${arrow}</div>
+        ${value}
         ${badge}
       </td>`;
     }
@@ -470,17 +482,22 @@
       return col.count === 1 ? shortDate(col.from) : `${shortDate(col.from)}〜${shortDate(col.to)}`;
     }
 
-    function minRateByType(rows, latestDate) {
-      // 表示中の行から、金利種別ごとの「現在」列の最安値を求める
-      const min = {};
-      for (const row of rows) {
-        const cur = entryAt(row, latestDate);
-        if (!cur || !isFiniteRate(cur.rate)) continue;
-        const t = row.rate_type;
-        const v = cur.rate;
-        if (!(t in min) || v < min[t]) min[t] = v;
+    function minRateByDateAndType(rows, dates) {
+      // 表示中の行から、各調査日×金利種別の最安値を求める。絞り込み後も毎回再計算する。
+      const minimums = {};
+      for (const date of dates) {
+        minimums[date] = {};
+        for (const row of rows) {
+          const entry = entryAt(row, date);
+          if (!entry || !isFiniteRate(entry.rate)) continue;
+          const type = row.rate_type;
+          const rate = entry.rate;
+          if (!(type in minimums[date]) || rate < minimums[date][type]) {
+            minimums[date][type] = rate;
+          }
+        }
       }
-      return min;
+      return minimums;
     }
 
     function render() {
@@ -494,9 +511,7 @@
         el.matrix.innerHTML = '<div class="empty-state"><strong>調査日データがありません</strong>金利履歴JSONをご確認ください。</div>';
         return;
       }
-      const latestDate = dates[0];
-
-      const minByType = minRateByType(rows, latestDate);
+      const minimums = minRateByDateAndType(rows, dates);
       const columns = buildColumns(rows, dates);
 
       const thead = `<tr>
@@ -516,16 +531,15 @@
         // 機関名セルは(機関×商品)単位で結合する。グループ先頭でのみ出力。
         const groupStart = !prev || prev.bank_id !== row.bank_id || prev.product_id !== row.product_id;
 
-        const history = row.history || [];
-        const cur = entryAt(row, latestDate);
-        const isBest = Boolean(cur) && isFiniteRate(cur.rate) && cur.rate === minByType[row.rate_type];
-
         const cells = columns.map((col) => {
           if (col.kind === "nochange") return '<td class="col-nochange"></td>';
           const i = col.index;
           const entry = entryAt(row, dates[i]);
           const older = i + 1 < dates.length ? entryAt(row, dates[i + 1]) : null;
-          return rateCell(entry, older, i === 0, i === 0 && isBest);
+          const isBest = Boolean(entry)
+            && isFiniteRate(entry.rate)
+            && entry.rate === minimums[col.date][row.rate_type];
+          return rateCell(entry, older, i === 0, isBest);
         });
 
         let bankCell = "";

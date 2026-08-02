@@ -58,6 +58,17 @@ class RateHistoryLayoutTest(unittest.TestCase):
             r"thead th\s*\{[^}]*position:\s*sticky;\s*top:\s*0;",
         )
 
+    def test_past_minimum_uses_font_only_without_label(self):
+        self.assertIn('isCurrent ? "best" : "past-best"', self.html)
+        self.assertIn("const badge = isCurrent && isBest", self.html)
+        self.assertIn(': `<span class="rate-val">', self.html)
+        self.assertRegex(
+            self.html,
+            r"\.rate-cell\.past-best \.rate-val\s*\{[^}]*font-weight:\s*900;"
+            r"[^}]*text-decoration:\s*underline;",
+        )
+        self.assertIn("function minRateByDateAndType(rows, dates)", self.html)
+
 
 if __name__ == "__main__":
     unittest.main()
