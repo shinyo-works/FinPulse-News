@@ -28,8 +28,7 @@
 
     * { box-sizing: border-box; }
     html { color-scheme: light; }
-    /* 見出し・操作列を常に見えるようにするため、ページ自体はスクロールさせず
-       表の枠だけを縦横にスクロールさせる（縦スクロールしても見出しが残る） */
+    /* ページ全体は固定し、補足情報と表を同じ枠の中でスクロールさせる。 */
     body {
       margin: 0;
       height: 100vh;
@@ -47,7 +46,10 @@
     /* index.html のタブ内（iframe）に表示するため、見出しは控えめの高さにする */
     .site-header {
       flex: none;
-      padding: 10px clamp(16px, 4vw, 48px);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px clamp(12px, 3vw, 36px);
       color: #eef7fa;
       background:
         radial-gradient(circle at 12% 0%, rgba(32, 144, 139, 0.32), transparent 34%),
@@ -55,6 +57,7 @@
     }
     .brand-mark {
       display: inline-flex;
+      flex: none;
       align-items: center;
       gap: 10px;
       font-size: 1.02rem;
@@ -65,9 +68,11 @@
       width: 11px; height: 11px; border-radius: 50%;
       background: #55d6c9; box-shadow: 0 0 0 5px rgba(85, 214, 201, 0.15);
     }
-    /* 説明文は折り返さず1行に収める */
+    /* 説明文は見出しの右側で、従来の文字サイズのまま1行に収める。 */
     .site-header p {
-      margin: 4px 0 0;
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
       color: #a9c0ce;
       font-size: 0.8rem;
       white-space: nowrap;
@@ -81,28 +86,30 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
-      padding: 10px clamp(16px, 4vw, 48px);
+      gap: 6px;
+      padding: 5px clamp(12px, 3vw, 36px);
       background: rgba(244, 247, 248, 0.95);
       border-bottom: 1px solid var(--line);
       backdrop-filter: blur(10px);
     }
-    .search-wrap { position: relative; flex: 0 1 208px; min-width: 132px; }
+    .search-wrap { position: relative; flex: 0 1 190px; min-width: 132px; }
     .search-icon {
-      position: absolute; left: 13px; top: 50%;
+      position: absolute; left: 11px; top: 50%;
       color: var(--muted); transform: translateY(-50%); pointer-events: none;
     }
     #searchInput {
       width: 100%;
-      padding: 7px 13px 7px 38px;
+      height: 30px;
+      padding: 3px 10px 3px 31px;
       color: var(--ink); background: var(--paper);
-      border: 1px solid var(--line); border-radius: 11px; outline: none;
+      border: 1px solid var(--line); border-radius: 9px; outline: none;
+      font-size: 0.84rem;
     }
     #searchInput:focus { border-color: var(--teal-600); box-shadow: 0 0 0 3px rgba(19,132,132,0.13); }
 
-    .type-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .type-chips { display: flex; flex-wrap: wrap; gap: 4px; }
     .chip {
-      padding: 6px 12px;
+      padding: 4px 10px;
       color: var(--navy-800); background: var(--paper);
       border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
       font-size: 0.85rem; font-weight: 700;
@@ -112,8 +119,9 @@
     .filter-menu { position: relative; }
     .control-button {
       display: inline-flex; align-items: center; gap: 7px;
-      min-height: 36px; padding: 6px 12px; white-space: nowrap;
-      background: var(--paper); border: 1px solid var(--line); border-radius: 11px; cursor: pointer;
+      min-height: 30px; padding: 4px 10px; white-space: nowrap;
+      background: var(--paper); border: 1px solid var(--line); border-radius: 9px; cursor: pointer;
+      font-size: 0.84rem;
     }
     .control-button:hover { border-color: #a9bbc7; }
     .filter-popover {
@@ -126,29 +134,38 @@
     .filter-option { display: flex; align-items: center; gap: 9px; padding: 4px 3px; cursor: pointer; font-size: 0.88rem; }
     .filter-option input { accent-color: var(--teal-700); }
 
-    .legend {
-      flex: none;
-      display: flex; flex-wrap: wrap; gap: 14px;
-      padding: 8px clamp(16px, 4vw, 48px) 0;
-      color: var(--muted); font-size: 0.78rem;
+    /* 補足3行は表と同じ枠内に置き、縦スクロール後は画面外へ流す。 */
+    .scrolling-notes {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      width: 100%;
+      padding: 5px 10px 4px;
+      color: var(--muted);
+      background: #fbfdfd;
+      border-bottom: 1px solid #e8eef1;
+      font-size: 0.72rem;
+      line-height: 1.35;
     }
-    .legend b { font-weight: 700; }
-    .legend .up { color: var(--up); }
-    .legend .down { color: var(--down); }
-    .source-note {
-      flex: none;
-      padding: 6px clamp(16px, 4vw, 48px) 0;
-      color: var(--muted); font-size: 0.74rem; line-height: 1.55;
+    .info-line {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    .info-line + .info-line { margin-top: 2px; }
+    .info-line b { font-weight: 700; }
+    .info-line .up { color: var(--up); }
+    .info-line .down { color: var(--down); }
 
-    /* 残りの高さをすべて表に渡す（表の中だけがスクロールする） */
+    /* 残りの高さをすべて表へ渡す。 */
     .content {
       flex: 1 1 auto;
       min-height: 0;
       display: flex;
-      padding: 12px clamp(16px, 4vw, 48px) 16px;
+      padding: 6px clamp(10px, 2vw, 24px) 8px;
     }
-    #matrix { flex: 1 1 auto; min-width: 0; display: flex; }
+    #matrix { min-width: 100%; }
 
     .table-scroll {
       flex: 1 1 auto;
@@ -162,7 +179,7 @@
     table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; }
     thead th {
       position: sticky; top: 0; z-index: 5;
-      padding: 9px 12px;
+      padding: 7px 8px;
       color: var(--muted); background: #f7fafa;
       font-size: 0.74rem; font-weight: 750; letter-spacing: 0.03em;
       text-align: center; white-space: nowrap;
@@ -171,7 +188,7 @@
     thead th.col-bank, thead th.col-type { text-align: left; z-index: 7; }
     /* 最新列は従来どおりの幅、過去列は詰める */
     thead th.col-date { min-width: 102px; }
-    thead th.col-date.past { min-width: 62px; padding: 9px 5px; }
+    thead th.col-date.past { min-width: 62px; padding: 7px 4px; }
     .date-year { display: block; color: #7b8b96; font-size: 0.65rem; font-weight: 650; }
     .date-day { display: block; margin-top: 1px; color: var(--navy-800); font-size: 0.82rem; }
     .col-date.past .date-year { font-size: 0.6rem; }
@@ -196,7 +213,7 @@
       width: 100%; min-width: 0; padding: 0; background: transparent;
     }
     tbody td {
-      padding: 8px 12px; vertical-align: top;
+      padding: 6px 8px; vertical-align: top;
       border-bottom: 1px solid #eef2f4;
       text-align: center; white-space: nowrap;
       font-variant-numeric: tabular-nums;
@@ -205,10 +222,10 @@
     tbody tr:hover td { background: #fbfdfd; }
 
     /* 左側の固定列（機関・商品・種別）。横スクロールしても残る */
-    .col-bank { position: sticky; left: 0; z-index: 4; width: 142px; min-width: 142px; padding: 8px 8px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
-    .col-type { position: sticky; left: 142px; z-index: 4; width: 58px; min-width: 58px; padding: 8px 4px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
-    thead th.col-bank { left: 0; padding: 9px 8px; background: #f7fafa; }
-    thead th.col-type { left: 142px; padding: 9px 4px; background: #f7fafa; }
+    .col-bank { position: sticky; left: 0; z-index: 4; width: 142px; min-width: 142px; padding: 6px 7px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    .col-type { position: sticky; left: 142px; z-index: 4; width: 58px; min-width: 58px; padding: 6px 3px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    thead th.col-bank { left: 0; padding: 7px; background: #f7fafa; }
+    thead th.col-type { left: 142px; padding: 7px 3px; background: #f7fafa; }
     tbody tr:hover .col-bank, tbody tr:hover .col-type { background: #fbfdfd; }
 
     .bank-name { font-weight: 700; color: var(--navy-900); font-size: 0.82rem; white-space: normal; line-height: 1.25; }
@@ -223,7 +240,7 @@
     }
 
     .rate-cell.current { background: var(--teal-100); }
-    tbody td.rate-cell.past { padding: 8px 5px; }
+    tbody td.rate-cell.past { padding: 6px 4px; }
     .rate-cell.past .rate-val { font-size: 0.82rem; }
     .rate-val { font-size: 0.98rem; font-weight: 750; color: var(--navy-900); }
     .rate-cell.up .rate-val { color: var(--up); }
@@ -233,7 +250,7 @@
     .rate-cell.down .arrow { color: var(--down); }
     .rate-empty { color: #c2ccd2; }
     .best-badge {
-      display: inline-block; margin-top: 3px; padding: 1px 7px;
+      display: inline-block; margin-top: 1px; padding: 1px 6px;
       background: #d59b2b; color: #fff;
       border-radius: 999px; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.02em;
     }
@@ -253,7 +270,7 @@
       .col-bank { width: 112px; min-width: 112px; }
       .col-type { left: 112px; width: 50px; min-width: 50px; }
       thead th.col-type { left: 112px; }
-      .site-header p { font-size: 0.72rem; }
+      .site-header { gap: 10px; padding-inline: 10px; }
     }
   </style>
 </head>
@@ -279,19 +296,16 @@
     </div>
   </div>
 
-  <div class="legend">
-    <span><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）</span>
-    <span class="up"><b>↑</b> 右隣の前回調査より上昇</span>
-    <span class="down"><b>↓</b> 右隣の前回調査より低下</span>
-    <span><b>変更なし</b>＝その期間は表示中の全商品で金利が動いていない</span>
-    <span><b>掲載範囲</b>＝公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）</span>
-    <span id="coverage"></span>
-  </div>
-  <div id="sourceNote" class="source-note"></div>
-
   <div class="content">
-    <div id="matrix" aria-live="polite">
-      <div class="loading-state"><strong>データを読み込んでいます</strong>しばらくお待ちください。</div>
+    <div class="table-scroll" id="tableScroll">
+      <div class="scrolling-notes">
+        <div class="info-line"><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）　<span class="up"><b>↑</b> 前回調査より上昇</span>　<span class="down"><b>↓</b> 前回調査より低下</span>　<b>変更なし</b>＝表示中の全商品で金利が動いていない期間</div>
+        <div class="info-line"><b>掲載範囲</b>＝公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）　<span id="coverage"></span></div>
+        <div id="sourceNote" class="info-line"></div>
+      </div>
+      <div id="matrix" aria-live="polite">
+        <div class="loading-state"><strong>データを読み込んでいます</strong>しばらくお待ちください。</div>
+      </div>
     </div>
   </div>
 
@@ -539,7 +553,7 @@
         </tr>`;
       }).join("");
 
-      el.matrix.innerHTML = `<div class="table-scroll"><table><thead>${thead}</thead><tbody>${body}</tbody></table></div>`;
+      el.matrix.innerHTML = `<table><thead>${thead}</thead><tbody>${body}</tbody></table>`;
       el.coverage.textContent = `${dates[dates.length - 1].replaceAll("-", "/")}〜${dates[0].replaceAll("-", "/")}（${dates.length}調査日）`;
       const sourceLabels = (state.data.data_sources || []).map((source) => source.description).filter(Boolean);
       el.sourceNote.textContent = sourceLabels.length ? `出典：${sourceLabels.join("、")}` : "";
