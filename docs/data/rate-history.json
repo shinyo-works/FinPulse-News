@@ -13,6 +13,7 @@
     "fixed_10y": "固定10年"
   },
   "observation_dates": [
+    "2026-08-03",
     "2026-07-27",
     "2026-07-20",
     "2026-07-13",
@@ -25,7 +26,7 @@
   "data_sources": [
     {
       "period_start": "2026-06-22",
-      "period_end": "2026-07-27",
+      "period_end": "2026-08-03",
       "kind": "financial_report_tool",
       "repository": "金利調査ツール",
       "description": "報告自動化ツールの週次JSON（GitHub Actions成功Artifactを含む）"
@@ -42,6 +43,10 @@
       "history": [
         {
           "rate": 1.625,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.625,
           "observed_on": "2026-07-27"
         },
         {
@@ -82,6 +87,10 @@
       "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.1,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 0.95,
           "observed_on": "2026-07-27"
@@ -124,6 +133,10 @@
       "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
       "rate_type": "fixed_5y",
       "history": [
+        {
+          "rate": 2.1,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.95,
           "observed_on": "2026-07-27"
@@ -167,6 +180,10 @@
       "rate_type": "fixed_10y",
       "history": [
         {
+          "rate": 2.5,
+          "observed_on": "2026-08-03"
+        },
+        {
           "rate": 2.45,
           "observed_on": "2026-07-27"
         },
@@ -209,6 +226,10 @@
       "rate_type": "fixed_3y",
       "history": [
         {
+          "rate": 0.75,
+          "observed_on": "2026-08-03"
+        },
+        {
           "rate": 0.6,
           "observed_on": "2026-07-27"
         },
@@ -250,6 +271,10 @@
       "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_teiritu_hokkaido.html",
       "rate_type": "fixed_5y",
       "history": [
+        {
+          "rate": 1.66,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.51,
           "observed_on": "2026-07-27"
@@ -294,6 +319,10 @@
       "history": [
         {
           "rate": 1.825,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.825,
           "observed_on": "2026-07-27"
         },
         {
@@ -334,6 +363,10 @@
       "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.1,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.1,
           "observed_on": "2026-07-27"
@@ -378,6 +411,10 @@
       "history": [
         {
           "rate": 2.1,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 2.1,
           "observed_on": "2026-07-27"
         },
         {
@@ -418,6 +455,10 @@
       "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.5,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 2.5,
           "observed_on": "2026-07-27"
@@ -462,6 +503,10 @@
       "history": [
         {
           "rate": 0.75,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 0.75,
           "observed_on": "2026-07-27"
         },
         {
@@ -504,6 +549,10 @@
       "history": [
         {
           "rate": 1.66,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.66,
           "observed_on": "2026-07-27"
         },
         {
@@ -544,6 +593,10 @@
       "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.1,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.1,
           "observed_on": "2026-07-27"
@@ -588,6 +641,10 @@
       "history": [
         {
           "rate": 2.1,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 2.1,
           "observed_on": "2026-07-27"
         },
         {
@@ -628,6 +685,10 @@
       "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.5,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 2.5,
           "observed_on": "2026-07-27"
@@ -672,6 +733,10 @@
       "history": [
         {
           "rate": 0.75,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 0.75,
           "observed_on": "2026-07-27"
         },
         {
@@ -714,6 +779,10 @@
       "history": [
         {
           "rate": 1.66,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.66,
           "observed_on": "2026-07-27"
         },
         {
@@ -756,6 +825,10 @@
       "history": [
         {
           "rate": 2.07,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 2.07,
           "observed_on": "2026-07-27"
         },
         {
@@ -796,6 +869,10 @@
       "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
       "rate_type": "variable",
       "history": [
+        {
+          "rate": 1.525,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.525,
           "observed_on": "2026-07-27"
@@ -839,6 +916,10 @@
       "rate_type": "fixed_3y",
       "history": [
         {
+          "rate": 1.2,
+          "observed_on": "2026-08-03"
+        },
+        {
           "rate": 1.05,
           "observed_on": "2026-07-27"
         },
@@ -881,6 +962,10 @@
       "rate_type": "fixed_5y",
       "history": [
         {
+          "rate": 2.1,
+          "observed_on": "2026-08-03"
+        },
+        {
           "rate": 1.85,
           "observed_on": "2026-07-27"
         },
@@ -922,6 +1007,10 @@
       "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.45,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 2.2,
           "observed_on": "2026-07-27"
@@ -966,6 +1055,10 @@
       "history": [
         {
           "rate": 3.325,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 3.325,
           "observed_on": "2026-07-27"
         },
         {
@@ -1006,6 +1099,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.15,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.15,
           "observed_on": "2026-07-27"
@@ -1050,6 +1147,10 @@
       "history": [
         {
           "rate": 2.05,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 2.05,
           "observed_on": "2026-07-27"
         },
         {
@@ -1090,6 +1191,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.55,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 2.55,
           "observed_on": "2026-07-27"
@@ -1134,6 +1239,10 @@
       "history": [
         {
           "rate": 1.375,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.375,
           "observed_on": "2026-07-27"
         },
         {
@@ -1174,6 +1283,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.05,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.05,
           "observed_on": "2026-07-27"
@@ -1218,6 +1331,10 @@
       "history": [
         {
           "rate": 1.95,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.95,
           "observed_on": "2026-07-27"
         },
         {
@@ -1258,6 +1375,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.45,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 2.45,
           "observed_on": "2026-07-27"
@@ -1302,6 +1423,10 @@
       "history": [
         {
           "rate": 1.05,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.05,
           "observed_on": "2026-07-27"
         },
         {
@@ -1344,6 +1469,10 @@
       "history": [
         {
           "rate": 1.85,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.85,
           "observed_on": "2026-07-27"
         },
         {
@@ -1384,6 +1513,10 @@
       "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.15,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 2.15,
           "observed_on": "2026-07-27"
@@ -1428,6 +1561,10 @@
       "history": [
         {
           "rate": 0.85,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 0.85,
           "observed_on": "2026-07-27"
         },
         {
@@ -1470,6 +1607,10 @@
       "history": [
         {
           "rate": 1.65,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.65,
           "observed_on": "2026-07-27"
         },
         {
@@ -1510,6 +1651,10 @@
       "url": "https://www.shinkin.co.jp/kitami/borrow/ichiran.html#HIKISAGE_JYUTAKU",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 1.95,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.95,
           "observed_on": "2026-07-27"
@@ -1554,6 +1699,10 @@
       "history": [
         {
           "rate": 3.325,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 3.325,
           "observed_on": "2026-07-27"
         },
         {
@@ -1594,6 +1743,10 @@
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.1,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.1,
           "observed_on": "2026-07-27"
@@ -1638,6 +1791,10 @@
       "history": [
         {
           "rate": 2.1,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 2.1,
           "observed_on": "2026-07-27"
         },
         {
@@ -1678,6 +1835,10 @@
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.5,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 2.5,
           "observed_on": "2026-07-27"
@@ -1722,6 +1883,10 @@
       "history": [
         {
           "rate": 0.8,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 0.8,
           "observed_on": "2026-07-27"
         },
         {
@@ -1764,6 +1929,10 @@
       "history": [
         {
           "rate": 1.15,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.15,
           "observed_on": "2026-07-27"
         },
         {
@@ -1804,6 +1973,10 @@
       "url": "https://www.tokachishinkumi.com/customer/loan/rate-l.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 1.25,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.25,
           "observed_on": "2026-07-27"
@@ -1848,6 +2021,10 @@
       "history": [
         {
           "rate": 3.125,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 3.125,
           "observed_on": "2026-07-27"
         },
         {
@@ -1888,6 +2065,10 @@
       "url": "https://www.jaobihirokawanisi.or.jp/service/bank/rate/",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 0.7,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 0.7,
           "observed_on": "2026-07-27"
@@ -1932,6 +2113,10 @@
       "history": [
         {
           "rate": 1.22,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 1.22,
           "observed_on": "2026-07-27"
         },
         {
@@ -1972,6 +2157,10 @@
       "url": "https://www.jaobihirokawanisi.or.jp/service/bank/rate/",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 1.67,
+          "observed_on": "2026-08-03"
+        },
         {
           "rate": 1.67,
           "observed_on": "2026-07-27"
@@ -2016,6 +2205,10 @@
       "history": [
         {
           "rate": 0.9,
+          "observed_on": "2026-08-03"
+        },
+        {
+          "rate": 0.9,
           "observed_on": "2026-07-27"
         },
         {
@@ -2041,6 +2234,6 @@
       ]
     }
   ],
-  "generated_at": "2026-07-27",
+  "generated_at": "2026-08-03",
   "is_demo": false
 }
