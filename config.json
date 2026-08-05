@@ -46,7 +46,7 @@
       "name": "北洋銀行",
       "url": "https://www.hokuyobank.co.jp/announcement/",
       "scraper": "hokuyo_xml",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手数料"],
       "exclude_rules": [
         { "keyword": "採用" },
         { "keyword": "詐欺" },
