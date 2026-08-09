@@ -12,7 +12,19 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03"
+          ]
+        },
+        {
+          "date": "2026-07-22",
+          "title": "創業110周年記念キャンペーン実施のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.07.22-campaign110-2027.03.31.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-10"
           ]
         },
         {
@@ -23,6 +35,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27"
           ]
@@ -35,6 +48,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27"
           ]
@@ -47,6 +61,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -76,6 +91,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -317,6 +333,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03"
           ]
         },
@@ -398,8 +415,20 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27"
+          ]
+        },
+        {
+          "date": "2026-07-21",
+          "title": "「cloverVisa」ショッピング（分割払い・リボルビング払い）利用手数料率改定のご案内",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260721_076689.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-10"
           ]
         },
         {
@@ -410,6 +439,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20"
@@ -423,6 +453,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -437,10 +468,22 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
             "2026-07-13"
+          ]
+        },
+        {
+          "date": "2026-06-29",
+          "title": "振込手続きにかかわる「振込組戻手数料」の申受けについて",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260629_076592.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-10"
           ]
         },
         {
@@ -545,6 +588,28 @@
       "name": "十勝信用組合",
       "items": [
         {
+          "date": "2026-08-06",
+          "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance03.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-10"
+          ]
+        },
+        {
+          "date": "2026-08-03",
+          "title": "預金金利の引き上げについて",
+          "url": "https://www.tokachishinkumi.com/common/pdf/20260803_kinri.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-10"
+          ]
+        },
+        {
           "date": "2026-08-01",
           "title": "今月のローン金利",
           "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
@@ -552,6 +617,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -597,6 +663,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20"
@@ -610,6 +677,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -827,6 +895,17 @@
       "name": "JAおとふけ",
       "items": [
         {
+          "date": "2026-08-03",
+          "title": "金利改定のご案内（貯金・貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/13045/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-10"
+          ]
+        },
+        {
           "date": "2026-07-13",
           "title": "第1スタンド日曜日営業のお知らせ",
           "url": "https://www.ja-otofuke.jp/hokurennews/13006/",
@@ -834,6 +913,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20"
@@ -859,6 +939,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -984,6 +1065,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -1009,6 +1091,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27",
             "2026-07-20",
@@ -1200,6 +1283,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-10",
             "2026-08-03",
             "2026-07-27"
           ]
