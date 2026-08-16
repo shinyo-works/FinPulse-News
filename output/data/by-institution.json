@@ -12,6 +12,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03"
           ]
@@ -24,6 +25,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10"
           ]
         },
@@ -35,6 +37,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27"
@@ -48,6 +51,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27"
@@ -61,6 +65,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -91,6 +96,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -333,6 +339,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03"
           ]
@@ -408,6 +415,17 @@
       "name": "北洋銀行",
       "items": [
         {
+          "date": "2026-08-10",
+          "title": "「投資信託・ファンドラップ 資産づくり応援キャンペーン」を実施します",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260810_076802.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-17"
+          ]
+        },
+        {
           "date": "2026-07-24",
           "title": "各種預金規定改定のお知らせ",
           "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260724_076734.pdf",
@@ -415,6 +433,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27"
@@ -428,6 +447,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10"
           ]
         },
@@ -439,6 +459,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -453,6 +474,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -468,6 +490,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -483,6 +506,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10"
           ]
         },
@@ -588,6 +612,17 @@
       "name": "十勝信用組合",
       "items": [
         {
+          "date": "2026-08-10",
+          "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance04.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-17"
+          ]
+        },
+        {
           "date": "2026-08-06",
           "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
           "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance03.html",
@@ -606,6 +641,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10"
           ]
         },
@@ -617,6 +653,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -663,6 +700,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -895,6 +933,28 @@
       "name": "JAおとふけ",
       "items": [
         {
+          "date": "2026-08-11",
+          "title": "【イベント】ウェルカムキャンペーンのお知らせ",
+          "url": "https://www.ja-otofuke.jp/2023/13065/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-17"
+          ]
+        },
+        {
+          "date": "2026-08-10",
+          "title": "金利改定のご案内（貯金）",
+          "url": "https://www.ja-otofuke.jp/2023/13055/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-17"
+          ]
+        },
+        {
           "date": "2026-08-03",
           "title": "金利改定のご案内（貯金・貸付金）",
           "url": "https://www.ja-otofuke.jp/2023/13045/",
@@ -902,6 +962,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10"
           ]
         },
@@ -913,6 +974,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -939,6 +1001,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -1065,6 +1128,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -1091,6 +1155,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27",
@@ -1276,6 +1341,17 @@
       "name": "JA木野",
       "items": [
         {
+          "date": "2026-08-10",
+          "title": "2026.08.10JAバンク/貯める貯金金利の引き上げについて",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/08/jakino_info_20260810.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-17"
+          ]
+        },
+        {
           "date": "2026-07-23",
           "title": "2026.07.23JAバンク/借りるJA木野住宅ローン借換キャンペーン実施中！",
           "url": "https://ja-kino.com/wp-content/uploads/2026/07/jakino_info_20260723.pdf",
@@ -1283,6 +1359,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-17",
             "2026-08-10",
             "2026-08-03",
             "2026-07-27"
