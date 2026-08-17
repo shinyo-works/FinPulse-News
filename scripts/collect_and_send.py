@@ -34,6 +34,12 @@ from bs4 import BeautifulSoup
 import anthropic
 
 try:
+    # requests の apparent_encoding と同じ判定実装（requestsの必須依存・lockでハッシュ固定済み）
+    import charset_normalizer as _charset_detector
+except ImportError:  # chardet 構成の requests 向けフォールバック
+    import chardet as _charset_detector
+
+try:
     from .emailer import send_resend_email
 except ImportError:
     from emailer import send_resend_email
@@ -48,8 +54,7 @@ INSTITUTION_WINDOW_MONTHS = 24
 DEFAULT_STAR_KEYWORDS = ("金利", "キャンペーン")
 MAX_HTML_BYTES = 5 * 1024 * 1024
 MAX_XML_BYTES = 5 * 1024 * 1024
-VIEWER_READY_MARKER = Path("output") / "viewer-json-ready.txt"
-VALID_SCRAPERS = {"programmatic", "hokuyo_xml"}
+VIEWER_READY_MARKER_NAME = "viewer-json-ready.txt"
 FAILED_STATUSES = {"fetch_failed", "parse_failed", "extract_failed"}
 
 
@@ -76,6 +81,11 @@ class InstitutionResult:
 def now_jst():
     """JST基準の現在時刻（tz-aware）"""
     return datetime.now(JST)
+
+
+def viewer_ready_marker_path(data_dir="output/data"):
+    """JSON三点セットの成功マーカーのパス。unlink側と作成側で同じ導出を使う。"""
+    return Path(data_dir).parent / VIEWER_READY_MARKER_NAME
 
 
 def validate_config(config):
@@ -175,8 +185,22 @@ def read_limited_response(response, *, max_bytes, allowed_content_types, url):
     return b"".join(chunks)
 
 
+def decode_html(content, encoding=None):
+    """取得したbytesを文字列へデコードする。
+    優先順は config の encoding 指定 → 実体からの自動判定 → utf-8。
+    HTTPヘッダ宣言より実体判定を優先するのは、従来の apparent_encoding 既定
+    （北洋の cp932 文字化け回避の経緯）を維持するため。"""
+    if not encoding:
+        detected = _charset_detector.detect(content) or {}
+        encoding = detected.get("encoding") or "utf-8"
+    try:
+        return str(content, encoding, errors="replace")
+    except (LookupError, TypeError):
+        return str(content, errors="replace")
+
+
 def fetch_page(url, encoding=None):
-    """HTMLページを取得"""
+    """HTMLページを取得してデコードする"""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
         with requests.get(url, headers=headers, timeout=30, stream=True) as resp:
@@ -186,10 +210,7 @@ def fetch_page(url, encoding=None):
                 allowed_content_types={"text/html", "application/xhtml+xml"},
                 url=url,
             )
-            resp._content = content
-            resp._content_consumed = True
-            resp.encoding = encoding if encoding else (resp.apparent_encoding or "utf-8")
-            return resp.text
+        return decode_html(content, encoding)
     except Exception as e:
         print(f"  取得失敗 ({url}): {e}")
         if isinstance(e, FetchError):
@@ -514,6 +535,61 @@ def scrape_hokuyo_xml(base_url):
     return items
 
 
+def _scrape_programmatic_institution(institution, url):
+    html = fetch_page(url, encoding=institution.get("encoding"))
+    return scrape_news_programmatic(html, url)
+
+
+def _scrape_hokuyo_institution(institution, url):
+    del institution
+    return scrape_hokuyo_xml(url)
+
+
+# スクレイパーの登録簿。設定検証（VALID_SCRAPERS）とディスパッチが自動で揃うよう、
+# 新方式を追加する場合はこの辞書へ1エントリ足すだけにする。
+SCRAPERS = {
+    "programmatic": _scrape_programmatic_institution,
+    "hokuyo_xml": _scrape_hokuyo_institution,
+}
+VALID_SCRAPERS = set(SCRAPERS)
+
+
+def sanitize_items(items, source_name):
+    """収集直後の外部由来アイテムを検証し、不正なものは項目単位で落とす入口防御。
+    1件の不正が下流のJSON検証（validate_report_document）でレポート全体を
+    失敗させないため、URL・日付は不正部分だけ空欄化して項目自体は残す。
+    凍結中のClaude経路には適用しない（再有効化時の一括堅牢化でここへ合流させる）。"""
+    cleaned = []
+    dropped = 0
+    for item in items if isinstance(items, list) else []:
+        if not isinstance(item, dict):
+            dropped += 1
+            continue
+        title = item.get("title")
+        if not isinstance(title, str) or not title.strip():
+            dropped += 1
+            continue
+        entry = dict(item)
+        entry["title"] = title.strip()
+
+        item_url = entry.get("url", "")
+        if item_url:
+            parsed = urlparse(item_url) if isinstance(item_url, str) else None
+            if not parsed or parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                print(f"  不正なURLを空欄化: {item_url!r}（{source_name}）")
+                entry["url"] = ""
+
+        date = entry.get("date", "")
+        if date and (not isinstance(date, str) or parse_ymd(date) is None):
+            print(f"  不正な日付を空欄化: {date!r}（{source_name}）")
+            entry["date"] = ""
+
+        cleaned.append(entry)
+    if dropped:
+        print(f"  不正な項目を除外: {dropped}件（{source_name}）")
+    return cleaned
+
+
 def extract_news_with_claude(client, name, url, html, lookback_days):
     """Claude APIでHTMLからニュース一覧を抽出（複雑サイト用）"""
     cutoff_note = f"過去{lookback_days}日以内の記事のみ抽出してください。" if lookback_days else "すべての記事を抽出してください。"
@@ -552,22 +628,16 @@ HTML:
 
 
 def filter_by_lookback(items, lookback_days):
-    """lookback_days日以内の記事のみ通過（0=全件）"""
+    """lookback_days日以内の記事のみ通過（0=全件）。
+    日付が空・不正な項目はfail-openで残す（既存仕様・テストで固定）。"""
     if not lookback_days:
         return items
     cutoff = (now_jst() - timedelta(days=lookback_days)).date()
-    result = []
-    for item in items:
-        date_str = item.get("date", "")
-        if not date_str:
-            result.append(item)
-            continue
-        try:
-            if datetime.strptime(date_str, "%Y-%m-%d").date() >= cutoff:
-                result.append(item)
-        except ValueError:
-            result.append(item)
-    return result
+    return [
+        item
+        for item in items
+        if (item_date := parse_ymd(item.get("date", ""))) is None or item_date >= cutoff
+    ]
 
 
 def get_fallback_item(passed_all, lookback_days):
@@ -575,16 +645,11 @@ def get_fallback_item(passed_all, lookback_days):
     if not lookback_days:
         return None
     cutoff = (now_jst() - timedelta(days=lookback_days)).date()
-    older = []
-    for item in passed_all:
-        date_str = item.get("date", "")
-        if not date_str:
-            continue
-        try:
-            if datetime.strptime(date_str, "%Y-%m-%d").date() < cutoff:
-                older.append(item)
-        except ValueError:
-            pass
+    older = [
+        item
+        for item in passed_all
+        if (item_date := parse_ymd(item.get("date", ""))) is not None and item_date < cutoff
+    ]
     if not older:
         return None
     best = max(older, key=lambda x: x["date"])
@@ -650,10 +715,10 @@ def format_report(results, today, lookback_days):
             lines.append("| 日付 | タイトル | URL |")
             lines.append("|---|---|---|")
             for item in result.passed:
-                star = " ⭐金利・キャンペーン" if item.get("star") else ""
-                note = " ※1ヵ月超・最新" if item.get("fallback") else ""
+                star = f" {ANNOTATION_BY_FLAG['star']}" if item.get("star") else ""
+                note = f" {ANNOTATION_BY_FLAG['fallback']}" if item.get("fallback") else ""
                 if item.get("date_inferred"):
-                    note += " ※当月分（日付はページに記載なし・当月初で補完）"
+                    note += f" {ANNOTATION_BY_FLAG['date_inferred']}"
                 lines.append(f"| {item.get('date','')} | {item['title']}{star}{note} | {item.get('url','')} |")
         else:
             lines.append("（該当なし）")
@@ -683,11 +748,15 @@ def format_report(results, today, lookback_days):
 
 
 # Markdown表示用の注記。JSONでは文字列ではなく真偽値のフラグとして保持する。
-_TITLE_ANNOTATIONS = [
-    "⭐金利・キャンペーン",
-    "※1ヵ月超・最新",
-    "※当月分（日付はページに記載なし・当月初で補完）",
-]
+# 付与（format_report）と除去（clean_report_title）の唯一の対応表。
+# 値を1文字でも変えると既存Markdown・by-institution.json の重複除去キーと
+# ズレるため、参照の追加はよいが値は変更しないこと。
+ANNOTATION_BY_FLAG = {
+    "star": "⭐金利・キャンペーン",
+    "fallback": "※1ヵ月超・最新",
+    "date_inferred": "※当月分（日付はページに記載なし・当月初で補完）",
+}
+_TITLE_ANNOTATIONS = list(ANNOTATION_BY_FLAG.values())
 
 
 def clean_report_title(title):
@@ -853,7 +922,7 @@ def write_json_viewer_data(
     """三点セットを一時領域で全検証し、成功後だけ正本へ反映する。"""
     data_path = Path(data_dir)
     data_path.mkdir(parents=True, exist_ok=True)
-    marker_path = data_path.parent / "viewer-json-ready.txt"
+    marker_path = viewer_ready_marker_path(data_dir)
     marker_path.unlink(missing_ok=True)
 
     report_data = build_report_data(results, today, lookback_days)
@@ -970,11 +1039,7 @@ def collect_institution(institution, lookback_days, star_keywords, claude_client
             )
             passed, excluded = apply_filters(items, institution, star_keywords)
         else:
-            if scraper == "hokuyo_xml":
-                items = scrape_hokuyo_xml(url)
-            else:
-                html = fetch_page(url, encoding=institution.get("encoding"))
-                items = scrape_news_programmatic(html, url)
+            items = sanitize_items(SCRAPERS[scraper](institution, url), name)
             passed_all, excluded = apply_filters(items, institution, star_keywords)
             passed = filter_by_lookback(passed_all, lookback_days)
             if not passed:
@@ -1028,7 +1093,7 @@ def run_collection(config, today):
     ]
 
     print(f"=== 金融機関新着情報収集 ({today} / 過去{lookback_days}日) ===")
-    VIEWER_READY_MARKER.unlink(missing_ok=True)
+    viewer_ready_marker_path().unlink(missing_ok=True)
 
     claude_client = None  # use_claude機関がある時だけ遅延生成（現configでは未使用）
     results = []

@@ -873,9 +873,13 @@
     }
 
     function buildInstitutionFilters(institutions) {
-      state.selectedInstitutions = new Set(institutions.map((item) => item.name));
+      // 日付切替時も前回の絞り込みを引き継ぐ（新レポートに存在する機関との積集合）。
+      // 初回表示や、引き継げる機関が1つも残らない場合は全選択に戻す。
+      const names = institutions.map((item) => item.name);
+      const kept = names.filter((name) => state.selectedInstitutions.has(name));
+      state.selectedInstitutions = new Set(kept.length ? kept : names);
       elements.institutionFilters.innerHTML = institutions.map((institution) => `
-        <label class="filter-option"><input type="checkbox" value="${escapeHtml(institution.name)}" checked> ${escapeHtml(institution.name)}</label>`).join("");
+        <label class="filter-option"><input type="checkbox" value="${escapeHtml(institution.name)}" ${state.selectedInstitutions.has(institution.name) ? "checked" : ""}> ${escapeHtml(institution.name)}</label>`).join("");
       updateFilterCount();
     }
 

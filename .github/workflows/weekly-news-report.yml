@@ -92,4 +92,17 @@ jobs:
           rm -f output/viewer-json-ready.txt
 
           git diff --staged --quiet || git commit -m "[自動] 金融機関新着情報レポート $(TZ='Asia/Tokyo' date '+%Y-%m-%d')"
-          git push origin main
+
+          # 別リポジトリ（金利調査ツール）の自動pushと同日に走るため、
+          # 競合したらリモートを取り込み直して再pushする（最大3回）。
+          # commit 済みの状態で rebase するため成果物は巻き戻らない。
+          # マーカーなしで output/data/ が未ステージのまま残る場合に備え autostash を使う。
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              exit 0
+            fi
+            echo "push失敗（${attempt}回目）。リモートの変更を取り込んで再試行します。"
+            git pull --rebase --autostash origin main || exit 1
+          done
+          echo "pushの再試行がすべて失敗しました。"
+          exit 1

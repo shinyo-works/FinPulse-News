@@ -31,6 +31,11 @@ class WorkflowSecurityTest(unittest.TestCase):
     def test_unused_claude_secret_is_not_exposed(self):
         self.assertNotIn("ANTHROPIC_API_KEY", self.workflow)
 
+    def test_publish_push_retries_with_rebase(self):
+        # 別リポジトリの自動pushとの競合時に、取り込み直して再pushするループがあること
+        self.assertIn("git pull --rebase --autostash origin main", self.workflow)
+        self.assertRegex(self.workflow, r"for attempt in 1 2 3[\s\S]*?git push origin main")
+
     def test_dependencies_require_lockfile_hashes(self):
         self.assertIn("--require-hashes -r requirements.lock", self.workflow)
         lock_text = (self.repository_root / "requirements.lock").read_text(

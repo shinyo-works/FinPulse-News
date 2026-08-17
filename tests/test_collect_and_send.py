@@ -199,6 +199,51 @@ class DateExtractionTest(unittest.TestCase):
         )
 
 
+class DecodeHtmlTest(unittest.TestCase):
+    def test_explicit_encoding_decodes_shift_jis(self):
+        content = "<html><body>住宅ローン金利のお知らせ</body></html>".encode("cp932")
+        self.assertIn("住宅ローン金利のお知らせ", collector.decode_html(content, "cp932"))
+
+    def test_auto_detection_decodes_shift_jis_without_mojibake(self):
+        # encoding 未指定時は実体からの自動判定（従来の apparent_encoding 相当）で復元できること
+        content = ("<html><head><title>北洋銀行</title></head><body>"
+                   + "住宅ローン金利とキャンペーンのお知らせ。振込手数料の改定について。" * 20
+                   + "</body></html>").encode("cp932")
+        decoded = collector.decode_html(content)
+        self.assertIn("住宅ローン金利", decoded)
+        self.assertNotIn("�", decoded)
+
+    def test_unknown_encoding_falls_back_without_error(self):
+        content = "<html>fallback</html>".encode("utf-8")
+        self.assertIn("fallback", collector.decode_html(content, "no-such-codec"))
+
+
+class SanitizeItemsTest(unittest.TestCase):
+    def test_drops_invalid_items_and_blanks_bad_fields(self):
+        items = [
+            "文字列は項目ではない",
+            {"title": "  ", "url": "https://example.com/1"},
+            {"title": "正常な記事", "url": "https://example.com/2", "date": "2026-08-01"},
+            {"title": "URLが不正", "url": "javascript:alert(1)", "date": "2026-08-01"},
+            {"title": "日付が不正", "url": "https://example.com/3", "date": "1234-56-78"},
+        ]
+
+        cleaned = collector.sanitize_items(items, "テスト銀行")
+
+        self.assertEqual(
+            ["正常な記事", "URLが不正", "日付が不正"],
+            [item["title"] for item in cleaned],
+        )
+        self.assertEqual("", cleaned[1]["url"])
+        self.assertEqual("", cleaned[2]["date"])
+        self.assertEqual("https://example.com/2", cleaned[0]["url"])
+        self.assertEqual("2026-08-01", cleaned[0]["date"])
+
+    def test_non_list_input_returns_empty(self):
+        self.assertEqual([], collector.sanitize_items(None, "テスト銀行"))
+        self.assertEqual([], collector.sanitize_items({"title": "dict"}, "テスト銀行"))
+
+
 class FilteringTest(unittest.TestCase):
     def test_include_exclude_unless_and_star_rules(self):
         institution = minimal_config()["institutions"][0]
@@ -215,6 +260,27 @@ class FilteringTest(unittest.TestCase):
         self.assertTrue(passed[0]["star"])
         self.assertEqual("規定", excluded[0]["exclude_keyword"])
         self.assertEqual(2, len(excluded))
+
+    def test_title_annotations_roundtrip(self):
+        # format_report が付けた注記を clean_report_title が正確に剥がせること
+        # （ANNOTATION_BY_FLAG が付与・除去の唯一の対応表であることの検査）
+        item = {
+            "date": "2026-08-01",
+            "title": "住宅ローン金利のお知らせ",
+            "url": "https://example.com/1",
+            "star": True,
+            "fallback": True,
+            "date_inferred": True,
+        }
+        result = collector.InstitutionResult("テスト銀行", [item], [], "プログラム")
+
+        report = collector.format_report([result], "2026-08-01", 30)
+
+        line = next(l for l in report.splitlines() if "住宅ローン金利のお知らせ" in l)
+        for annotation in collector.ANNOTATION_BY_FLAG.values():
+            self.assertIn(annotation, line)
+        title_cell = line.split("|")[2].strip()
+        self.assertEqual("住宅ローン金利のお知らせ", collector.clean_report_title(title_cell))
 
     def test_lookback_keeps_cutoff_and_unknown_date(self):
         items = [
