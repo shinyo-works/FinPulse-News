@@ -1233,6 +1233,14 @@
       "history": [
         {
           "rate": 3.325,
+          "observed_on": "2026-08-17"
+        },
+        {
+          "rate": 3.325,
+          "observed_on": "2026-08-10"
+        },
+        {
+          "rate": 3.325,
           "observed_on": "2026-08-03"
         },
         {
@@ -1277,6 +1285,14 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.2,
+          "observed_on": "2026-08-17"
+        },
+        {
+          "rate": 1.2,
+          "observed_on": "2026-08-10"
+        },
         {
           "rate": 1.15,
           "observed_on": "2026-08-03"
@@ -1324,6 +1340,14 @@
       "rate_type": "fixed_5y",
       "history": [
         {
+          "rate": 2.2,
+          "observed_on": "2026-08-17"
+        },
+        {
+          "rate": 2.2,
+          "observed_on": "2026-08-10"
+        },
+        {
           "rate": 2.05,
           "observed_on": "2026-08-03"
         },
@@ -1369,6 +1393,14 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.6,
+          "observed_on": "2026-08-17"
+        },
+        {
+          "rate": 2.6,
+          "observed_on": "2026-08-10"
+        },
         {
           "rate": 2.55,
           "observed_on": "2026-08-03"
