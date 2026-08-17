@@ -261,6 +261,25 @@ class UpdateRateHistoryTest(unittest.TestCase):
         self.assertEqual(["2026-08-08", "2026-08-01"], history["observation_dates"])
         self.assertTrue(history["rows"][0]["is_legacy"])
 
+    def test_rebuild_history_accepts_same_path_twice(self):
+        # 日付・パスが同値の入力でも、sorted が第3要素（dict）の比較に到達して
+        # TypeError にならないこと（同日再投入は冪等）
+        report = {
+            "survey_date": "2026/08/01",
+            "loan_table": [{
+                "bank_id": "test-bank",
+                "bank_name": "テスト銀行",
+                "loan_variable": 1.0,
+            }],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            path.write_text(json.dumps(report, ensure_ascii=False), encoding="utf-8")
+
+            history = rebuild_history([path, path])
+
+        self.assertEqual(["2026-08-01"], history["observation_dates"])
+
 
 if __name__ == "__main__":
     unittest.main()

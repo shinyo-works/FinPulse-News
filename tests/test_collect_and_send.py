@@ -177,6 +177,28 @@ class CollectionStateTest(unittest.TestCase):
                 os.chdir(previous_cwd)
 
 
+class DateExtractionTest(unittest.TestCase):
+    def test_rejects_phone_number_and_impossible_dates(self):
+        self.assertEqual("", collector.extract_date_from_text("お問い合わせ: 0155-24-1234"))
+        self.assertEqual("", collector.extract_date_from_text("2026.13.01 のお知らせ"))
+        self.assertEqual("", collector.extract_date_from_text("2026年2月30日"))
+
+    def test_skips_invalid_candidate_and_finds_real_date(self):
+        text = "TEL 0155-24-1234 / 2026年8月1日更新"
+        self.assertEqual("2026-08-01", collector.extract_date_from_text(text))
+        self.assertEqual("2026-08-01", collector.extract_date_from_text("2026.8.1"))
+
+    def test_url_extraction_accepts_only_real_dates(self):
+        self.assertEqual(
+            "2026-05-28",
+            collector.extract_date_from_url("https://example.com/detail/20260528_news.html"),
+        )
+        self.assertEqual(
+            "",
+            collector.extract_date_from_url("https://example.com/detail/12345678_news.html"),
+        )
+
+
 class FilteringTest(unittest.TestCase):
     def test_include_exclude_unless_and_star_rules(self):
         institution = minimal_config()["institutions"][0]

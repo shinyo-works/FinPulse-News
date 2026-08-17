@@ -76,7 +76,8 @@ def rebuild_history(report_paths: list[Path]) -> dict:
         "observation_dates": [],
         "rows": [],
     }
-    for survey_date, _path, report in sorted(reports):
+    # key を明示し、日付・パスが同値でも第3要素（dict）の比較に到達しないようにする
+    for survey_date, _path, report in sorted(reports, key=lambda entry: (entry[0], entry[1])):
         update_history(
             history,
             report,

@@ -21,6 +21,21 @@ class FindReportTest(unittest.TestCase):
             self.assertEqual(report.resolve(), path)
             self.assertEqual("2026-08-01", date)
 
+    def test_latest_selection_ignores_non_date_filenames(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "output"
+            output.mkdir()
+            (output / "2026-08-01.md").write_text("real", encoding="utf-8")
+            # glob の ? は任意1文字にマッチするため、数字でない偽名を混入させる
+            (output / "abcd-ef-gh.md").write_text("fake", encoding="utf-8")
+
+            with mock.patch.object(send_report, "__file__", str(root / "send_report.py")):
+                path, date = send_report.find_report()
+
+            self.assertEqual("2026-08-01", date)
+            self.assertEqual("2026-08-01.md", path.name)
+
     def test_rejects_traversal_and_invalid_dates(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

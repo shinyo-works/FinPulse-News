@@ -197,17 +197,33 @@ def fetch_page(url, encoding=None):
         raise FetchError(f"ページ取得に失敗しました: {url}") from e
 
 
+# 実在しない日付候補（電話番号の誤認など）は破棄する。同じ値を何度も出力しないための記録。
+_REJECTED_DATE_CANDIDATES = set()
+
+
+def _log_rejected_date(candidate, source):
+    """破棄した日付候補を、同一値につき1回だけログへ残す（黙殺防止）。"""
+    if candidate not in _REJECTED_DATE_CANDIDATES:
+        _REJECTED_DATE_CANDIDATES.add(candidate)
+        print(f"  日付候補を破棄（実在しない日付）: {candidate}（{source}）")
+
+
 def extract_date_from_text(text):
-    """テキストから日付（YYYY-MM-DD）を抽出"""
+    """テキストから日付（YYYY-MM-DD）を抽出。実在する日付だけを返す。
+    電話番号「0155-24-1234」等がパターンに一致しても、実在日でなければ破棄して
+    次の候補を探す。不正日付を通すと下流のJSON検証（validate_optional_date）が
+    レポート全体を失敗させるため、ここで止める。"""
     patterns = [
         r'(\d{4})[./\-](\d{1,2})[./\-](\d{1,2})',
         r'(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日',
     ]
     for pat in patterns:
-        m = re.search(pat, text)
-        if m:
+        for m in re.finditer(pat, text):
             y, mo, d = m.group(1), m.group(2), m.group(3)
-            return f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+            candidate = f"{int(y):04d}-{int(mo):02d}-{int(d):02d}"
+            if parse_ymd(candidate):
+                return candidate
+            _log_rejected_date(candidate, "テキスト")
     return ""
 
 
@@ -372,11 +388,15 @@ def is_recent_excluded(item, today):
 
 
 def extract_date_from_url(url):
-    """URL 内の YYYYMMDD パターンから日付を抽出（例: /detail/20260528_xxx.html）"""
+    """URL 内の YYYYMMDD パターンから日付を抽出（例: /detail/20260528_xxx.html）。
+    記事IDなどの8桁数字を日付と誤認しないよう、実在日だけを返す。"""
     m = re.search(r'/(\d{8})[_/]', url)
     if m:
         d = m.group(1)
-        return f"{d[:4]}-{d[4:6]}-{d[6:8]}"
+        candidate = f"{d[:4]}-{d[4:6]}-{d[6:8]}"
+        if parse_ymd(candidate):
+            return candidate
+        _log_rejected_date(candidate, url)
     return ""
 
 

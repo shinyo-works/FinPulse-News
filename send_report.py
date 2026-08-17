@@ -6,6 +6,7 @@ send_report.py — 最新の収集レポートをResend経由でメール送信
   python send_report.py 2026-05-17   # 日付指定
 """
 
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -35,7 +36,12 @@ def find_report(date_str=None):
             print(f"エラー: {path} が見つかりません")
             return None, None
         return path, normalized_date
-    files = sorted(output_dir.glob("????-??-??.md"))
+    # glob の ? は任意1文字のため、数字のみの日付名に絞る（list_report_dates と同じ流儀）
+    files = sorted(
+        path
+        for path in output_dir.glob("????-??-??.md")
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", path.stem)
+    )
     if not files:
         print("エラー: output/ にレポートファイルがありません")
         return None, None

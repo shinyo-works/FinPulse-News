@@ -12,8 +12,9 @@
 |---|---|---|
 | Webサイト巡回・取得 | Claude in Chrome MCP（接続済み） | ✅ Phase 1で使用 |
 | メール送信 | Resend API（`scripts/collect_and_send.py`） | ✅ Phase 2で使用 |
-| スクレイピング自動化 | Claude ルーティン（月曜 05:00 JST） | ✅ Phase 3で使用 |
+| スクレイピング自動化 | GitHub Actions（月曜 05:00 JST・収集も実行） | ✅ Phase 3で使用 |
 | メール自動送信 | GitHub Actions（週次・手動実行） | ✅ Phase 3で使用 |
+| Claude ルーティン | 旧構成（repository_dispatch 方式） | 廃止（2026-05-26 に Actions へ移行） |
 | LINE通知 | LINE Notify REST API（要設定） | Phase 3候補 |
 | データ保存 | Markdown ファイル | Phase 1から使用 |
 

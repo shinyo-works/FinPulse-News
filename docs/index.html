@@ -805,6 +805,13 @@
       return `<div class="empty-state"><strong>${escapeHtml(title)}</strong>${escapeHtml(message)}</div>`;
     }
 
+    function passedEmptyMessage(excludedCount) {
+      // 除外トグルの状態と除外件数に合わせ、実際に表示されている内容と矛盾しない文言を返す
+      if (!excludedCount) return "対象期間内の記事はありません。";
+      if (state.showExcluded) return "除外情報のみ表示しています。";
+      return "除外された記事は「除外も表示」で確認できます。";
+    }
+
     function renderDateMode() {
       const report = state.report;
       if (!report) return;
@@ -825,7 +832,7 @@
               <h2 class="section-title">${escapeHtml(institution.name)}</h2>
               <span class="count">${passed.length}件</span>
             </div>
-            ${passed.length ? articleTable(passed) : emptyState("通過記事はありません", "除外情報のみ表示しています。")}
+            ${passed.length ? articleTable(passed) : emptyState("通過記事はありません", passedEmptyMessage(excluded.length))}
             ${state.showExcluded && excluded.length ? excludedTable(excluded) : ""}
           </section>`);
       }
