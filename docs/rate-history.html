@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="帯広エリアの金融機関の住宅ローン金利を、種別ごとに過去まで遡れる金利履歴ビューアー">
-  <title>金利履歴ビューアー｜FinPulse</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b1f33'/><circle cx='16' cy='16' r='7' fill='%2355d6c9'/></svg>">
+  <title>FinPulse News｜金利履歴</title>
   <style>
     :root {
       --navy-950: #0b1f33;
@@ -203,8 +204,9 @@
     tbody td.col-nochange { border-bottom: 1px solid #eef2f4; }
     tbody tr:hover td.col-nochange { background: #f2f8f9; }
     .nochange-label { display: block; color: #8595a1; font-size: 0.65rem; font-weight: 800; }
+    /* 読み飛ばしてよい畳み列だが、読もうとしたときに読める濃さは確保する */
     .nochange-range {
-      display: block; margin-top: 2px; color: #a3b3bd;
+      display: block; margin-top: 2px; color: var(--muted);
       font-size: 0.58rem; font-weight: 650; font-variant-numeric: tabular-nums;
     }
 
@@ -274,18 +276,24 @@
     }
     .empty-state strong, .loading-state strong { display: block; margin-bottom: 5px; color: var(--navy-900); font-size: 1rem; }
 
+    /* 表は左が最新の逆時系列のため、この説明が切れると誤読につながる。
+       狭い画面では全文を諦め、読み方だけを必ず表示する。 */
+    .subtitle-short { display: none; }
+
     @media (max-width: 640px) {
       .col-bank { width: 112px; min-width: 112px; }
       .col-type { left: 112px; width: 50px; min-width: 50px; }
       thead th.col-type { left: 112px; }
       .site-header { gap: 10px; padding-inline: 10px; }
+      .subtitle-full { display: none; }
+      .subtitle-short { display: inline; }
     }
   </style>
 </head>
 <body>
   <header class="site-header">
     <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>金利履歴ビューアー</div>
-    <p id="subtitle">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。</p>
+    <p id="subtitle"><span class="subtitle-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。</span><span class="subtitle-short">左が最新、右が過去です。</span></p>
   </header>
 
   <div class="controls">
@@ -636,6 +644,15 @@
         el.filterPopover.classList.remove("open");
         el.filterButton.setAttribute("aria-expanded", "false");
       }
+    });
+
+    // キーボード操作でも閉じられるようにする（閉じたらボタンへフォーカスを戻す）
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (!el.filterPopover.classList.contains("open")) return;
+      el.filterPopover.classList.remove("open");
+      el.filterButton.setAttribute("aria-expanded", "false");
+      el.filterButton.focus();
     });
 
     async function initialize() {

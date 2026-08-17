@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="帯広エリアの金融機関新着情報を日付・機関別に閲覧するヴューアー">
+  <meta name="description" content="帯広エリアの金融機関新着情報を日付・機関別に閲覧するビューアー">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b1f33'/><circle cx='16' cy='16' r='7' fill='%2355d6c9'/></svg>">
   <title>FinPulse News｜金融機関新着情報</title>
   <style>
     :root {
@@ -513,6 +514,9 @@
     @media (max-width: 700px) {
       body { padding-top: 98px; }
 
+      /* PCは見出し右の1行表示。狭い画面では折り返さないと画面外へはみ出す */
+      .summary.date-summary { white-space: normal; }
+
       .mobile-tabs {
         position: fixed;
         inset: 44px 0 auto 0;
@@ -892,6 +896,7 @@
       const requestId = ++state.reportRequestId;
       state.mode = "date";
       state.selectedDate = date;
+      syncHash();
       elements.reportContent.innerHTML = '<div class="loading-state"><strong>レポートを読み込んでいます</strong>しばらくお待ちください。</div>';
       try {
         const response = await fetch(`${DATA_ROOT}/${date}.json`);
@@ -917,6 +922,7 @@
       state.selectedInstitution = name;
       elements.filterPopover.classList.remove("open");
       elements.filterButton.setAttribute("aria-expanded", "false");
+      syncHash();
       render();
       showMobilePane("content");
     }
@@ -926,6 +932,41 @@
       document.querySelectorAll(".mobile-tab").forEach((button) => {
         button.classList.toggle("active", button.dataset.pane === pane);
       });
+    }
+
+    // 復元用の初期ハッシュ。初期化の途中で syncHash に上書きされるため、起動時に控えておく。
+    const INITIAL_HASH = location.hash;
+
+    // 表示中のタブと選択内容をURLへ書き戻す。リロードやブックマークで同じ画面に戻れる。
+    // 履歴は増やさない（replaceState）。戻るボタンは従来どおりサイト外へ戻る。
+    function syncHash() {
+      let hash = "";
+      if (document.body.dataset.view === "rate") {
+        hash = "#rate";
+      } else if (state.mode === "institution" && state.selectedInstitution) {
+        hash = `#inst/${encodeURIComponent(state.selectedInstitution)}`;
+      } else if (state.mode === "date" && state.selectedDate) {
+        hash = `#date/${state.selectedDate}`;
+      }
+      if (hash && hash !== location.hash) {
+        history.replaceState(null, "", hash);
+      }
+    }
+
+    /** URLのハッシュを解釈する。読み取れない場合は null を返し、呼び出し側の既定動作へ委ねる。 */
+    function parseHash(raw = location.hash) {
+      if (raw === "#rate") return { view: "rate" };
+      const dateMatch = raw.match(/^#date\/(\d{4}-\d{2}-\d{2})$/);
+      if (dateMatch) return { view: "news", date: dateMatch[1] };
+      const instMatch = raw.match(/^#inst\/(.+)$/);
+      if (instMatch) {
+        try {
+          return { view: "news", institution: decodeURIComponent(instMatch[1]) };
+        } catch (_error) {
+          return null;  // 壊れたパーセントエンコードは無視する
+        }
+      }
+      return null;
     }
 
     async function initialize() {
@@ -948,7 +989,18 @@
       }
 
       renderNavigation();
-      if (state.manifest.reports.length) {
+
+      // URLで指定された選択を復元する。存在しない日付・機関名は既定動作へ落とす。
+      const requested = parseHash(INITIAL_HASH);
+      const wantsDate = requested?.date && state.manifest.reports.includes(requested.date);
+      const wantsInstitution = requested?.institution
+        && state.institutionIndex.institutions.some((item) => item.name === requested.institution);
+
+      if (wantsInstitution) {
+        selectInstitution(requested.institution);
+      } else if (wantsDate) {
+        await loadReport(requested.date);
+      } else if (state.manifest.reports.length) {
         await loadReport(state.manifest.reports[0]);
       } else if (state.institutionIndex.institutions.length) {
         selectInstitution(state.institutionIndex.institutions[0].name);
@@ -1005,11 +1057,22 @@
       }
     });
 
+    // キーボード操作でも閉じられるようにする（閉じたらボタンへフォーカスを戻す）
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (!elements.filterPopover.classList.contains("open")) return;
+      elements.filterPopover.classList.remove("open");
+      elements.filterButton.setAttribute("aria-expanded", "false");
+      elements.filterButton.focus();
+    });
+
     document.querySelectorAll(".mobile-tab").forEach((button) => {
       button.addEventListener("click", () => showMobilePane(button.dataset.pane));
     });
 
     const RATE_REPORT_SRC = "./rate-history.html";
+    const NEWS_TITLE = "FinPulse News｜金融機関新着情報";
+    const RATE_TITLE = "FinPulse News｜金利履歴";
     let rateLoaded = false;
 
     function switchView(view) {
@@ -1022,13 +1085,36 @@
         document.getElementById("rateFrame").src = RATE_REPORT_SRC;
         rateLoaded = true;
       }
+      document.title = view === "rate" ? RATE_TITLE : NEWS_TITLE;
+      syncHash();
     }
 
     document.querySelectorAll(".product-tab").forEach((button) => {
       button.addEventListener("click", () => switchView(button.dataset.view));
     });
 
-    initialize();
+    // アドレスバーのハッシュを手で書き換えた場合（ページは再読み込みされない）にも追従する。
+    // 自分の syncHash による書き換えは replaceState のため、このイベントは発火しない。
+    window.addEventListener("hashchange", () => {
+      const requested = parseHash();
+      if (!requested) return;
+      if (requested.view === "rate") {
+        switchView("rate");
+        return;
+      }
+      if (document.body.dataset.view !== "news") switchView("news");
+      if (requested.institution
+        && state.institutionIndex.institutions.some((item) => item.name === requested.institution)) {
+        selectInstitution(requested.institution);
+      } else if (requested.date && state.manifest.reports.includes(requested.date)) {
+        loadReport(requested.date);
+      }
+    });
+
+    // ニュース側の復元を終えてからタブを切り替える（金利タブのiframe遅延読み込みを保つ）
+    initialize().then(() => {
+      if (parseHash(INITIAL_HASH)?.view === "rate") switchView("rate");
+    });
   </script>
 </body>
 </html>
