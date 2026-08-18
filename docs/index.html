@@ -489,6 +489,8 @@
       gap: 6px;
       height: 44px;
       padding: 0 16px;
+      /* タブは縮めない方針のため、拡大表示ではみ出しても横スクロールを出さず切り取る */
+      overflow: hidden;
       background: var(--navy-950);
       border-bottom: 1px solid rgba(255, 255, 255, 0.09);
     }
@@ -513,12 +515,12 @@
       border-color: rgba(85, 214, 201, 0.38);
     }
 
-    /* 金利履歴の見出しと説明は、タブ行の右側に置く（画面の縦を使わない） */
+    /* サイト名・金利履歴の見出し・説明は、タブ行の右側に置く（画面の縦を使わない） */
     .tab-note {
       display: none;
       flex: 1 1 auto;
       min-width: 0;
-      align-items: baseline;
+      align-items: center;
       gap: 10px;
       margin: 0 0 0 6px;
       color: #a9c0ce;
@@ -528,11 +530,27 @@
       text-overflow: ellipsis;
     }
 
+    /* 縮み代が無いと省略記号が出ないため、自前の overflow を持たせる */
     .tab-note b {
-      flex: none;
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
       color: #eef7fa;
       font-weight: 750;
     }
+
+    /* サイト名は縮めない（.tab-note b より詳細度を上げて上書きする） */
+    .tab-note .tab-brand {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      gap: 8px;
+      overflow: visible;
+      font-size: 0.95rem;
+    }
+
+    .tab-brand .pulse-dot { flex: none; }
 
     .tab-note span {
       overflow: hidden;
@@ -614,8 +632,10 @@
       .nav-section { padding: 9px 12px 2px; }
       .brand-mark { font-size: 1rem; }
 
-      /* タブ行が狭いので、金利履歴の説明は短い版だけにする */
-      .tab-note .note-full { display: none; }
+      /* タブ行が狭いので、サイト名と短い説明だけ残す */
+      .tab-note .note-full,
+      .tab-note .note-heading { display: none; }
+      .tab-brand { font-size: 0.88rem; }
 
       .topbar { top: 98px; padding: 6px 10px; }
       .controls { gap: 5px; }
@@ -662,7 +682,7 @@
   <nav class="product-tabs" aria-label="表示するレポートの切替">
     <button class="product-tab active" type="button" data-view="news">新着ニュース</button>
     <button class="product-tab" type="button" data-view="rate">金利履歴</button>
-    <p class="tab-note"><b>金利履歴ビューアー</b><span><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
+    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
   </nav>
 
   <div id="newsView">

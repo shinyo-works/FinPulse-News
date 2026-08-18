@@ -42,6 +42,25 @@ class ViewerLayoutTest(unittest.TestCase):
         )
         self.assertIn('window.self !== window.top', self.rate_html)
 
+    def test_site_name_leads_the_rate_tab_note(self):
+        tabs = re.search(
+            r'<nav class="product-tabs".*?</nav>', self.html, re.DOTALL
+        ).group(0)
+
+        # サイト名 → 金利履歴ビューアー → 説明文 の順
+        self.assertLess(tabs.index("十勝金融機関News"), tabs.index("金利履歴ビューアー"))
+        self.assertLess(tabs.index("金利履歴ビューアー"), tabs.index("左が最新"))
+        # サイト名だけは縮めない（.tab-note b の flex を詳細度で上書きする）
+        self.assertRegex(
+            self.html,
+            r"\.tab-note\s+\.tab-brand\s*\{[^}]*flex:\s*none;",
+        )
+        # 狭い画面ではサイト名と短い説明だけ残す
+        self.assertRegex(
+            self.html,
+            r"\.tab-note\s+\.note-full,\s*\n\s*\.tab-note\s+\.note-heading\s*\{\s*display:\s*none;\s*\}",
+        )
+
     def test_panes_can_be_resized_and_the_width_persists(self):
         self.assertIn('id="paneResizer"', self.html)
         self.assertRegex(
