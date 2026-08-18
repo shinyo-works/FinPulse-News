@@ -280,6 +280,9 @@
        狭い画面では全文を諦め、読み方だけを必ず表示する。 */
     .subtitle-short { display: none; }
 
+    /* 親ページ（タブ表示）に埋め込まれているときは、見出しをタブ行の右側に出すので重複させない */
+    body.embedded .site-header { display: none; }
+
     @media (max-width: 640px) {
       .col-bank { width: 112px; min-width: 112px; }
       .col-type { left: 112px; width: 50px; min-width: 50px; }
@@ -327,6 +330,9 @@
 
   <script>
     "use strict";
+
+    // iframe 内（タブ表示）かどうか。単体で開いたときは従来どおり見出しを出す。
+    if (window.self !== window.top) document.body.classList.add("embedded");
 
     const DATA_URL = "./data/rate-history.json";
     const state = {

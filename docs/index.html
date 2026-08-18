@@ -25,6 +25,8 @@
       --danger-700: #a54234;
       --shadow: 0 10px 30px rgba(11, 31, 51, 0.08);
       --radius: 14px;
+      /* サイドバー幅の既定値。ドラッグで変更した値は .app-shell 側に直接書き込む。 */
+      --sidebar-width: 292px;
     }
 
     * { box-sizing: border-box; }
@@ -48,9 +50,29 @@
 
     .app-shell {
       display: grid;
-      grid-template-columns: 292px minmax(0, 1fr);
+      grid-template-columns: var(--sidebar-width) 6px minmax(0, 1fr);
       min-height: 100vh;
     }
+
+    /* 一覧ペインと記事ペインの境界。ドラッグ・矢印キーで幅を変えられる。 */
+    .pane-resizer {
+      position: sticky;
+      top: 44px;
+      height: calc(100vh - 44px);
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-right: 1px solid transparent;
+      cursor: col-resize;
+      touch-action: none;
+    }
+
+    .pane-resizer:hover,
+    .pane-resizer:focus-visible,
+    .pane-resizer.dragging { background: rgba(19, 132, 132, 0.28); outline: none; }
+
+    /* ドラッグ中はテキスト選択やiframeのhoverで操作が途切れないようにする */
+    body.resizing { cursor: col-resize; user-select: none; }
 
     .sidebar {
       position: sticky;
@@ -64,17 +86,14 @@
       border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .brand {
-      padding: 16px 20px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.11);
-    }
-
+    /* サイトの見出し。検索ボックスの真上（トップバー内）に置く。 */
     .brand-mark {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      margin: 0 0 4px;
-      font-size: 1.15rem;
+      gap: 9px;
+      margin: 0 0 5px;
+      color: var(--navy-950);
+      font-size: 1.08rem;
       font-weight: 750;
       letter-spacing: 0.02em;
     }
@@ -87,13 +106,7 @@
       box-shadow: 0 0 0 5px rgba(85, 214, 201, 0.15);
     }
 
-    .brand p {
-      margin: 0;
-      color: #a9c0ce;
-      font-size: 0.78rem;
-    }
-
-    .nav-section { padding: 10px 14px 2px; }
+    .nav-section { padding: 12px 14px 2px; }
 
     .nav-heading {
       margin: 0 10px 4px;
@@ -160,12 +173,15 @@
       backdrop-filter: blur(12px);
     }
 
+    .topbar-inner {
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
     .controls {
       display: flex;
       align-items: center;
       gap: 7px;
-      max-width: 1250px;
-      margin: 0 auto;
     }
 
     .search-wrap { position: relative; flex: 1 1 300px; }
@@ -467,6 +483,7 @@
     }
 
     .product-tab {
+      flex: none;
       padding: 6px 14px;
       color: #c8d9e2;
       background: transparent;
@@ -484,6 +501,34 @@
       background: rgba(85, 214, 201, 0.18);
       border-color: rgba(85, 214, 201, 0.38);
     }
+
+    /* 金利履歴の見出しと説明は、タブ行の右側に置く（画面の縦を使わない） */
+    .tab-note {
+      display: none;
+      flex: 1 1 auto;
+      min-width: 0;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 0 6px;
+      color: #a9c0ce;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tab-note b {
+      flex: none;
+      color: #eef7fa;
+      font-weight: 750;
+    }
+
+    .tab-note span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    body[data-view="rate"] .tab-note { display: flex; }
 
     /* 製品タブ44pxぶん全体を下げる */
     body { padding-top: 44px; }
@@ -506,9 +551,10 @@
     body[data-view="rate"] { padding-top: 44px !important; }
 
     @media (max-width: 920px) {
-      .app-shell { grid-template-columns: 245px minmax(0, 1fr); }
+      :root { --sidebar-width: 245px; }
       .controls { flex-wrap: wrap; }
       .search-wrap { flex-basis: 100%; }
+      .tab-note { font-size: 0.76rem; }
     }
 
     @media (max-width: 700px) {
@@ -541,6 +587,9 @@
 
       .app-shell { display: block; min-height: calc(100vh - 98px); }
 
+      /* 1画面1ペインのモバイルでは幅の調整は不要 */
+      .pane-resizer { display: none; }
+
       .sidebar {
         position: static;
         width: 100%;
@@ -551,8 +600,11 @@
       body[data-mobile-pane="content"] .sidebar { display: none; }
       body[data-mobile-pane="nav"] .main { display: none; }
 
-      .brand { padding: 14px 18px 11px; }
       .nav-section { padding: 9px 12px 2px; }
+      .brand-mark { font-size: 1rem; }
+
+      /* タブ行が狭いので、金利履歴の説明は短い版だけにする */
+      .tab-note .note-full { display: none; }
 
       .topbar { top: 98px; padding: 6px 10px; }
       .controls { gap: 5px; }
@@ -599,6 +651,7 @@
   <nav class="product-tabs" aria-label="表示するレポートの切替">
     <button class="product-tab active" type="button" data-view="news">新着ニュース</button>
     <button class="product-tab" type="button" data-view="rate">金利履歴</button>
+    <p class="tab-note"><b>金利履歴ビューアー</b><span><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
   </nav>
 
   <div id="newsView">
@@ -609,11 +662,6 @@
 
   <div class="app-shell">
     <aside class="sidebar" aria-label="レポート選択">
-      <div class="brand">
-        <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>FinPulse News</div>
-        <p>帯広エリア 金融機関レポート</p>
-      </div>
-
       <section class="nav-section">
         <h2 class="nav-heading">🏦 機関で見る</h2>
         <ul class="nav-list" id="institutionList"><li class="nav-button">読み込み中…</li></ul>
@@ -625,8 +673,13 @@
       </section>
     </aside>
 
+    <div class="pane-resizer" id="paneResizer" role="separator" aria-orientation="vertical"
+         aria-label="一覧ペインの幅を調整" tabindex="0"></div>
+
     <main class="main">
       <header class="topbar">
+        <div class="topbar-inner">
+        <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</div>
         <div class="controls">
           <label class="search-wrap">
             <span class="search-icon" aria-hidden="true">⌕</span>
@@ -648,6 +701,7 @@
             <input id="excludedToggle" type="checkbox">
             除外も表示
           </label>
+        </div>
         </div>
       </header>
 
@@ -1068,6 +1122,86 @@
 
     document.querySelectorAll(".mobile-tab").forEach((button) => {
       button.addEventListener("click", () => showMobilePane(button.dataset.pane));
+    });
+
+    // 一覧ペイン（左）と記事ペイン（右）の幅調整。ドラッグと矢印キーに対応し、
+    // 決めた幅は localStorage に残す。ダブルクリックで既定幅へ戻す。
+    const SIDEBAR_WIDTH_KEY = "finpulse.sidebarWidth";
+    const SIDEBAR_MIN = 180;
+    const SIDEBAR_MAX = 620;
+    const appShell = document.querySelector(".app-shell");
+    const paneResizer = document.getElementById("paneResizer");
+
+    function applySidebarWidth(width) {
+      // 画面が狭いときに右ペインが潰れないよう、上限は表示幅にも従わせる
+      const limit = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, window.innerWidth - 320));
+      const value = Math.round(Math.min(limit, Math.max(SIDEBAR_MIN, width)));
+      appShell.style.setProperty("--sidebar-width", `${value}px`);
+      paneResizer.setAttribute("aria-valuenow", String(value));
+      return value;
+    }
+
+    function storeSidebarWidth(width) {
+      try {
+        localStorage.setItem(SIDEBAR_WIDTH_KEY, String(width));
+      } catch (_error) {
+        // プライベートモード等で保存できなくても、その場の幅調整は使える
+      }
+    }
+
+    function resetSidebarWidth() {
+      appShell.style.removeProperty("--sidebar-width");
+      paneResizer.removeAttribute("aria-valuenow");
+      try {
+        localStorage.removeItem(SIDEBAR_WIDTH_KEY);
+      } catch (_error) { /* 保存できない環境では何もしない */ }
+    }
+
+    (function restoreSidebarWidth() {
+      let saved = null;
+      try {
+        saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
+      } catch (_error) { /* 読めなければ既定幅のまま */ }
+      const width = Number(saved);
+      if (Number.isFinite(width) && width > 0) applySidebarWidth(width);
+    })();
+
+    paneResizer.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      paneResizer.setPointerCapture(event.pointerId);
+      paneResizer.classList.add("dragging");
+      document.body.classList.add("resizing");
+    });
+
+    paneResizer.addEventListener("pointermove", (event) => {
+      if (!paneResizer.hasPointerCapture(event.pointerId)) return;
+      applySidebarWidth(event.clientX - appShell.getBoundingClientRect().left);
+    });
+
+    function endResize(event) {
+      if (!paneResizer.hasPointerCapture(event.pointerId)) return;
+      paneResizer.releasePointerCapture(event.pointerId);
+      paneResizer.classList.remove("dragging");
+      document.body.classList.remove("resizing");
+      const current = parseInt(appShell.style.getPropertyValue("--sidebar-width"), 10);
+      if (Number.isFinite(current)) storeSidebarWidth(current);
+    }
+
+    paneResizer.addEventListener("pointerup", endResize);
+    paneResizer.addEventListener("pointercancel", endResize);
+
+    paneResizer.addEventListener("dblclick", resetSidebarWidth);
+
+    paneResizer.addEventListener("keydown", (event) => {
+      const step = event.shiftKey ? 40 : 12;
+      let delta = 0;
+      if (event.key === "ArrowLeft") delta = -step;
+      else if (event.key === "ArrowRight") delta = step;
+      else if (event.key === "Home") { resetSidebarWidth(); event.preventDefault(); return; }
+      else return;
+      event.preventDefault();
+      storeSidebarWidth(applySidebarWidth(appShell.querySelector(".sidebar").getBoundingClientRect().width + delta));
     });
 
     const RATE_REPORT_SRC = "./rate-history.html";
