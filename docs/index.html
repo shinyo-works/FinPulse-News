@@ -1142,13 +1142,15 @@
     const SIDEBAR_MAX = 620;
     const appShell = document.querySelector(".app-shell");
     const paneResizer = document.getElementById("paneResizer");
+    // ユーザーが決めた幅そのもの。表示上はウィンドウ幅で切り詰めるが、
+    // 窓を広げれば元の希望幅へ戻せるよう、切り詰め前の値をここに保つ。
+    let preferredWidth = null;
 
     function applySidebarWidth(width) {
       // 画面が狭いときに右ペインが潰れないよう、上限は表示幅にも従わせる
       const limit = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, window.innerWidth - 320));
       const value = Math.round(Math.min(limit, Math.max(SIDEBAR_MIN, width)));
       appShell.style.setProperty("--sidebar-width", `${value}px`);
-      paneResizer.setAttribute("aria-valuenow", String(value));
       return value;
     }
 
@@ -1162,7 +1164,7 @@
 
     function resetSidebarWidth() {
       appShell.style.removeProperty("--sidebar-width");
-      paneResizer.removeAttribute("aria-valuenow");
+      preferredWidth = null;
       try {
         localStorage.removeItem(SIDEBAR_WIDTH_KEY);
       } catch (_error) { /* 保存できない環境では何もしない */ }
@@ -1174,8 +1176,20 @@
         saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
       } catch (_error) { /* 読めなければ既定幅のまま */ }
       const width = Number(saved);
-      if (Number.isFinite(width) && width > 0) applySidebarWidth(width);
+      if (Number.isFinite(width) && width > 0) {
+        preferredWidth = width;
+        applySidebarWidth(width);
+      }
     })();
+
+    // ウィンドウを縮めたときに右ペインが潰れないよう、希望幅を上限で切り詰め直す。
+    // 保存値は書き換えないので、窓を広げれば元の幅へ戻る。
+    // 700px以下は1画面1ペイン（.app-shell が block）なので何もしない。
+    window.addEventListener("resize", () => {
+      if (preferredWidth === null) return;
+      if (window.innerWidth <= 700) return;
+      applySidebarWidth(preferredWidth);
+    });
 
     paneResizer.addEventListener("pointerdown", (event) => {
       if (event.button !== 0) return;
@@ -1189,7 +1203,7 @@
 
     paneResizer.addEventListener("pointermove", (event) => {
       if (!paneResizer.hasPointerCapture(event.pointerId)) return;
-      applySidebarWidth(event.clientX - appShell.getBoundingClientRect().left);
+      preferredWidth = applySidebarWidth(event.clientX - appShell.getBoundingClientRect().left);
     });
 
     // ドラッグ表示の後始末だけを行う（何度呼んでも安全）。
@@ -1222,7 +1236,8 @@
       else if (event.key === "Home") { resetSidebarWidth(); event.preventDefault(); return; }
       else return;
       event.preventDefault();
-      storeSidebarWidth(applySidebarWidth(appShell.querySelector(".sidebar").getBoundingClientRect().width + delta));
+      preferredWidth = applySidebarWidth(appShell.querySelector(".sidebar").getBoundingClientRect().width + delta);
+      storeSidebarWidth(preferredWidth);
     });
 
     const RATE_REPORT_SRC = "./rate-history.html";
