@@ -68,8 +68,19 @@
     }
 
     .pane-resizer:hover,
-    .pane-resizer:focus-visible,
-    .pane-resizer.dragging { background: rgba(19, 132, 132, 0.28); outline: none; }
+    .pane-resizer.dragging { background: rgba(19, 132, 132, 0.28); }
+
+    /* キーボード操作が唯一の非マウス手段なので、フォーカスは hover と別表現にする。
+       背景色はハイコントラストで置き換わるため、枠線でも示す。 */
+    .pane-resizer:focus-visible {
+      background: rgba(19, 132, 132, 0.28);
+      outline: 2px solid var(--teal-600);
+      outline-offset: -2px;
+    }
+
+    @media (forced-colors: active) {
+      .pane-resizer:focus-visible { outline: 2px solid Highlight; }
+    }
 
     /* ドラッグ中はテキスト選択やiframeのhoverで操作が途切れないようにする */
     body.resizing { cursor: col-resize; user-select: none; }
@@ -1168,7 +1179,9 @@
 
     paneResizer.addEventListener("pointerdown", (event) => {
       if (event.button !== 0) return;
+      // 既定動作を止めるとフォーカス移動も止まるため、矢印キー操作のために明示的に当てる
       event.preventDefault();
+      paneResizer.focus();
       paneResizer.setPointerCapture(event.pointerId);
       paneResizer.classList.add("dragging");
       document.body.classList.add("resizing");
@@ -1179,17 +1192,25 @@
       applySidebarWidth(event.clientX - appShell.getBoundingClientRect().left);
     });
 
+    // ドラッグ表示の後始末だけを行う（何度呼んでも安全）。
+    function cleanupResize() {
+      paneResizer.classList.remove("dragging");
+      document.body.classList.remove("resizing");
+    }
+
     function endResize(event) {
       if (!paneResizer.hasPointerCapture(event.pointerId)) return;
       paneResizer.releasePointerCapture(event.pointerId);
-      paneResizer.classList.remove("dragging");
-      document.body.classList.remove("resizing");
+      cleanupResize();
       const current = parseInt(appShell.style.getPropertyValue("--sidebar-width"), 10);
       if (Number.isFinite(current)) storeSidebarWidth(current);
     }
 
     paneResizer.addEventListener("pointerup", endResize);
     paneResizer.addEventListener("pointercancel", endResize);
+    // 要素が消える等でキャプチャが暗黙解放されると pointerup が届かない。
+    // body.resizing（全面 user-select:none）が残らないよう、ここでも必ず後始末する。
+    paneResizer.addEventListener("lostpointercapture", cleanupResize);
 
     paneResizer.addEventListener("dblclick", resetSidebarWidth);
 
