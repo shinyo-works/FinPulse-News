@@ -103,6 +103,23 @@ class ViewerLayoutTest(unittest.TestCase):
             self.assertIn("M16 5 L28 12 H4 Z", html)
             self.assertEqual(3, html.count("width='3.4' height='9'"))
 
+    def test_date_navigation_folds_old_reports(self):
+        # 直近2か月はそのまま、それ以前は月ごと、前年度以前は会計年度ごとに畳む
+        self.assertIn("const FLAT_MONTHS = 2;", self.html)
+        self.assertRegex(
+            self.html,
+            r"function fiscalYear\(year, month\) \{\s*\n\s*return month < 4 \? year - 1 : year;",
+        )
+        self.assertIn("function groupReportDates(dates)", self.html)
+        self.assertIn('`${fy}年度`', self.html)
+        # 開閉は details なので JavaScript を足さずに動く
+        self.assertIn('<details class="nav-group"', self.html)
+        # 選択中の日付を含むグループは開いた状態で描く
+        self.assertIn("dates.includes(selectedDate)", self.html)
+        self.assertIn("allDates.includes(selectedDate)", self.html)
+        # 畳んだ中の日付も同じクリック経路（data-date）を通る
+        self.assertIn('data-date="${escapeHtml(date)}"', self.html)
+
     def test_panes_can_be_resized_and_the_width_persists(self):
         self.assertIn('id="paneResizer"', self.html)
         self.assertRegex(

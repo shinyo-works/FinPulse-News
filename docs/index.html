@@ -160,6 +160,47 @@
       white-space: nowrap;
     }
 
+    /* 古い日付は月・年度で畳む。details なので JavaScript なしで開閉できる。 */
+    .nav-group > summary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 12px;
+      color: #d7e5ec;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 1.25;
+      list-style: none;
+    }
+
+    .nav-group > summary::-webkit-details-marker { display: none; }
+
+    .nav-group > summary::before {
+      content: "▸";
+      flex: none;
+      color: #9db6c5;
+      font-size: 0.7rem;
+    }
+
+    .nav-group[open] > summary::before { content: "▾"; }
+
+    .nav-group > summary:hover { background: rgba(255, 255, 255, 0.07); }
+
+    .nav-group > summary:focus-visible {
+      outline: 2px solid rgba(85, 214, 201, 0.7);
+      outline-offset: -2px;
+    }
+
+    .group-count {
+      margin-left: auto;
+      color: #9db6c5;
+      font-size: 0.7rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nav-group > .nav-list { margin-left: 10px; }
+
     .main { min-width: 0; }
 
     .topbar {
@@ -948,9 +989,99 @@
       if (isDateMode) renderDateMode(); else renderInstitutionMode();
     }
 
+    // 日付ナビは、直近2か月ぶんの日付をそのまま並べ、それ以前は月ごと、
+    // さらに前の会計年度（4月〜翌3月）は年度ごとに畳む。
+    const FLAT_MONTHS = 2;
+
+    function fiscalYear(year, month) {
+      return month < 4 ? year - 1 : year;
+    }
+
+    function monthIndex(year, month) {
+      return year * 12 + (month - 1);
+    }
+
+    /**
+     * 日付一覧（新しい順）を、そのまま並べる分・月ごと・年度ごとに仕分ける。
+     * 基準は「一番新しいレポートの月」。データが止まっても畳み方が変わらないようにするため、
+     * 実行日ではなくデータ側を基準にする。
+     */
+    function groupReportDates(dates) {
+      const parsed = [];
+      for (const date of dates || []) {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+        if (match) parsed.push({ date, year: Number(match[1]), month: Number(match[2]) });
+      }
+      const flat = [];
+      const months = new Map();  // "YYYY-MM" → 日付（今年度の古い分）
+      const years = new Map();   // 会計年度 → Map("YYYY-MM" → 日付)
+      if (!parsed.length) return { flat, months, years };
+
+      const newest = parsed[0];
+      const flatFrom = monthIndex(newest.year, newest.month) - (FLAT_MONTHS - 1);
+      const currentFiscalYear = fiscalYear(newest.year, newest.month);
+
+      for (const item of parsed) {
+        if (monthIndex(item.year, item.month) >= flatFrom) {
+          flat.push(item.date);
+          continue;
+        }
+        const monthKey = `${item.year}-${String(item.month).padStart(2, "0")}`;
+        const fy = fiscalYear(item.year, item.month);
+        const bucket = fy === currentFiscalYear ? months : (years.get(fy) ?? years.set(fy, new Map()).get(fy));
+        if (!bucket.has(monthKey)) bucket.set(monthKey, []);
+        bucket.get(monthKey).push(item.date);
+      }
+      return { flat, months, years };
+    }
+
+    function formatMonthLabel(monthKey) {
+      const [year, month] = monthKey.split("-");
+      return `${year}年${Number(month)}月`;
+    }
+
+    function dateNavItem(date) {
+      const active = state.mode === "date" && state.selectedDate === date;
+      return `<li><button type="button" class="nav-button ${active ? "active" : ""}" data-date="${escapeHtml(date)}">${escapeHtml(formatDate(date))}</button></li>`;
+    }
+
+    // 選択中の日付を含むグループは開いた状態で描き直す（畳まれて見失わないように）
+    function navGroup(label, count, innerHtml, open) {
+      return `<li><details class="nav-group"${open ? " open" : ""}>
+        <summary>${escapeHtml(label)}<span class="group-count">${count}</span></summary>
+        <ul class="nav-list">${innerHtml}</ul>
+      </details></li>`;
+    }
+
+    function monthNavGroup(monthKey, dates, selectedDate) {
+      return navGroup(
+        formatMonthLabel(monthKey),
+        dates.length,
+        dates.map(dateNavItem).join(""),
+        dates.includes(selectedDate),
+      );
+    }
+
+    function renderDateNavigation() {
+      const { flat, months, years } = groupReportDates(state.manifest.reports);
+      const selectedDate = state.mode === "date" ? state.selectedDate : "";
+      const parts = flat.map(dateNavItem);
+
+      for (const [monthKey, dates] of months) {
+        parts.push(monthNavGroup(monthKey, dates, selectedDate));
+      }
+
+      for (const [fy, monthMap] of years) {
+        const allDates = [...monthMap.values()].flat();
+        const inner = [...monthMap].map(([monthKey, dates]) => monthNavGroup(monthKey, dates, selectedDate)).join("");
+        parts.push(navGroup(`${fy}年度`, allDates.length, inner, allDates.includes(selectedDate)));
+      }
+
+      return parts.join("");
+    }
+
     function renderNavigation() {
-      elements.dateList.innerHTML = state.manifest.reports.map((date) => `
-        <li><button type="button" class="nav-button ${state.mode === "date" && state.selectedDate === date ? "active" : ""}" data-date="${escapeHtml(date)}">${escapeHtml(formatDate(date))}</button></li>`).join("");
+      elements.dateList.innerHTML = renderDateNavigation();
       elements.institutionList.innerHTML = state.institutionIndex.institutions.map((institution) => `
         <li><button type="button" class="nav-button ${state.mode === "institution" && state.selectedInstitution === institution.name ? "active" : ""}" data-institution="${escapeHtml(institution.name)}">${escapeHtml(institution.name)}</button></li>`).join("");
     }
