@@ -82,6 +82,16 @@ class ViewerLayoutTest(unittest.TestCase):
             self.html,
         )
 
+    def test_titles_use_the_japanese_site_name(self):
+        # ブラウザのタブ名・ブックマーク名は画面上の見出しと同じ名前に揃える
+        self.assertIn("<title>十勝金融機関News｜金利情報</title>", self.html)
+        self.assertIn('const NEWS_TITLE = "十勝金融機関News｜新着ニュース";', self.html)
+        self.assertIn('const RATE_TITLE = "十勝金融機関News｜金利情報";', self.html)
+        self.assertIn("<title>十勝金融機関News｜金利情報</title>", self.rate_html)
+        self.assertIn("<title>十勝金融機関News</title>", self.root_html)
+        for html in (self.html, self.rate_html, self.root_html):
+            self.assertNotIn("<title>FinPulse", html)
+
     def test_favicon_shows_a_bank_building(self):
         # 3ファイルとも同じ銀行アイコン（切妻＋3本柱＋台座）を使う
         for html in (self.html, self.rate_html, self.root_html):
