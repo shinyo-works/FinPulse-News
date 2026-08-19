@@ -97,18 +97,6 @@
       border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* サイトの見出し。検索ボックスの真上（トップバー内）に置く。 */
-    .brand-mark {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      margin: 0 0 5px;
-      color: var(--navy-950);
-      font-size: 1.08rem;
-      font-weight: 750;
-      letter-spacing: 0.02em;
-    }
-
     .pulse-dot {
       width: 11px;
       height: 11px;
@@ -557,10 +545,12 @@
       text-overflow: ellipsis;
     }
 
-    /* 新着ニュース表示中はサイト名・見出し・説明を出す。
-       金利履歴表示中は説明だけを残す（画面内に表があるため見出しは不要）。 */
+    /* 新着ニュース表示中はサイト名だけ、金利情報表示中は説明だけを出す。 */
     body[data-view="news"] .tab-note,
     body[data-view="rate"] .tab-note { display: flex; }
+
+    body[data-view="news"] .note-heading,
+    body[data-view="news"] .note-text { display: none; }
 
     body[data-view="rate"] .tab-brand,
     body[data-view="rate"] .note-heading { display: none; }
@@ -636,7 +626,6 @@
       body[data-mobile-pane="nav"] .main { display: none; }
 
       .nav-section { padding: 9px 12px 2px; }
-      .brand-mark { font-size: 1rem; }
 
       /* タブ行が狭いので、サイト名と短い説明だけ残す */
       .tab-note .note-full,
@@ -688,7 +677,7 @@
   <nav class="product-tabs" aria-label="表示するレポートの切替">
     <button class="product-tab" type="button" data-view="news">新着ニュース</button>
     <button class="product-tab active" type="button" data-view="rate">金利情報</button>
-    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
+    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
   </nav>
 
   <div id="newsView">
@@ -716,7 +705,6 @@
     <main class="main">
       <header class="topbar">
         <div class="topbar-inner">
-        <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</div>
         <div class="controls">
           <label class="search-wrap">
             <span class="search-icon" aria-hidden="true">⌕</span>

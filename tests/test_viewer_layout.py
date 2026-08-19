@@ -11,19 +11,20 @@ class ViewerLayoutTest(unittest.TestCase):
         cls.rate_html = (root / "rate-history.html").read_text(encoding="utf-8")
         cls.root_html = (root.parent / "index.html").read_text(encoding="utf-8")
 
-    def test_site_title_sits_just_above_the_search_box(self):
+    def test_site_title_lives_only_in_the_tab_row(self):
+        # サイト名はタブ行の1か所だけ。検索窓の上とサイドバーには置かない。
         topbar = re.search(
             r'<header class="topbar">(.*?)</header>', self.html, re.DOTALL
         ).group(1)
-
-        self.assertIn("十勝金融機関News", topbar)
-        self.assertLess(topbar.index("十勝金融機関News"), topbar.index('id="searchInput"'))
-        # 旧ブランド表記はサイドバーごと廃止した
-        self.assertNotIn("帯広エリア 金融機関レポート", self.html)
         sidebar = re.search(
             r'<aside class="sidebar".*?</aside>', self.html, re.DOTALL
         ).group(0)
-        self.assertNotIn("brand-mark", sidebar)
+
+        self.assertNotIn("十勝金融機関News", topbar)
+        self.assertNotIn("十勝金融機関News", sidebar)
+        self.assertNotIn("brand-mark", self.html)
+        self.assertNotIn("帯広エリア 金融機関レポート", self.html)
+        self.assertEqual(1, self.html.count("十勝金融機関News</b>"))
 
     def test_rate_heading_moves_to_the_right_of_the_tabs(self):
         tabs = re.search(
@@ -32,10 +33,14 @@ class ViewerLayoutTest(unittest.TestCase):
 
         self.assertLess(tabs.index('data-view="rate"'), tabs.index("金利履歴ビューアー"))
         self.assertIn("左が最新、右が過去です。", tabs)
-        # 両方の表示で出す。ただし金利履歴表示中はサイト名と見出しを畳んで説明だけ残す
+        # 新着ニュース表示中はサイト名だけ、金利情報表示中は説明だけを出す
         self.assertRegex(
             self.html,
             r'body\[data-view="news"\]\s*\.tab-note,\s*\n\s*body\[data-view="rate"\]\s*\.tab-note\s*\{[^}]*display:\s*flex;',
+        )
+        self.assertRegex(
+            self.html,
+            r'body\[data-view="news"\]\s*\.note-heading,\s*\n\s*body\[data-view="news"\]\s*\.note-text\s*\{\s*display:\s*none;\s*\}',
         )
         self.assertRegex(
             self.html,
