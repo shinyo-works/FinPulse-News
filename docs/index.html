@@ -557,7 +557,8 @@
       text-overflow: ellipsis;
     }
 
-    body[data-view="rate"] .tab-note { display: flex; }
+    /* 新着ニュース表示中だけ、金利履歴タブの右側に出す（金利履歴表示中は出さない） */
+    body[data-view="news"] .tab-note { display: flex; }
 
     /* 製品タブ44pxぶん全体を下げる */
     body { padding-top: 44px; }

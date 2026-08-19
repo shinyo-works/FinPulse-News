@@ -31,9 +31,14 @@ class ViewerLayoutTest(unittest.TestCase):
 
         self.assertLess(tabs.index('data-view="rate"'), tabs.index("金利履歴ビューアー"))
         self.assertIn("左が最新、右が過去です。", tabs)
+        # 出すのは新着ニュース表示中だけ（金利履歴表示中は出さない）
         self.assertRegex(
             self.html,
-            r'body\[data-view="rate"\]\s*\.tab-note\s*\{[^}]*display:\s*flex;',
+            r'body\[data-view="news"\]\s*\.tab-note\s*\{[^}]*display:\s*flex;',
+        )
+        self.assertNotRegex(
+            self.html,
+            r'body\[data-view="rate"\]\s*\.tab-note\s*\{',
         )
         # iframe 側の見出しは重複するので、埋め込み時だけ隠す
         self.assertRegex(
