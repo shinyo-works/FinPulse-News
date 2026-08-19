@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="帯広エリアの金融機関新着情報を日付・機関別に閲覧するビューアー">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b1f33'/><circle cx='16' cy='16' r='7' fill='%2355d6c9'/></svg>">
-  <title>FinPulse News｜金融機関新着情報</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b1f33'/><path d='M16 5 L28 12 H4 Z' fill='%2355d6c9'/><rect x='7' y='14' width='3.4' height='9' fill='%2355d6c9'/><rect x='14.3' y='14' width='3.4' height='9' fill='%2355d6c9'/><rect x='21.6' y='14' width='3.4' height='9' fill='%2355d6c9'/><rect x='5' y='24.5' width='22' height='3' rx='1.2' fill='%2355d6c9'/></svg>">
+  <title>FinPulse News｜金利情報</title>
   <style>
     :root {
       --navy-950: #0b1f33;
@@ -557,8 +557,13 @@
       text-overflow: ellipsis;
     }
 
-    /* 新着ニュース表示中だけ、金利履歴タブの右側に出す（金利履歴表示中は出さない） */
-    body[data-view="news"] .tab-note { display: flex; }
+    /* 新着ニュース表示中はサイト名・見出し・説明を出す。
+       金利履歴表示中は説明だけを残す（画面内に表があるため見出しは不要）。 */
+    body[data-view="news"] .tab-note,
+    body[data-view="rate"] .tab-note { display: flex; }
+
+    body[data-view="rate"] .tab-brand,
+    body[data-view="rate"] .note-heading { display: none; }
 
     /* 製品タブ44pxぶん全体を下げる */
     body { padding-top: 44px; }
@@ -679,10 +684,10 @@
     }
   </style>
 </head>
-<body data-mobile-pane="nav" data-view="news">
+<body data-mobile-pane="nav" data-view="rate">
   <nav class="product-tabs" aria-label="表示するレポートの切替">
-    <button class="product-tab active" type="button" data-view="news">新着ニュース</button>
-    <button class="product-tab" type="button" data-view="rate">金利履歴</button>
+    <button class="product-tab" type="button" data-view="news">新着ニュース</button>
+    <button class="product-tab active" type="button" data-view="rate">金利情報</button>
     <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
   </nav>
 
@@ -754,7 +759,7 @@
   </div><!-- /newsView -->
 
   <div id="rateView">
-    <iframe id="rateFrame" title="金利履歴" loading="lazy"></iframe>
+    <iframe id="rateFrame" title="金利情報" loading="lazy"></iframe>
   </div>
 
   <script>
@@ -1263,7 +1268,7 @@
 
     const RATE_REPORT_SRC = "./rate-history.html";
     const NEWS_TITLE = "FinPulse News｜金融機関新着情報";
-    const RATE_TITLE = "FinPulse News｜金利履歴";
+    const RATE_TITLE = "FinPulse News｜金利情報";
     let rateLoaded = false;
 
     function switchView(view) {
@@ -1302,9 +1307,10 @@
       }
     });
 
-    // ニュース側の復元を終えてからタブを切り替える（金利タブのiframe遅延読み込みを保つ）
+    // ニュース側の復元を終えてからタブを切り替える（金利タブのiframe遅延読み込みを保つ）。
+    // 既定は金利情報タブ。URLがニュース側を指しているときだけ新着ニュースへ切り替える。
     initialize().then(() => {
-      if (parseHash(INITIAL_HASH)?.view === "rate") switchView("rate");
+      switchView(parseHash(INITIAL_HASH)?.view === "news" ? "news" : "rate");
     });
   </script>
 </body>
