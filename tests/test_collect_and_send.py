@@ -245,6 +245,67 @@ class SanitizeItemsTest(unittest.TestCase):
 
 
 class FilteringTest(unittest.TestCase):
+    def test_ja_obihirokawanisi_keeps_financial_news_only(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        config = json.loads(
+            (repository_root / "config.json").read_text(encoding="utf-8")
+        )
+        institution = next(
+            item
+            for item in config["institutions"]
+            if item["name"] == "JA帯広かわにし"
+        )
+        items = [
+            {
+                "date": "2026-07-31",
+                "title": "ＪＡバンク貯金 各種手数料改定のお知らせ（再案内）",
+                "url": "https://example.com/fee.pdf",
+            },
+            {
+                "date": "2026-06-10",
+                "title": "夏の定期貯金 金利上乗せキャンペーン",
+                "url": "https://example.com/campaign.pdf",
+            },
+            {
+                "date": "",
+                "title": "キャンペーン情報",
+                "url": "https://example.com/campaign/",
+            },
+            {
+                "date": "2026-06-26",
+                "title": "APIサービスに関する規定の改正について",
+                "url": "https://example.com/rule.pdf",
+            },
+            {
+                "date": "2026-06-23",
+                "title": "預貯金等の不正な払戻しへの対応について",
+                "url": "https://example.com/security.pdf",
+            },
+            {
+                "date": "",
+                "title": "各種手数料はこちら",
+                "url": "https://example.com/fee/",
+            },
+        ]
+
+        passed, excluded = collector.apply_filters(
+            items,
+            institution,
+            config["star_keywords"],
+        )
+
+        self.assertEqual(
+            [
+                "ＪＡバンク貯金 各種手数料改定のお知らせ（再案内）",
+                "夏の定期貯金 金利上乗せキャンペーン",
+            ],
+            [item["title"] for item in passed],
+        )
+        self.assertFalse(passed[0].get("star", False))
+        self.assertTrue(passed[1]["star"])
+        self.assertEqual(4, len(excluded))
+        self.assertEqual("utf-8", institution["encoding"])
+
     def test_include_exclude_unless_and_star_rules(self):
         institution = minimal_config()["institutions"][0]
         institution["exclude_rules"] = [{"keyword": "規定", "unless": ["改定"]}]

@@ -66,6 +66,6 @@ FinPulse-News/
 
 ## Phase 進捗
 
-- [x] Phase 1: 複数サイト手動スクレイピング → ファイル保存（7機関）
+- [x] Phase 1: 複数サイト手動スクレイピング → ファイル保存（8機関）
 - [x] Phase 2: Resend でメール送信
 - [x] Phase 3: 週次自動化（GitHub Actions）

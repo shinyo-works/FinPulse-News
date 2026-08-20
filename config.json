@@ -120,6 +120,24 @@
         { "keyword": "女性部" },
         { "keyword": "青年部" }
       ]
+    },
+    {
+      "name": "JA帯広かわにし",
+      "url": "https://www.jaobihirokawanisi.or.jp/service/bank/",
+      "encoding": "utf-8",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "貯金", "ローン", "手数料"],
+      "exclude_rules": [
+        { "keyword": "キャンペーン情報" },
+        { "keyword": "商品一覧" },
+        { "keyword": "各種事務手数料" },
+        { "keyword": "各種手数料はこちら" },
+        { "keyword": "規定" },
+        { "keyword": "不正" },
+        { "keyword": "犯罪" },
+        { "keyword": "詐欺" },
+        { "keyword": "共済" },
+        { "keyword": "採用" }
+      ]
     }
   ]
 }

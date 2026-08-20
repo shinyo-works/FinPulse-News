@@ -17,6 +17,7 @@ TARGETS = [
     ("JAおとふけ",   "https://www.ja-otofuke.jp/newslist/"),
     ("十勝信用組合", "https://www.tokachishinkumi.com/info/"),
     ("JA木野",       "https://ja-kino.com/news/"),
+    ("JA帯広かわにし", "https://www.jaobihirokawanisi.or.jp/service/bank/"),
 ]
 
 def check(name, url):
