@@ -37,6 +37,49 @@ class FakeResponse:
         yield from self._chunks
 
 
+JA_OBIHIROKAWANISI_HTML = """
+<section class="content_section news_list">
+  <ul>
+    <li class="news_content">
+      <a href="/wp/fee.pdf">
+        <time class="news_content__date">2026.07.31</time>
+        <span class="news_content__label">お知らせ 重要なお知らせ ＪＡバンク 貯金</span>
+        <span class="news_content__text">各種手数料改定のお知らせ（再案内）</span>
+      </a>
+    </li>
+    <li class="news_content">
+      <a href="/wp/api-rule.pdf">
+        <time class="news_content__date">2026.06.26</time>
+        <span class="news_content__label">お知らせ 重要なお知らせ ＪＡバンク 貯金</span>
+        <span class="news_content__text">「APIサービスに関する規定」にかかる改正について</span>
+      </a>
+    </li>
+    <li class="news_content">
+      <a href="/wp/security.pdf">
+        <time class="news_content__date">2026.06.23</time>
+        <span class="news_content__label">お知らせ 重要なお知らせ ＪＡバンク 貯金</span>
+        <span class="news_content__text">預貯金等の不正な払戻しへのJAバンクの対応について</span>
+      </a>
+    </li>
+    <li class="news_content">
+      <a href="/wp/campaign.pdf">
+        <time class="news_content__date">2026.06.10</time>
+        <span class="news_content__label">お知らせ ＪＡバンク 貯金</span>
+        <span class="news_content__text">夏の定期貯金 金利上乗せキャンペーン</span>
+      </a>
+    </li>
+    <li class="news_content">
+      <a href="/wp/car-loan.pdf">
+        <time class="news_content__date">2026.04.01</time>
+        <span class="news_content__label">お知らせ キャンペーン ＪＡバンク ローン</span>
+        <span class="news_content__text">マイカーローン金利情報</span>
+      </a>
+    </li>
+  </ul>
+</section>
+"""
+
+
 class ValidationTest(unittest.TestCase):
     def test_accepts_current_config_shape(self):
         collector.validate_config(minimal_config())
@@ -244,67 +287,107 @@ class SanitizeItemsTest(unittest.TestCase):
         self.assertEqual([], collector.sanitize_items({"title": "dict"}, "テスト銀行"))
 
 
-class FilteringTest(unittest.TestCase):
-    def test_ja_obihirokawanisi_keeps_financial_news_only(self):
+class JaObihirokawanisiTest(unittest.TestCase):
+    def setUp(self):
         repository_root = Path(__file__).resolve().parents[1]
         config = json.loads(
             (repository_root / "config.json").read_text(encoding="utf-8")
         )
-        institution = next(
+        self.config = config
+        self.institution = next(
             item
             for item in config["institutions"]
             if item["name"] == "JA帯広かわにし"
         )
-        items = [
-            {
-                "date": "2026-07-31",
-                "title": "ＪＡバンク貯金 各種手数料改定のお知らせ（再案内）",
-                "url": "https://example.com/fee.pdf",
-            },
-            {
-                "date": "2026-06-10",
-                "title": "夏の定期貯金 金利上乗せキャンペーン",
-                "url": "https://example.com/campaign.pdf",
-            },
-            {
-                "date": "",
-                "title": "キャンペーン情報",
-                "url": "https://example.com/campaign/",
-            },
-            {
-                "date": "2026-06-26",
-                "title": "APIサービスに関する規定の改正について",
-                "url": "https://example.com/rule.pdf",
-            },
-            {
-                "date": "2026-06-23",
-                "title": "預貯金等の不正な払戻しへの対応について",
-                "url": "https://example.com/security.pdf",
-            },
-            {
-                "date": "",
-                "title": "各種手数料はこちら",
-                "url": "https://example.com/fee/",
-            },
-        ]
 
-        passed, excluded = collector.apply_filters(
-            items,
-            institution,
-            config["star_keywords"],
+    def test_extracts_clean_titles_and_keeps_recent_financial_news(self):
+        items = collector.scrape_ja_obihirokawanisi(
+            JA_OBIHIROKAWANISI_HTML,
+            self.institution["url"],
         )
+
+        self.assertEqual(5, len(items))
+        self.assertEqual("各種手数料改定のお知らせ（再案内）", items[0]["title"])
+        self.assertEqual("2026-07-31", items[0]["date"])
+        self.assertEqual(
+            "https://www.jaobihirokawanisi.or.jp/wp/fee.pdf",
+            items[0]["url"],
+        )
+        self.assertNotIn("重要なお知らせ", items[0]["title"])
+        self.assertNotIn("2026.07.31", items[0]["title"])
+
+        passed_all, excluded = collector.apply_filters(
+            items,
+            self.institution,
+            self.config["star_keywords"],
+        )
+        self.assertEqual(
+            [
+                "各種手数料改定のお知らせ（再案内）",
+                "夏の定期貯金 金利上乗せキャンペーン",
+                "マイカーローン金利情報",
+            ],
+            [item["title"] for item in passed_all],
+        )
+        self.assertEqual(2, len(excluded))
+
+        with mock.patch.object(
+            collector,
+            "now_jst",
+            return_value=datetime(2026, 8, 20, tzinfo=collector.JST),
+        ):
+            passed = collector.filter_by_lookback(passed_all, 90)
 
         self.assertEqual(
             [
-                "ＪＡバンク貯金 各種手数料改定のお知らせ（再案内）",
+                "各種手数料改定のお知らせ（再案内）",
                 "夏の定期貯金 金利上乗せキャンペーン",
             ],
             [item["title"] for item in passed],
         )
         self.assertFalse(passed[0].get("star", False))
         self.assertTrue(passed[1]["star"])
-        self.assertEqual(4, len(excluded))
-        self.assertEqual("utf-8", institution["encoding"])
+        self.assertEqual("utf-8", self.institution["encoding"])
+        self.assertEqual("ja_obihirokawanisi", self.institution["scraper"])
+
+        result = collector.InstitutionResult(
+            self.institution["name"],
+            passed,
+            excluded,
+            "プログラム",
+        )
+        report = collector.format_report([result], "2026-08-20", 90)
+        report_data = collector.build_report_data([result], "2026-08-20", 90)
+        self.assertIn("各種手数料改定のお知らせ（再案内）", report)
+        self.assertNotIn("2026.07.31お知らせ", report)
+        self.assertEqual(
+            "各種手数料改定のお知らせ（再案内）",
+            report_data["institutions"][0]["passed"][0]["title"],
+        )
+
+    def test_missing_news_structure_is_reported_as_extraction_failure(self):
+        with self.assertRaisesRegex(collector.ExtractionError, "ニュース一覧"):
+            collector.scrape_ja_obihirokawanisi(
+                "<html><body>ニュース領域なし</body></html>",
+                self.institution["url"],
+            )
+
+        with mock.patch.object(
+            collector,
+            "fetch_page",
+            return_value="<html><body>ニュース領域なし</body></html>",
+        ):
+            result, _ = collector.collect_institution(
+                self.institution,
+                90,
+                self.config["star_keywords"],
+            )
+
+        self.assertEqual("extract_failed", result.status)
+        self.assertEqual("記事一覧を抽出できませんでした。", result.error)
+
+
+class FilteringTest(unittest.TestCase):
 
     def test_include_exclude_unless_and_star_rules(self):
         institution = minimal_config()["institutions"][0]

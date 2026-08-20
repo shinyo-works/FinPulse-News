@@ -63,7 +63,7 @@ class FetchError(RuntimeError):
 
 
 class ExtractionError(RuntimeError):
-    """Claude APIで記事一覧を抽出できなかった。"""
+    """取得ページから記事一覧を抽出できなかった。"""
 
 
 @dataclass
@@ -484,6 +484,40 @@ def scrape_news_programmatic(html, base_url):
     return items[:60]
 
 
+def scrape_ja_obihirokawanisi(html, base_url):
+    """JA帯広かわにしの金融ニュース一覧から記事名・日付・URLを個別に抽出する。"""
+    soup = BeautifulSoup(html, "html.parser")
+    rows = soup.select(".content_section.news_list li.news_content")
+    if not rows:
+        raise ExtractionError("JA帯広かわにしのニュース一覧が見つかりませんでした。")
+
+    items = []
+    for row in rows:
+        link = row.find("a", href=True)
+        title_element = row.select_one(".news_content__text")
+        date_element = row.select_one(".news_content__date")
+        if not link or not title_element:
+            continue
+
+        title = title_element.get_text(" ", strip=True)
+        href = link.get("href", "").strip()
+        if not title or not href or href.startswith(("#", "javascript", "mailto", "tel")):
+            continue
+
+        date_text = date_element.get_text(" ", strip=True) if date_element else ""
+        date = extract_date_from_text(date_text) or extract_date_from_url(href)
+        items.append({
+            "date": date,
+            "title": title,
+            "url": urljoin(base_url, href),
+            "date_inferred": False,
+        })
+
+    if not items:
+        raise ExtractionError("JA帯広かわにしのニュース記事を抽出できませんでした。")
+    return items
+
+
 def scrape_hokuyo_xml(base_url):
     """北洋銀行: 新着情報は JS で年別XMLフィード（announcement/{year}.xml）から描画される。
     静的HTMLには記事タイトルが無いため、XMLを直接取得して解析する。
@@ -545,11 +579,17 @@ def _scrape_hokuyo_institution(institution, url):
     return scrape_hokuyo_xml(url)
 
 
+def _scrape_ja_obihirokawanisi_institution(institution, url):
+    html = fetch_page(url, encoding=institution.get("encoding"))
+    return scrape_ja_obihirokawanisi(html, url)
+
+
 # スクレイパーの登録簿。設定検証（VALID_SCRAPERS）とディスパッチが自動で揃うよう、
 # 新方式を追加する場合はこの辞書へ1エントリ足すだけにする。
 SCRAPERS = {
     "programmatic": _scrape_programmatic_institution,
     "hokuyo_xml": _scrape_hokuyo_institution,
+    "ja_obihirokawanisi": _scrape_ja_obihirokawanisi_institution,
 }
 VALID_SCRAPERS = set(SCRAPERS)
 
@@ -1064,7 +1104,7 @@ def collect_institution(institution, lookback_days, star_keywords, claude_client
             [],
             method,
             status="extract_failed",
-            error="Claude APIで記事を抽出できませんでした。",
+            error="記事一覧を抽出できませんでした。",
         ), claude_client
     except Exception as exc:
         print(f"  解析失敗 ({name}): {type(exc).__name__}: {exc}")

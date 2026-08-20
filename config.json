@@ -125,6 +125,7 @@
       "name": "JA帯広かわにし",
       "url": "https://www.jaobihirokawanisi.or.jp/service/bank/",
       "encoding": "utf-8",
+      "scraper": "ja_obihirokawanisi",
       "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "貯金", "ローン", "手数料"],
       "exclude_rules": [
         { "keyword": "キャンペーン情報" },
