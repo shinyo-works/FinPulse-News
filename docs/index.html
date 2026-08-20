@@ -504,6 +504,20 @@
       font-size: 1rem;
     }
 
+    .collection-error {
+      margin: 0 9px 9px;
+      padding: 10px 12px;
+      color: var(--danger-700);
+      background: #fff8f7;
+      border: 1px solid #f0d5d0;
+      border-radius: 8px;
+    }
+
+    .collection-error strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+
     .hidden { display: none !important; }
 
     /* 製品タブ（新着ニュース / 金利調査レポート）とビュー切替 */
@@ -795,6 +809,7 @@
     "use strict";
 
     const DATA_ROOT = "../output/data";
+    const FAILED_STATUSES = new Set(["fetch_failed", "parse_failed", "extract_failed"]);
     const state = {
       mode: "date",
       selectedDate: "",
@@ -936,27 +951,37 @@
       return "除外された記事は「除外も表示」で確認できます。";
     }
 
+    function collectionFailureNotice(institution) {
+      if (!FAILED_STATUSES.has(institution?.status)) return "";
+      const detail = institution.error || "この金融機関の新着情報を取得できませんでした。";
+      return `<div class="collection-error" role="status"><strong>収集に失敗しました</strong>${escapeHtml(detail)}</div>`;
+    }
+
     function renderDateMode() {
       const report = state.report;
       if (!report) return;
       const sections = [];
       let passedCount = 0;
       let excludedCount = 0;
+      let failedCount = 0;
 
       for (const institution of report.institutions || []) {
         if (!state.selectedInstitutions.has(institution.name)) continue;
         const passed = (institution.passed || []).filter(matchesSearch);
         const excluded = (institution.excluded || []).filter(matchesSearch);
-        if (state.search.trim() && !passed.length && !(state.showExcluded && excluded.length)) continue;
+        const failureNotice = collectionFailureNotice(institution);
+        if (state.search.trim() && !passed.length && !(state.showExcluded && excluded.length) && !failureNotice) continue;
         passedCount += passed.length;
         excludedCount += state.showExcluded ? excluded.length : 0;
+        failedCount += failureNotice ? 1 : 0;
         sections.push(`
           <section class="institution-section">
             <div class="section-head">
               <h2 class="section-title">${escapeHtml(institution.name)}</h2>
               <span class="count">${passed.length}件</span>
             </div>
-            ${passed.length ? articleTable(passed) : emptyState("通過記事はありません", passedEmptyMessage(excluded.length))}
+            ${failureNotice}
+            ${passed.length ? articleTable(passed) : (failureNotice ? "" : emptyState("通過記事はありません", passedEmptyMessage(excluded.length)))}
             ${state.showExcluded && excluded.length ? excludedTable(excluded) : ""}
           </section>`);
       }
@@ -965,7 +990,7 @@
       elements.pageTitle.textContent = formatDate(report.date);
       const period = report.lookback_days ? `対象期間 過去${report.lookback_days}日` : "対象期間 全件";
       elements.pageSummary.classList.add("date-summary");
-      elements.pageSummary.textContent = `${period}　通過 ${passedCount}件${state.showExcluded ? `　除外 ${excludedCount}件` : ""}`;
+      elements.pageSummary.textContent = `${period}　通過 ${passedCount}件${state.showExcluded ? `　除外 ${excludedCount}件` : ""}${failedCount ? `　収集失敗 ${failedCount}機関` : ""}`;
       elements.reportContent.innerHTML = sections.length ? sections.join("") : emptyState("該当する記事がありません", "検索語または機関の絞り込みを変更してください。 ");
     }
 

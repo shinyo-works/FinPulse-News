@@ -17,10 +17,14 @@ def send_via_resend(subject: str, body: str) -> bool:
     return send_resend_email(subject, body, html_body=True)
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 3:
+def main(argv=None) -> int:
+    argv = sys.argv if argv is None else argv
+    if len(argv) != 3:
         print("使い方: python send_resend.py \"件名\" \"本文\"")
-        sys.exit(1)
+        return 1
 
-    ok = send_via_resend(sys.argv[1], sys.argv[2])
-    sys.exit(0 if ok else 1)
+    return 0 if send_via_resend(argv[1], argv[2]) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

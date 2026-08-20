@@ -54,6 +54,7 @@ INSTITUTION_WINDOW_MONTHS = 24
 DEFAULT_STAR_KEYWORDS = ("金利", "キャンペーン")
 MAX_HTML_BYTES = 5 * 1024 * 1024
 MAX_XML_BYTES = 5 * 1024 * 1024
+REQUEST_TIMEOUT = (5, 30)  # 接続待ち・読取無通信の上限（秒）
 VIEWER_READY_MARKER_NAME = "viewer-json-ready.txt"
 FAILED_STATUSES = {"fetch_failed", "parse_failed", "extract_failed"}
 
@@ -203,7 +204,7 @@ def fetch_page(url, encoding=None):
     """HTMLページを取得してデコードする"""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
-        with requests.get(url, headers=headers, timeout=30, stream=True) as resp:
+        with requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, stream=True) as resp:
             content = read_limited_response(
                 resp,
                 max_bytes=MAX_HTML_BYTES,
@@ -447,7 +448,7 @@ def scrape_news_programmatic(html, base_url):
     """BeautifulSoupでニュース一覧を汎用的に抽出"""
     soup = BeautifulSoup(html, "html.parser")
     items = []
-    seen_titles = set()
+    seen_articles = set()
 
     for a in soup.find_all("a", href=True):
         title = a.get_text(strip=True)
@@ -462,9 +463,10 @@ def scrape_news_programmatic(html, base_url):
             continue
 
         url = urljoin(base_url, href)
-        if title in seen_titles:
+        article_key = (title, url)
+        if article_key in seen_articles:
             continue
-        seen_titles.add(title)
+        seen_articles.add(article_key)
 
         date = ""
         for candidate in [a, a.parent, a.parent.parent if a.parent else None]:
@@ -515,6 +517,8 @@ def scrape_ja_obihirokawanisi(html, base_url):
 
     if not items:
         raise ExtractionError("JA帯広かわにしのニュース記事を抽出できませんでした。")
+    if not any(item["date"] for item in items):
+        raise ExtractionError("JA帯広かわにしのニュース記事から日付を抽出できませんでした。")
     return items
 
 
@@ -525,12 +529,16 @@ def scrape_hokuyo_xml(base_url):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     items = []
     seen = set()  # 同一記事が複数カテゴリで重複登録されるため除去
-    successful_feeds = 0
     this_year = now_jst().year
     for year in (this_year, this_year - 1):
         xml_url = urljoin(base_url, f"{year}.xml")
         try:
-            with requests.get(xml_url, headers=headers, timeout=30, stream=True) as resp:
+            with requests.get(
+                xml_url,
+                headers=headers,
+                timeout=REQUEST_TIMEOUT,
+                stream=True,
+            ) as resp:
                 content = read_limited_response(
                     resp,
                     max_bytes=MAX_XML_BYTES,
@@ -542,10 +550,11 @@ def scrape_hokuyo_xml(base_url):
                     url=xml_url,
                 )
             root = ET.fromstring(content)
-            successful_feeds += 1
         except Exception as e:
             print(f"  XML取得失敗 ({xml_url}): {e}")
-            continue
+            if isinstance(e, FetchError):
+                raise
+            raise FetchError(f"北洋銀行のXMLを取得・解析できませんでした: {xml_url}") from e
         for art in root.findall("article"):
             title_el = art.find("title")
             if title_el is None:
@@ -564,8 +573,8 @@ def scrape_hokuyo_xml(base_url):
                 continue
             seen.add(key)
             items.append({"date": date, "title": title, "url": url})
-    if successful_feeds == 0:
-        raise FetchError("北洋銀行のXMLを取得・解析できませんでした。")
+    if not items:
+        raise ExtractionError("北洋銀行のXMLからニュース記事を抽出できませんでした。")
     return items
 
 

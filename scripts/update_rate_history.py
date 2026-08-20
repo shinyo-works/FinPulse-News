@@ -111,6 +111,9 @@ def validate_report_data(report_data: dict) -> None:
             raise ValueError(f"機関IDと商品IDが重複しています: {bank_id}/{product_id}")
         seen_products.add(product_key)
 
+        if "manual" in loan and not isinstance(loan["manual"], bool):
+            raise ValueError(f"loan_table[{index}].manual は真偽値にしてください。")
+
         for loan_key in RATE_KEY_MAP:
             value = loan.get(loan_key)
             if value is not None:
@@ -147,6 +150,28 @@ def validate_history(history: dict) -> None:
     if history.get("schema_version") != SCHEMA_VERSION:
         raise ValueError(f"履歴JSONの schema_version は {SCHEMA_VERSION} にしてください。")
 
+    rate_type_order = history.get("rate_type_order")
+    if (
+        not isinstance(rate_type_order, list)
+        or not rate_type_order
+        or not all(isinstance(value, str) and value for value in rate_type_order)
+    ):
+        raise ValueError("rate_type_order は空でない文字列の配列にしてください。")
+    if len(set(rate_type_order)) != len(rate_type_order):
+        raise ValueError("rate_type_order に重複があります。")
+
+    rate_type_labels = history.get("rate_type_labels")
+    if not isinstance(rate_type_labels, dict) or not all(
+        isinstance(key, str)
+        and key
+        and isinstance(value, str)
+        and value
+        for key, value in rate_type_labels.items()
+    ):
+        raise ValueError("rate_type_labels は空でない文字列の辞書にしてください。")
+    if set(rate_type_labels) != set(rate_type_order):
+        raise ValueError("rate_type_labels のキーは rate_type_order と一致させてください。")
+
     observation_dates = history.get("observation_dates")
     if not isinstance(observation_dates, list):
         raise ValueError("履歴JSONの observation_dates は配列にしてください。")
@@ -170,7 +195,7 @@ def validate_history(history: dict) -> None:
         bank_id = validate_id(row.get("bank_id"), f"rows[{index}].bank_id")
         product_id = validate_id(row.get("product_id"), f"rows[{index}].product_id")
         rate_type = row.get("rate_type")
-        if rate_type not in DEFAULT_ORDER:
+        if rate_type not in rate_type_order:
             raise ValueError(f"rows[{index}].rate_type が不正です: {rate_type!r}")
         key = row_key(bank_id, product_id, rate_type)
         if key in seen_rows:

@@ -52,6 +52,20 @@ class UpdateRateHistoryTest(unittest.TestCase):
         bank_ids = [row["bank_id"] for row in self.history["rows"]]
         self.assertEqual(["test-bank"], bank_ids)
 
+    def test_manual_must_be_boolean_when_present(self):
+        for invalid_value in ("false", 0, None):
+            report = copy.deepcopy(self.report)
+            report["loan_table"][0]["manual"] = invalid_value
+            with self.subTest(value=invalid_value), self.assertRaisesRegex(
+                ValueError, "manual は真偽値"
+            ):
+                update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+        for valid_value in (True, False):
+            report = copy.deepcopy(self.report)
+            report["loan_table"][0]["manual"] = valid_value
+            update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
     def test_rejects_missing_or_mismatched_rate_contract(self):
         missing = copy.deepcopy(self.report)
         missing.pop("rate_contract")
@@ -176,19 +190,55 @@ class UpdateRateHistoryTest(unittest.TestCase):
         )
 
     def test_rejects_invalid_ids_and_rates(self):
-        invalid_reports = [
-            {"loan_table": [{"bank_id": "", "product_id": "p", "loan_variable": 1.0}]},
-            {"loan_table": [{"bank_id": "b", "product_id": "p", "loan_variable": "1.0"}]},
-            {"loan_table": [{"bank_id": "b", "product_id": "p", "loan_variable": -1.0}]},
-            {"loan_table": [
-                {"bank_id": "b", "product_id": "p", "loan_variable": 1.0},
-                {"bank_id": "b", "product_id": "p", "loan_variable": 1.1},
-            ]},
-        ]
+        invalid_reports = []
 
-        for report in invalid_reports:
-            with self.subTest(report=report), self.assertRaises(ValueError):
+        empty_id = copy.deepcopy(self.report)
+        empty_id["loan_table"][0]["bank_id"] = ""
+        invalid_reports.append((empty_id, "bank_id は空でない文字列"))
+
+        string_rate = copy.deepcopy(self.report)
+        string_rate["loan_table"][0]["loan_variable"] = "1.0"
+        invalid_reports.append((string_rate, "loan_variable は数値"))
+
+        negative_rate = copy.deepcopy(self.report)
+        negative_rate["loan_table"][0]["loan_variable"] = -1.0
+        invalid_reports.append((negative_rate, "0〜100"))
+
+        duplicate = copy.deepcopy(self.report)
+        duplicate["loan_table"].append(copy.deepcopy(duplicate["loan_table"][0]))
+        invalid_reports.append((duplicate, "機関IDと商品IDが重複"))
+
+        for report, expected_error in invalid_reports:
+            with self.subTest(error=expected_error), self.assertRaisesRegex(
+                ValueError, expected_error
+            ):
                 update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+    def test_rejects_invalid_rate_type_metadata(self):
+        update_history(self.history, self.report, "2026-08-01")
+        invalid_histories = []
+
+        invalid_order_type = copy.deepcopy(self.history)
+        invalid_order_type["rate_type_order"] = "variable"
+        invalid_histories.append((invalid_order_type, "rate_type_order"))
+
+        duplicate_order = copy.deepcopy(self.history)
+        duplicate_order["rate_type_order"] = ["variable", "variable"]
+        invalid_histories.append((duplicate_order, "重複"))
+
+        missing_label = copy.deepcopy(self.history)
+        missing_label["rate_type_labels"] = {}
+        invalid_histories.append((missing_label, "rate_type_labels"))
+
+        unknown_row_type = copy.deepcopy(self.history)
+        unknown_row_type["rows"][0]["rate_type"] = "unknown"
+        invalid_histories.append((unknown_row_type, "rate_type が不正"))
+
+        for history, expected_error in invalid_histories:
+            with self.subTest(error=expected_error), self.assertRaisesRegex(
+                ValueError, expected_error
+            ):
+                validate_history(history)
 
     def test_atomic_write_produces_valid_json_without_temp_file(self):
         update_history(self.history, self.report, "2026-08-01")

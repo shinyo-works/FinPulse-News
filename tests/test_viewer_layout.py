@@ -1,4 +1,6 @@
+import json
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -130,6 +132,94 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn("localStorage.setItem(SIDEBAR_WIDTH_KEY", self.html)
         # モバイルは1画面1ペインなので調整バーを出さない
         self.assertRegex(self.html, r"\.pane-resizer\s*\{\s*display:\s*none;\s*\}")
+
+    def test_collection_failures_remain_visible_during_filters(self):
+        self.assertIn(
+            'const FAILED_STATUSES = new Set(["fetch_failed", "parse_failed", "extract_failed"]);',
+            self.html,
+        )
+        self.assertIn("function collectionFailureNotice(institution)", self.html)
+        self.assertIn('role="status"><strong>収集に失敗しました</strong>', self.html)
+        self.assertIn("escapeHtml(detail)", self.html)
+        self.assertIn("&& !failureNotice) continue;", self.html)
+        self.assertIn("収集失敗 ${failedCount}機関", self.html)
+
+        functions = []
+        for name in ("escapeHtml", "collectionFailureNotice"):
+            match = re.search(
+                rf"    function {name}\([^\n]*\) \{{[\s\S]*?\n    \}}",
+                self.html,
+            )
+            self.assertIsNotNone(match, name)
+            functions.append(match.group(0))
+        script = (
+            'const FAILED_STATUSES = new Set(["fetch_failed", "parse_failed", "extract_failed"]);\n'
+            + "\n".join(functions)
+            + """
+            console.log(JSON.stringify({
+              failed: collectionFailureNotice({ status: "fetch_failed", error: "<script>alert(1)</script>" }),
+              empty: collectionFailureNotice({ status: "empty", error: "" }),
+            }));
+            """
+        )
+        result = subprocess.run(
+            ["node", "-e", script],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        behavior = json.loads(result.stdout)
+        self.assertIn("collection-error", behavior["failed"])
+        self.assertIn("&lt;script&gt;", behavior["failed"])
+        self.assertNotIn("<script>", behavior["failed"])
+        self.assertEqual("", behavior["empty"])
+
+    def test_missing_rates_are_not_collapsed_as_unchanged(self):
+        function_names = (
+            "isFiniteRate",
+            "entryDate",
+            "entryAt",
+            "sameRate",
+            "buildColumns",
+        )
+        functions = []
+        for name in function_names:
+            match = re.search(
+                rf"    function {name}\([^\n]*\) \{{[\s\S]*?\n    \}}",
+                self.rate_html,
+            )
+            self.assertIsNotNone(match, name)
+            functions.append(match.group(0))
+
+        script = "\n".join(functions) + """
+        const dates = ["2026-08-15", "2026-08-08", "2026-08-01"];
+        const numericRows = [{ history: dates.map((date) => ({ observed_on: date, rate: 1.25 })) }];
+        const missingRows = [{ history: [{ observed_on: dates[0], rate: 1.25 }] }];
+        console.log(JSON.stringify({
+          equal: sameRate({ rate: 1.25 }, { rate: 1.25 }),
+          oneMissing: sameRate({ rate: 1.25 }, undefined),
+          bothMissing: sameRate(undefined, undefined),
+          changed: sameRate({ rate: 1.25 }, { rate: 1.35 }),
+          numericColumns: buildColumns(numericRows, dates).map((item) => item.kind),
+          missingColumns: buildColumns(missingRows, dates).map((item) => item.kind),
+        }));
+        """
+        result = subprocess.run(
+            ["node", "-e", script],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        behavior = json.loads(result.stdout)
+
+        self.assertTrue(behavior["equal"])
+        self.assertFalse(behavior["oneMissing"])
+        self.assertFalse(behavior["bothMissing"])
+        self.assertFalse(behavior["changed"])
+        self.assertEqual(["date", "nochange", "date"], behavior["numericColumns"])
+        self.assertEqual(["date", "date", "date"], behavior["missingColumns"])
 
 
 if __name__ == "__main__":

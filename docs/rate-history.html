@@ -461,9 +461,8 @@
     }
 
     function sameRate(a, b) {
-      const av = a && isFiniteRate(a.rate) ? a.rate : null;
-      const bv = b && isFiniteRate(b.rate) ? b.rate : null;
-      return av === bv;
+      if (!a || !b || !isFiniteRate(a.rate) || !isFiniteRate(b.rate)) return false;
+      return a.rate === b.rate;
     }
 
     function shortDate(date) {

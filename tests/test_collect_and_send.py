@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import tempfile
 import unittest
 from datetime import datetime
@@ -35,6 +36,13 @@ class FakeResponse:
     def iter_content(self, chunk_size):
         del chunk_size
         yield from self._chunks
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        del exc_type, exc_value, traceback
+        return False
 
 
 JA_OBIHIROKAWANISI_HTML = """
@@ -243,6 +251,15 @@ class DateExtractionTest(unittest.TestCase):
 
 
 class DecodeHtmlTest(unittest.TestCase):
+    def test_fetch_page_uses_shared_connect_and_read_timeout(self):
+        response = FakeResponse([b"<html>ok</html>"])
+        with mock.patch.object(
+            collector.requests, "get", return_value=response
+        ) as request:
+            collector.fetch_page("https://example.com/news/")
+
+        self.assertEqual(collector.REQUEST_TIMEOUT, request.call_args.kwargs["timeout"])
+
     def test_explicit_encoding_decodes_shift_jis(self):
         content = "<html><body>住宅ローン金利のお知らせ</body></html>".encode("cp932")
         self.assertIn("住宅ローン金利のお知らせ", collector.decode_html(content, "cp932"))
@@ -259,6 +276,79 @@ class DecodeHtmlTest(unittest.TestCase):
     def test_unknown_encoding_falls_back_without_error(self):
         content = "<html>fallback</html>".encode("utf-8")
         self.assertIn("fallback", collector.decode_html(content, "no-such-codec"))
+
+
+class ProgrammaticScraperTest(unittest.TestCase):
+    def test_deduplicates_only_the_same_title_and_url(self):
+        html = """
+        <a href="/news/1">住宅ローン金利のお知らせ</a>
+        <a href="/news/1">住宅ローン金利のお知らせ</a>
+        <a href="/news/2">住宅ローン金利のお知らせ</a>
+        """
+
+        items = collector.scrape_news_programmatic(html, "https://example.com/")
+
+        self.assertEqual(
+            ["https://example.com/news/1", "https://example.com/news/2"],
+            [item["url"] for item in items],
+        )
+
+
+class HokuyoXmlTest(unittest.TestCase):
+    XML_WITH_ARTICLE = """<?xml version="1.0" encoding="UTF-8"?>
+    <announcements><article><viewdate>2026.08.20</viewdate>
+    <title href="detail/1.pdf">住宅ローン金利のお知らせ (PDF 2.4MB)</title>
+    </article></announcements>""".encode("utf-8")
+    EMPTY_XML = b"<?xml version=\"1.0\"?><announcements></announcements>"
+
+    def xml_response(self, content):
+        return FakeResponse([content], content_type="application/xml")
+
+    def test_requires_both_yearly_feeds(self):
+        with mock.patch.object(
+            collector.requests,
+            "get",
+            side_effect=[
+                self.xml_response(self.XML_WITH_ARTICLE),
+                collector.requests.Timeout("前年フィードがタイムアウト"),
+            ],
+        ), self.assertRaisesRegex(collector.FetchError, "北洋銀行のXML"):
+            collector.scrape_hokuyo_xml(
+                "https://www.hokuyobank.co.jp/announcement/"
+            )
+
+    def test_rejects_two_successful_but_empty_feeds(self):
+        with mock.patch.object(
+            collector.requests,
+            "get",
+            side_effect=[
+                self.xml_response(self.EMPTY_XML),
+                self.xml_response(self.EMPTY_XML),
+            ],
+        ), self.assertRaisesRegex(collector.ExtractionError, "ニュース記事"):
+            collector.scrape_hokuyo_xml(
+                "https://www.hokuyobank.co.jp/announcement/"
+            )
+
+    def test_keeps_normal_parsing_deduplication_and_pdf_suffix_removal(self):
+        with mock.patch.object(
+            collector.requests,
+            "get",
+            side_effect=[
+                self.xml_response(self.XML_WITH_ARTICLE),
+                self.xml_response(self.XML_WITH_ARTICLE),
+            ],
+        ) as request:
+            items = collector.scrape_hokuyo_xml(
+                "https://www.hokuyobank.co.jp/announcement/"
+            )
+
+        self.assertEqual(1, len(items))
+        self.assertEqual("住宅ローン金利のお知らせ", items[0]["title"])
+        self.assertEqual("2026-08-20", items[0]["date"])
+        self.assertEqual(2, request.call_count)
+        for call in request.call_args_list:
+            self.assertEqual(collector.REQUEST_TIMEOUT, call.kwargs["timeout"])
 
 
 class SanitizeItemsTest(unittest.TestCase):
@@ -385,6 +475,47 @@ class JaObihirokawanisiTest(unittest.TestCase):
 
         self.assertEqual("extract_failed", result.status)
         self.assertEqual("記事一覧を抽出できませんでした。", result.error)
+
+    def test_all_missing_dates_are_reported_as_structure_failure(self):
+        html_without_dates = re.sub(
+            r'<time class="news_content__date">.*?</time>',
+            "",
+            JA_OBIHIROKAWANISI_HTML,
+        )
+
+        with self.assertRaisesRegex(collector.ExtractionError, "日付"):
+            collector.scrape_ja_obihirokawanisi(
+                html_without_dates,
+                self.institution["url"],
+            )
+
+    def test_partial_missing_dates_keep_the_existing_fail_open_behavior(self):
+        html_with_one_missing_date = JA_OBIHIROKAWANISI_HTML.replace(
+            '<time class="news_content__date">2026.07.31</time>',
+            "",
+            1,
+        )
+
+        items = collector.scrape_ja_obihirokawanisi(
+            html_with_one_missing_date,
+            self.institution["url"],
+        )
+
+        self.assertEqual("", items[0]["date"])
+        self.assertTrue(any(item["date"] for item in items[1:]))
+
+    def test_date_can_be_recovered_from_article_url(self):
+        html = """
+        <section class="content_section news_list"><ul>
+          <li class="news_content"><a href="/wp/20260820_campaign.pdf">
+            <span class="news_content__text">定期貯金キャンペーンのお知らせ</span>
+          </a></li>
+        </ul></section>
+        """
+
+        items = collector.scrape_ja_obihirokawanisi(html, self.institution["url"])
+
+        self.assertEqual("2026-08-20", items[0]["date"])
 
 
 class FilteringTest(unittest.TestCase):

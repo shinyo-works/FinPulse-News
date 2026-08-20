@@ -37,6 +37,7 @@ jobs:
       - name: 収集・レポート生成・送信
         id: collect
         continue-on-error: true
+        timeout-minutes: 15
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           REPORT_TO: ${{ secrets.REPORT_TO }}

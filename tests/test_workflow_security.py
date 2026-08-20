@@ -31,6 +31,15 @@ class WorkflowSecurityTest(unittest.TestCase):
     def test_unused_claude_secret_is_not_exposed(self):
         self.assertNotIn("ANTHROPIC_API_KEY", self.workflow)
 
+    def test_only_collection_step_has_wall_clock_timeout(self):
+        self.assertRegex(
+            self.workflow,
+            r"- name: 収集・レポート生成・送信[\s\S]*?timeout-minutes: 15[\s\S]*?run: python scripts/collect_and_send.py",
+        )
+        # ジョブ全体を打ち切ると、if: always() の成果物保存まで失うため設定しない。
+        collect_job_header = self.workflow.split("steps:", 1)[0]
+        self.assertNotIn("timeout-minutes", collect_job_header)
+
     def test_publish_push_retries_with_rebase(self):
         # 別リポジトリの自動pushとの競合時に、取り込み直して再pushするループがあること
         self.assertIn("git pull --rebase --autostash origin main", self.workflow)

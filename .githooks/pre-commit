@@ -6,13 +6,13 @@
 # 有効化（クローン直後に1回だけ）:
 #   git config core.hooksPath .githooks
 
-if git diff --cached --quiet --diff-filter=ACM -- '*.py'; then
+if git diff --cached --quiet --diff-filter=ACMR -- '*.py'; then
   exit 0
 fi
 
 echo "[pre-commit] Python 構文チェック中..."
-if ! git diff --cached --name-only -z --diff-filter=ACM -- '*.py' \
-  | xargs -0 python -m py_compile --; then
+HOOK_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if ! python "$HOOK_DIR/check_staged_python.py"; then
   echo "[pre-commit] 構文エラーがあります。修正してから再コミットしてください。" >&2
   exit 1
 fi
