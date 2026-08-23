@@ -5,6 +5,17 @@
       "name": "帯広信用金庫",
       "items": [
         {
+          "date": "2026-08-19",
+          "title": "「しんきん（個⼈）（法⼈）ワンタイムパスワードアプリ」バージョンアップのお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.08.19-onetimeverupinfo-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-24"
+          ]
+        },
+        {
           "date": "2026-08-03",
           "title": "「当座預金規定（一般当座口用）他15 規定」改定のお知らせ",
           "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.08.03-kogitte_kitei-2027.03.31.pdf",
@@ -12,6 +23,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03"
@@ -25,6 +37,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10"
           ]
@@ -37,6 +50,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -51,6 +65,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -65,6 +80,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -96,6 +112,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -332,6 +349,17 @@
       "name": "北海道銀行",
       "items": [
         {
+          "date": "2026-08-21",
+          "title": "2026.08.21個人のお客さま「口座開設プラザ」のシルバーウィーク営業のお知らせ",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/bf2e809592939e72fdf7d73e1ebc3afd.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-24"
+          ]
+        },
+        {
           "date": "2026-07-29",
           "title": "2026.07.29個人のお客さま法人のお客さまテレホンバンキングサービス終了のお知らせ",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/87de1cdb596f3469c8cd438791d04b7c.pdf",
@@ -339,6 +367,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03"
@@ -415,6 +444,17 @@
       "name": "北洋銀行",
       "items": [
         {
+          "date": "2026-08-17",
+          "title": "「事前登録口座の申込み」機能追加のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260817_076812.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-24"
+          ]
+        },
+        {
           "date": "2026-08-10",
           "title": "「投資信託・ファンドラップ 資産づくり応援キャンペーン」を実施します",
           "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260810_076802.pdf",
@@ -422,6 +462,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17"
           ]
         },
@@ -433,6 +474,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -447,6 +489,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10"
           ]
@@ -459,6 +502,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -474,6 +518,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -490,6 +535,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -506,6 +552,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10"
           ]
@@ -619,6 +666,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17"
           ]
         },
@@ -641,6 +689,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10"
           ]
@@ -653,6 +702,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -700,6 +750,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -940,6 +991,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17"
           ]
         },
@@ -951,6 +1003,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17"
           ]
         },
@@ -962,6 +1015,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10"
           ]
@@ -974,6 +1028,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -1001,6 +1056,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -1128,6 +1184,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -1155,6 +1212,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -1348,6 +1406,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17"
           ]
         },
@@ -1359,6 +1418,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03",
@@ -1474,6 +1534,33 @@
           "date_inferred": false,
           "reports": [
             "2026-05-17"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JA帯広かわにし",
+      "items": [
+        {
+          "date": "2026-07-31",
+          "title": "各種手数料改定のお知らせ（再案内）",
+          "url": "https://www.jaobihirokawanisi.or.jp/wp/wp-content/uploads/2026/07/a087c3d95ead3d5094d1a2356476cf81-1.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-24"
+          ]
+        },
+        {
+          "date": "2026-06-10",
+          "title": "夏の定期貯金 金利上乗せキャンペーン",
+          "url": "https://www.jaobihirokawanisi.or.jp/wp/wp-content/uploads/2026/06/174c91dd16c487ac17feb672d9f81213.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-24"
           ]
         }
       ]
