@@ -52,6 +52,12 @@ JST = timezone(timedelta(hours=9))
 # 日付別レポートは対象外のため、過去分も従来どおりすべて閲覧できる。
 INSTITUTION_WINDOW_MONTHS = 24
 DEFAULT_STAR_KEYWORDS = ("金利", "キャンペーン")
+
+# 除外ルールの照合先。既定は記事名。記事名では区別できない区分（JAおとふけの
+# ホクレン給油所ニュースなど）だけ、URLを見て落とすために "url" を使う。
+EXCLUDE_TARGET_TITLE = "title"
+EXCLUDE_TARGET_URL = "url"
+EXCLUDE_TARGETS = (EXCLUDE_TARGET_TITLE, EXCLUDE_TARGET_URL)
 MAX_HTML_BYTES = 5 * 1024 * 1024
 MAX_XML_BYTES = 5 * 1024 * 1024
 REQUEST_TIMEOUT = (5, 30)  # 接続待ち・読取無通信の上限（秒）
@@ -147,6 +153,11 @@ def validate_config(config):
                 isinstance(value, str) and value for value in unless
             ):
                 raise ValueError(f"{name} の exclude_rules[{rule_index}].unless は文字列の配列にしてください。")
+            if rule.get("target", EXCLUDE_TARGET_TITLE) not in EXCLUDE_TARGETS:
+                raise ValueError(
+                    f"{name} の exclude_rules[{rule_index}].target は "
+                    f"{' / '.join(sorted(EXCLUDE_TARGETS))} のいずれかにしてください。"
+                )
 
 
 def load_config():
@@ -767,9 +778,16 @@ def apply_filters(items, institution, star_keywords=None):
         excluded_by = None
         for rule in exclude_rules:
             kw = rule["keyword"]
-            if kw in title:
+            # 照合先はルール単位。unless も同じ文字列に対して見て、1ルール内で
+            # 判断材料が2か所に割れないようにする。
+            haystack = (
+                item.get("url", "")
+                if rule.get("target") == EXCLUDE_TARGET_URL
+                else title
+            )
+            if kw in haystack:
                 unless = rule.get("unless", [])
-                if unless and any(u in title for u in unless):
+                if unless and any(u in haystack for u in unless):
                     continue
                 excluded_by = kw
                 break

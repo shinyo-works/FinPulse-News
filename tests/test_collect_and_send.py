@@ -592,6 +592,126 @@ class JaObihirokawanisiTest(unittest.TestCase):
         self.assertEqual("2026-08-20", items[0]["date"])
 
 
+class JaOtofukeExcludeTest(unittest.TestCase):
+    """JAおとふけはホクレン給油所の記事が金融の記事と同じ一覧に混ざる。
+    記事名だけでは分けられないため、URL照合の除外ルールと併用する。"""
+
+    # 実レポート（output/data/*.json）に通過として残っていた12本。
+    REAL_PASSED_ARTICLES = [
+        ("2026-08-11", "【イベント】ウェルカムキャンペーンのお知らせ", "/2023/13065/", False),
+        ("2026-08-10", "金利改定のご案内（貯金）", "/2023/13055/", True),
+        ("2026-08-03", "金利改定のご案内（貯金・貸付金）", "/2023/13045/", True),
+        ("2026-07-13", "第1スタンド日曜日営業のお知らせ", "/hokurennews/13006/", False),
+        ("2026-06-23", "【イベント】ウェルカムキャンペーンのお知らせ", "/2023/12965/", False),
+        ("2026-06-03", "営業時間変更のお知らせ", "/hokurennews/12937/", False),
+        ("2026-05-01", "キャンペーン金利のご案内（貸付金）", "/2023/12882/", True),
+        ("2026-04-01", "定期貯金（独自取扱商品）キャンペーンのご案内", "/2023/12715/", True),
+        ("2026-03-23", "金融店舗における昼休み時間帯（12時〜13時）の対応について", "/2023/12698/", True),
+        ("2026-02-26", "金利改定のご案内（貯金）", "/2023/12629/", True),
+        ("2026-02-24", "金融店舗の営業時間変更（お昼休み導入）について", "/2023/12618/", True),
+        ("2026-02-03", "金利改定のご案内（貯金・貸付金）", "/2023/12596/", True),
+    ]
+
+    def setUp(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        config = json.loads(
+            (repository_root / "config.json").read_text(encoding="utf-8")
+        )
+        self.config = config
+        self.institution = next(
+            item for item in config["institutions"] if item["name"] == "JAおとふけ"
+        )
+
+    def _items(self):
+        return [
+            {
+                "date": date,
+                "title": title,
+                "url": f"https://www.ja-otofuke.jp{path}",
+            }
+            for date, title, path, _ in self.REAL_PASSED_ARTICLES
+        ]
+
+    def test_real_articles_split_into_financial_and_gas_station(self):
+        passed, excluded = collector.apply_filters(
+            self._items(),
+            self.institution,
+            self.config["star_keywords"],
+        )
+
+        self.assertEqual(
+            [title for _, title, _, keep in self.REAL_PASSED_ARTICLES if keep],
+            [item["title"] for item in passed],
+        )
+        self.assertEqual(
+            [title for _, title, _, keep in self.REAL_PASSED_ARTICLES if not keep],
+            [item["title"] for item in excluded],
+        )
+        # 「営業時間変更のお知らせ」はURLで落とす。同名で始まる金融店舗の記事は残す。
+        self.assertIn(
+            "金融店舗の営業時間変更（お昼休み導入）について",
+            [item["title"] for item in passed],
+        )
+        self.assertEqual(
+            ["【イベント】", "/hokurennews/", "【イベント】", "/hokurennews/"],
+            [item["exclude_keyword"] for item in excluded],
+        )
+
+    def test_event_rule_keeps_financial_events(self):
+        items = [{
+            "date": "2026-09-01",
+            "title": "【イベント】住宅ローン相談会のお知らせ",
+            "url": "https://www.ja-otofuke.jp/2023/99999/",
+        }]
+
+        passed, excluded = collector.apply_filters(
+            items,
+            self.institution,
+            self.config["star_keywords"],
+        )
+
+        self.assertEqual(1, len(passed))
+        self.assertEqual([], excluded)
+
+    def test_url_rule_ignores_the_same_word_in_the_title(self):
+        items = [{
+            "date": "2026-09-01",
+            "title": "「/hokurennews/」表記を含む金利のお知らせ",
+            "url": "https://www.ja-otofuke.jp/2023/99998/",
+        }]
+
+        passed, _ = collector.apply_filters(
+            items,
+            self.institution,
+            self.config["star_keywords"],
+        )
+
+        self.assertEqual(1, len(passed))
+
+    def test_rejects_unknown_exclude_target(self):
+        config = minimal_config()
+        config["institutions"][0]["exclude_rules"] = [
+            {"keyword": "テスト", "target": "body"}
+        ]
+
+        with self.assertRaisesRegex(ValueError, "target"):
+            collector.validate_config(config)
+
+    def test_missing_target_defaults_to_title(self):
+        config = minimal_config()
+        config["institutions"][0]["exclude_rules"] = [{"keyword": "テスト"}]
+        collector.validate_config(config)
+
+        passed, excluded = collector.apply_filters(
+            [{"title": "テストのお知らせ", "url": "https://example.com/a", "date": "2026-09-01"}],
+            config["institutions"][0],
+            self.config["star_keywords"],
+        )
+
+        self.assertEqual([], passed)
+        self.assertEqual("テスト", excluded[0]["exclude_keyword"])
+
+
 class JaKinoTest(unittest.TestCase):
     def setUp(self):
         repository_root = Path(__file__).resolve().parents[1]
