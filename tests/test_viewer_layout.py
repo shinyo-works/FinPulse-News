@@ -35,18 +35,27 @@ class ViewerLayoutTest(unittest.TestCase):
 
         self.assertLess(tabs.index('data-view="rate"'), tabs.index("金利履歴ビューアー"))
         self.assertIn("左が最新、右が過去です。", tabs)
-        # 新着ニュース表示中はサイト名だけ、金利情報表示中は説明だけを出す
+        # 新着ニュース表示中はサイト名だけ、金利タブ表示中は説明だけを出す
         self.assertRegex(
             self.html,
-            r'body\[data-view="news"\]\s*\.tab-note,\s*\n\s*body\[data-view="rate"\]\s*\.tab-note\s*\{[^}]*display:\s*flex;',
+            r'body\[data-view="news"\]\s*\.tab-note,\s*\n\s*body\[data-view="rate"\]\s*\.tab-note,'
+            r'\s*\n\s*body\[data-view="car"\]\s*\.tab-note\s*\{[^}]*display:\s*flex;',
         )
         self.assertRegex(
             self.html,
-            r'body\[data-view="news"\]\s*\.note-heading,\s*\n\s*body\[data-view="news"\]\s*\.note-text\s*\{\s*display:\s*none;\s*\}',
+            r'body\[data-view="news"\]\s*\.note-heading\s*\{\s*display:\s*none;\s*\}',
         )
         self.assertRegex(
             self.html,
-            r'body\[data-view="rate"\]\s*\.tab-brand,\s*\n\s*body\[data-view="rate"\]\s*\.note-heading\s*\{\s*display:\s*none;\s*\}',
+            r'body\[data-view="rate"\]\s*\.tab-brand,\s*\n\s*body\[data-view="rate"\]\s*\.note-heading,'
+            r'\s*\n\s*body\[data-view="car"\]\s*\.tab-brand,'
+            r'\s*\n\s*body\[data-view="car"\]\s*\.note-heading\s*\{\s*display:\s*none;\s*\}',
+        )
+        # 説明文はローン種別ごとに違うので、既定は非表示で表示中のタブのものだけ出す
+        self.assertRegex(self.html, r"\.note-text\s*\{\s*display:\s*none;\s*\}")
+        self.assertRegex(
+            self.html,
+            r'body\[data-view="rate"\]\s*\.note-rate,\s*\n\s*body\[data-view="car"\]\s*\.note-car\s*\{\s*display:\s*inline;\s*\}',
         )
         # iframe 側の見出しは重複するので、埋め込み時だけ隠す
         self.assertRegex(
@@ -80,13 +89,32 @@ class ViewerLayoutTest(unittest.TestCase):
             r'<nav class="product-tabs".*?</nav>', self.html, re.DOTALL
         ).group(0)
         self.assertIn(
-            '<button class="product-tab active" type="button" data-view="rate">金利情報</button>',
+            '<button class="product-tab active" type="button" data-view="rate">住宅ローン金利情報</button>',
             tabs,
         )
-        # URLがニュース側を指すときだけ新着ニュースへ切り替える
+        # URLが他のタブを指すときだけそちらへ切り替える
         self.assertIn(
-            'switchView(parseHash(INITIAL_HASH)?.view === "news" ? "news" : "rate");',
+            'switchView(parseHash(INITIAL_HASH)?.view || "rate");',
             self.html,
+        )
+
+    def test_car_loan_tab_shows_the_same_viewer_with_car_data(self):
+        tabs = re.search(
+            r'<nav class="product-tabs".*?</nav>', self.html, re.DOTALL
+        ).group(0)
+        self.assertIn(
+            '<button class="product-tab" type="button" data-view="car">マイカーローン金利情報</button>',
+            tabs,
+        )
+        # 住宅ローンの右隣に置く（新着ニュース → 住宅ローン → マイカーローン）
+        self.assertLess(tabs.index('data-view="rate"'), tabs.index('data-view="car"'))
+        # 同じビューアーを読むJSONだけ変えて使う
+        self.assertIn('src: "./rate-history.html?dataset=car"', self.html)
+        self.assertIn('<iframe id="carFrame" class="report-frame"', self.html)
+        # ビューアー側は既知のデータセットだけを受け付ける
+        self.assertIn('dataUrl: "./data/car-loan-history.json"', self.rate_html)
+        self.assertIn(
+            'const DATASET = DATASETS[DATASET_KEY] || DATASETS.housing;', self.rate_html
         )
 
     def test_titles_use_the_japanese_site_name(self):
@@ -94,6 +122,7 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn("<title>十勝金融機関News｜金利情報</title>", self.html)
         self.assertIn('const NEWS_TITLE = "十勝金融機関News｜新着ニュース";', self.html)
         self.assertIn('const RATE_TITLE = "十勝金融機関News｜金利情報";', self.html)
+        self.assertIn('const CAR_TITLE = "十勝金融機関News｜マイカーローン金利情報";', self.html)
         self.assertIn("<title>十勝金融機関News｜金利情報</title>", self.rate_html)
         self.assertIn("<title>十勝金融機関News</title>", self.root_html)
         for html in (self.html, self.rate_html, self.root_html):

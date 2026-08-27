@@ -600,24 +600,31 @@
       text-overflow: ellipsis;
     }
 
-    /* 新着ニュース表示中はサイト名だけ、金利情報表示中は説明だけを出す。 */
+    /* 新着ニュース表示中はサイト名だけ、金利タブ表示中は説明だけを出す。 */
     body[data-view="news"] .tab-note,
-    body[data-view="rate"] .tab-note { display: flex; }
+    body[data-view="rate"] .tab-note,
+    body[data-view="car"] .tab-note { display: flex; }
 
-    body[data-view="news"] .note-heading,
-    body[data-view="news"] .note-text { display: none; }
+    body[data-view="news"] .note-heading { display: none; }
 
     body[data-view="rate"] .tab-brand,
-    body[data-view="rate"] .note-heading { display: none; }
+    body[data-view="rate"] .note-heading,
+    body[data-view="car"] .tab-brand,
+    body[data-view="car"] .note-heading { display: none; }
+
+    /* 説明文はローン種別ごとに違うので、表示中のタブのものだけを出す。 */
+    .note-text { display: none; }
+    body[data-view="rate"] .note-rate,
+    body[data-view="car"] .note-car { display: inline; }
 
     /* 製品タブ44pxぶん全体を下げる */
     body { padding-top: 44px; }
     .sidebar { top: 44px; height: calc(100vh - 44px); }
     .topbar { top: 44px; }
 
-    #rateView { display: none; }
+    .report-view { display: none; }
 
-    #rateFrame {
+    .report-frame {
       display: block;
       width: 100%;
       height: calc(100vh - 44px);
@@ -625,10 +632,13 @@
       background: #ffffff;
     }
 
-    body[data-view="rate"] #newsView { display: none; }
-    body[data-view="rate"] #rateView { display: block; }
+    body[data-view="rate"] #newsView,
+    body[data-view="car"] #newsView { display: none; }
+    body[data-view="rate"] #rateView,
+    body[data-view="car"] #carView { display: block; }
     /* 金利レポート表示中はニュース用モバイルタブが無いので44pxのみ */
-    body[data-view="rate"] { padding-top: 44px !important; }
+    body[data-view="rate"],
+    body[data-view="car"] { padding-top: 44px !important; }
 
     @media (max-width: 920px) {
       :root { --sidebar-width: 245px; }
@@ -731,8 +741,9 @@
 <body data-mobile-pane="nav" data-view="rate">
   <nav class="product-tabs" aria-label="表示するレポートの切替">
     <button class="product-tab" type="button" data-view="news">新着ニュース</button>
-    <button class="product-tab active" type="button" data-view="rate">金利情報</button>
-    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
+    <button class="product-tab active" type="button" data-view="rate">住宅ローン金利情報</button>
+    <button class="product-tab" type="button" data-view="car">マイカーローン金利情報</button>
+    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text note-rate"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-car"><span class="note-full">帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
   </nav>
 
   <div id="newsView">
@@ -801,8 +812,12 @@
   </div>
   </div><!-- /newsView -->
 
-  <div id="rateView">
-    <iframe id="rateFrame" title="金利情報" loading="lazy"></iframe>
+  <div id="rateView" class="report-view">
+    <iframe id="rateFrame" class="report-frame" title="住宅ローン金利情報" loading="lazy"></iframe>
+  </div>
+
+  <div id="carView" class="report-view">
+    <iframe id="carFrame" class="report-frame" title="マイカーローン金利情報" loading="lazy"></iframe>
   </div>
 
   <script>
@@ -1176,8 +1191,9 @@
     // 履歴は増やさない（replaceState）。戻るボタンは従来どおりサイト外へ戻る。
     function syncHash() {
       let hash = "";
-      if (document.body.dataset.view === "rate") {
-        hash = "#rate";
+      const view = document.body.dataset.view;
+      if (REPORT_VIEWS[view]) {
+        hash = `#${view}`;
       } else if (state.mode === "institution" && state.selectedInstitution) {
         hash = `#inst/${encodeURIComponent(state.selectedInstitution)}`;
       } else if (state.mode === "date" && state.selectedDate) {
@@ -1190,7 +1206,8 @@
 
     /** URLのハッシュを解釈する。読み取れない場合は null を返し、呼び出し側の既定動作へ委ねる。 */
     function parseHash(raw = location.hash) {
-      if (raw === "#rate") return { view: "rate" };
+      const reportView = raw.replace(/^#/, "");
+      if (REPORT_VIEWS[reportView]) return { view: reportView };
       const dateMatch = raw.match(/^#date\/(\d{4}-\d{2}-\d{2})$/);
       if (dateMatch) return { view: "news", date: dateMatch[1] };
       const instMatch = raw.match(/^#inst\/(.+)$/);
@@ -1410,10 +1427,15 @@
       storeSidebarWidth(preferredWidth);
     });
 
-    const RATE_REPORT_SRC = "./rate-history.html";
     const NEWS_TITLE = "十勝金融機関News｜新着ニュース";
     const RATE_TITLE = "十勝金融機関News｜金利情報";
-    let rateLoaded = false;
+    const CAR_TITLE = "十勝金融機関News｜マイカーローン金利情報";
+    // ローン種別ごとの金利タブ。表示するのは同じビューアーで、読むJSONだけが違う。
+    const REPORT_VIEWS = {
+      rate: { frameId: "rateFrame", src: "./rate-history.html", title: RATE_TITLE },
+      car: { frameId: "carFrame", src: "./rate-history.html?dataset=car", title: CAR_TITLE },
+    };
+    const loadedReportViews = new Set();
 
     function switchView(view) {
       document.body.dataset.view = view;
@@ -1421,11 +1443,12 @@
         button.classList.toggle("active", button.dataset.view === view);
       });
       // 金利履歴は初回表示時にだけ読み込む（初期表示を軽くする）
-      if (view === "rate" && !rateLoaded) {
-        document.getElementById("rateFrame").src = RATE_REPORT_SRC;
-        rateLoaded = true;
+      const report = REPORT_VIEWS[view];
+      if (report && !loadedReportViews.has(view)) {
+        document.getElementById(report.frameId).src = report.src;
+        loadedReportViews.add(view);
       }
-      document.title = view === "rate" ? RATE_TITLE : NEWS_TITLE;
+      document.title = report ? report.title : NEWS_TITLE;
       syncHash();
     }
 
@@ -1438,8 +1461,8 @@
     window.addEventListener("hashchange", () => {
       const requested = parseHash();
       if (!requested) return;
-      if (requested.view === "rate") {
-        switchView("rate");
+      if (REPORT_VIEWS[requested.view]) {
+        switchView(requested.view);
         return;
       }
       if (document.body.dataset.view !== "news") switchView("news");
@@ -1452,9 +1475,9 @@
     });
 
     // ニュース側の復元を終えてからタブを切り替える（金利タブのiframe遅延読み込みを保つ）。
-    // 既定は金利情報タブ。URLがニュース側を指しているときだけ新着ニュースへ切り替える。
+    // 既定は住宅ローン金利タブ。URLが他のタブを指しているときだけそちらへ切り替える。
     initialize().then(() => {
-      switchView(parseHash(INITIAL_HASH)?.view === "news" ? "news" : "rate");
+      switchView(parseHash(INITIAL_HASH)?.view || "rate");
     });
   </script>
 </body>

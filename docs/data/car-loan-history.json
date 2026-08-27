@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "rate_type_order": [
+    "variable",
+    "fixed"
+  ],
+  "rate_type_labels": {
+    "variable": "変動",
+    "fixed": "固定"
+  },
+  "observation_dates": [],
+  "data_sources": [
+    {
+      "period_start": "",
+      "period_end": "",
+      "kind": "financial_report_tool",
+      "repository": "金利調査ツール",
+      "description": "報告自動化ツールの週次JSON（GitHub Actions実行のArtifactを含む）"
+    }
+  ],
+  "is_demo": false,
+  "rows": []
+}

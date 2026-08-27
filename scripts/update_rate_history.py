@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-"""金利履歴データ（docs/data/rate-history.json）を更新するスクリプト。
+"""金利履歴データ（docs/data/*.json）を更新するスクリプト。
 
 報告自動化ツールが毎週出力する report_data_YYYYMMDD.json を入力に取り、
 各(機関×商品×金利種別)について、調査日ごとの確認値を
 { rate, observed_on } として保存する。値を取得できなかった項目は保存しないため、
 画面側で「据え置き」と「未確認」を混同せずに表示できる。
+
+住宅ローン（loan_table -> rate-history.json）とマイカーローン
+（car_loan_table -> car-loan-history.json）を同じ仕組みで扱う。違いは
+DATASETS の定義だけに閉じ込め、積み上げ・検証の処理は共通にする。
 
 依存: 標準ライブラリのみ（json）。スクレイピングやGeminiは不要。
 
@@ -19,10 +23,13 @@ import math
 import os
 import re
 import tempfile
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-HISTORY_PATH = Path(__file__).resolve().parent.parent / "docs" / "data" / "rate-history.json"
+DATA_DIR = Path(__file__).resolve().parent.parent / "docs" / "data"
+HISTORY_PATH = DATA_DIR / "rate-history.json"
+CAR_HISTORY_PATH = DATA_DIR / "car-loan-history.json"
 
 # report_data.loan_table のキー -> 履歴側の rate_type
 RATE_KEY_MAP = {
@@ -31,15 +38,51 @@ RATE_KEY_MAP = {
     "loan_fixed_5y": "fixed_5y",
     "loan_fixed_10y": "fixed_10y",
 }
+# report_data.car_loan_table のキー -> 履歴側の rate_type
+CAR_RATE_KEY_MAP = {
+    "car_loan_variable": "variable",
+    "car_loan_fixed": "fixed",
+}
+# 1: 住宅ローンのみ。2: マイカーローンを追加。
+# 上流とFinPulseは別リポジトリで別々に更新されるため、旧契約も受け入れ続ける。
 REPORT_RATE_CONTRACT_VERSION = 1
+REPORT_RATE_CONTRACT_VERSION_WITH_CAR = 2
+
+
+@dataclass(frozen=True)
+class Dataset:
+    """1つの履歴ファイルが扱うローン種別の定義。"""
+
+    key: str
+    label: str
+    table_key: str
+    contract_field: str
+    rate_key_map: dict
+    rate_type_order: list
+    rate_type_labels: dict
+    history_path: Path
 
 
 def expected_rate_contract_metadata() -> dict:
-    """報告自動化ツールから受け入れる金利項目契約を返す。"""
+    """住宅ローンのみを扱う旧契約（version 1）を返す。"""
     return {
         "version": REPORT_RATE_CONTRACT_VERSION,
         "loan_rate_fields": list(RATE_KEY_MAP),
     }
+
+
+def expected_rate_contract_metadata_with_car() -> dict:
+    """マイカーローンを含む契約（version 2）を返す。"""
+    return {
+        "version": REPORT_RATE_CONTRACT_VERSION_WITH_CAR,
+        "loan_rate_fields": list(RATE_KEY_MAP),
+        "car_loan_rate_fields": list(CAR_RATE_KEY_MAP),
+    }
+
+
+def supported_rate_contracts() -> list:
+    """受け入れ可能な契約を新しい順に返す。"""
+    return [expected_rate_contract_metadata_with_car(), expected_rate_contract_metadata()]
 
 # 上流の報告自動化ツールが渡す商品名が、実サイト上の区分を表さない場合の表示名。
 # 北海道労働金庫は定額型・定率型で金利体系が別なのに、上流の名称では見分けられない。
@@ -62,8 +105,45 @@ DEFAULT_LABELS = {
     "fixed_10y": "固定10年",
 }
 DEFAULT_ORDER = ["variable", "fixed_3y", "fixed_5y", "fixed_10y"]
+CAR_DEFAULT_LABELS = {
+    "variable": "変動",
+    "fixed": "固定",
+}
+CAR_DEFAULT_ORDER = ["variable", "fixed"]
 MAX_RATE_PERCENT = 100.0
 SCHEMA_VERSION = 2
+
+HOUSING_DATASET = Dataset(
+    key="housing",
+    label="住宅ローン金利",
+    table_key="loan_table",
+    contract_field="loan_rate_fields",
+    rate_key_map=RATE_KEY_MAP,
+    rate_type_order=DEFAULT_ORDER,
+    rate_type_labels=DEFAULT_LABELS,
+    history_path=HISTORY_PATH,
+)
+CAR_DATASET = Dataset(
+    key="car",
+    label="マイカーローン金利",
+    table_key="car_loan_table",
+    contract_field="car_loan_rate_fields",
+    rate_key_map=CAR_RATE_KEY_MAP,
+    rate_type_order=CAR_DEFAULT_ORDER,
+    rate_type_labels=CAR_DEFAULT_LABELS,
+    history_path=CAR_HISTORY_PATH,
+)
+DATASETS = {dataset.key: dataset for dataset in (HOUSING_DATASET, CAR_DATASET)}
+
+
+def report_has_dataset(report_data: dict, dataset: Dataset) -> bool:
+    """入力レポートがこのローン種別の表を持つかを返す。"""
+    if not isinstance(report_data, dict):
+        return False
+    contract = report_data.get("rate_contract")
+    if not isinstance(contract, dict) or dataset.contract_field not in contract:
+        return False
+    return bool(report_data.get(dataset.table_key))
 
 
 def normalize_date(value: str) -> str:
@@ -99,45 +179,51 @@ def validate_rate(value, field_name: str) -> float:
     return rate
 
 
-def validate_report_data(report_data: dict) -> None:
-    """入力レポートの住宅ローン行を、履歴変更前に検証する。"""
+def validate_report_data(report_data: dict, dataset: Dataset = HOUSING_DATASET) -> None:
+    """入力レポートのローン行を、履歴変更前に検証する。"""
     if not isinstance(report_data, dict):
         raise ValueError("入力JSONのルートはオブジェクトにしてください。")
     contract = report_data.get("rate_contract")
-    expected_contract = expected_rate_contract_metadata()
-    if contract != expected_contract:
+    supported = supported_rate_contracts()
+    if contract not in supported:
         raise ValueError(
             "rate_contract がFinPulseの対応契約と一致しません。"
-            f"期待値={expected_contract!r} / 入力値={contract!r}"
+            f"対応契約={supported!r} / 入力値={contract!r}"
         )
-    loans = report_data.get("loan_table")
+    if dataset.contract_field not in contract:
+        raise ValueError(
+            f"rate_contract に {dataset.contract_field} がないため"
+            f"{dataset.label}は取り込めません。"
+        )
+    table_key = dataset.table_key
+    loans = report_data.get(table_key)
     if not isinstance(loans, list) or not loans:
-        raise ValueError("loan_table は1件以上の配列にしてください。")
+        raise ValueError(f"{table_key} は1件以上の配列にしてください。")
 
     seen_products = set()
     for index, loan in enumerate(loans, start=1):
         if not isinstance(loan, dict):
-            raise ValueError(f"loan_table[{index}] はオブジェクトにしてください。")
-        bank_id = validate_id(loan.get("bank_id"), f"loan_table[{index}].bank_id")
-        product_id = validate_id(loan.get("product_id"), f"loan_table[{index}].product_id")
+            raise ValueError(f"{table_key}[{index}] はオブジェクトにしてください。")
+        bank_id = validate_id(loan.get("bank_id"), f"{table_key}[{index}].bank_id")
+        product_id = validate_id(loan.get("product_id"), f"{table_key}[{index}].product_id")
         product_key = (bank_id, product_id)
         if product_key in seen_products:
             raise ValueError(f"機関IDと商品IDが重複しています: {bank_id}/{product_id}")
         seen_products.add(product_key)
 
         if "manual" in loan and not isinstance(loan["manual"], bool):
-            raise ValueError(f"loan_table[{index}].manual は真偽値にしてください。")
+            raise ValueError(f"{table_key}[{index}].manual は真偽値にしてください。")
 
-        for loan_key in RATE_KEY_MAP:
+        for loan_key in dataset.rate_key_map:
             value = loan.get(loan_key)
             if value is not None:
-                validate_rate(value, f"loan_table[{index}].{loan_key}")
+                validate_rate(value, f"{table_key}[{index}].{loan_key}")
 
 
-def migrate_history(history: dict) -> None:
+def migrate_history(history: dict, dataset: Dataset = HOUSING_DATASET) -> None:
     """旧形式の変更時点履歴を、調査日ごとの観測形式へ移行する。"""
-    history.setdefault("rate_type_order", DEFAULT_ORDER)
-    history.setdefault("rate_type_labels", DEFAULT_LABELS)
+    history.setdefault("rate_type_order", list(dataset.rate_type_order))
+    history.setdefault("rate_type_labels", dict(dataset.rate_type_labels))
     history.setdefault("rows", [])
 
     raw_observation_dates = history.get("observation_dates", [])
@@ -253,16 +339,16 @@ def latest_history_date(history: dict) -> str:
     return max(history.get("observation_dates", []), default="")
 
 
-def load_history() -> dict:
-    if HISTORY_PATH.exists():
-        with open(HISTORY_PATH, encoding="utf-8") as f:
+def load_history(dataset: Dataset = HOUSING_DATASET) -> dict:
+    if dataset.history_path.exists():
+        with open(dataset.history_path, encoding="utf-8") as f:
             data = json.load(f)
-        migrate_history(data)
+        migrate_history(data, dataset)
         return data
     return {
         "schema_version": SCHEMA_VERSION,
-        "rate_type_order": DEFAULT_ORDER,
-        "rate_type_labels": DEFAULT_LABELS,
+        "rate_type_order": list(dataset.rate_type_order),
+        "rate_type_labels": dict(dataset.rate_type_labels),
         "observation_dates": [],
         "rows": [],
     }
@@ -288,12 +374,13 @@ def update_history(
     survey_date: str,
     *,
     allow_backfill: bool = False,
+    dataset: Dataset = HOUSING_DATASET,
 ) -> dict:
-    """report_data の住宅ローン金利を履歴へ反映する。返り値は変更サマリー。"""
+    """report_data のローン金利を履歴へ反映する。返り値は変更サマリー。"""
     survey_date = normalize_date(survey_date)
-    migrate_history(history)
+    migrate_history(history, dataset)
     validate_history(history)
-    validate_report_data(report_data)
+    validate_report_data(report_data, dataset)
     replaced_demo = history.get("is_demo") is True
     if replaced_demo:
         # デモ金利を実績として残さない。入力検証後にだけ初期化する。
@@ -321,7 +408,7 @@ def update_history(
         "unchanged": 0,
     }
 
-    for loan in report_data.get("loan_table", []):
+    for loan in report_data.get(dataset.table_key, []):
         # 手動入力の機関（サイトから取得できずconfig/manual_rates.jsonに手書きした値）は
         # 履歴に入れない。毎週同じ値がコピーされるだけで「その日に確認した金利」ではなく、
         # 自動取得分と並べると確認済みに見えてしまうため。金利調査レポート本体でも
@@ -330,7 +417,7 @@ def update_history(
             continue
         bank_id = validate_id(loan.get("bank_id"), "bank_id")
         product_id = validate_id(loan.get("product_id"), "product_id")
-        for loan_key, rate_type in RATE_KEY_MAP.items():
+        for loan_key, rate_type in dataset.rate_key_map.items():
             value = loan.get(loan_key)
             if value is None:
                 continue
@@ -431,6 +518,26 @@ def write_history_atomic(history: dict, path: Path = HISTORY_PATH) -> None:
             temporary_path.unlink()
 
 
+def update_dataset_file(
+    report_data: dict,
+    survey_date: str,
+    dataset: Dataset,
+    *,
+    allow_backfill: bool = False,
+) -> dict:
+    """1つのローン種別の履歴ファイルを更新し、変更サマリーを返す。"""
+    history = load_history(dataset)
+    summary = update_history(
+        history,
+        report_data,
+        survey_date,
+        allow_backfill=allow_backfill,
+        dataset=dataset,
+    )
+    write_history_atomic(history, dataset.history_path)
+    return summary
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="金利履歴JSONを更新する")
     parser.add_argument("report_data", help="報告自動化ツールの report_data_*.json のパス")
@@ -440,6 +547,12 @@ def main() -> None:
         action="store_true",
         help="既存の最新日より前の調査日を追加する（過去データ投入専用）",
     )
+    parser.add_argument(
+        "--dataset",
+        choices=sorted(DATASETS) + ["all"],
+        default="all",
+        help="更新するローン種別。既定はレポートに含まれるものすべて",
+    )
     args = parser.parse_args()
 
     with open(args.report_data, encoding="utf-8") as f:
@@ -448,23 +561,36 @@ def main() -> None:
     raw_date = args.date or report_data.get("survey_date", "")
     survey_date = normalize_date(raw_date)
 
-    history = load_history()
-    summary = update_history(
-        history,
-        report_data,
-        survey_date,
-        allow_backfill=args.allow_backfill,
-    )
+    if args.dataset == "all":
+        targets = [
+            dataset
+            for dataset in DATASETS.values()
+            if report_has_dataset(report_data, dataset)
+        ]
+        if not targets:
+            raise SystemExit(
+                "入力レポートに取り込めるローン表がありません（loan_table / car_loan_table）。"
+            )
+    else:
+        targets = [DATASETS[args.dataset]]
 
-    write_history_atomic(history)
-
-    print(f"金利履歴を更新しました（調査日 {survey_date}）: {HISTORY_PATH}")
-    if summary["replaced_demo"]:
-        print("  デモ履歴を削除し、実データで初期化しました")
-    print(
-        f"  新規行 {summary['added_rows']} / 金利変更 {summary['changed']} / "
-        f"据え置き {summary['unchanged']}"
-    )
+    for dataset in targets:
+        summary = update_dataset_file(
+            report_data,
+            survey_date,
+            dataset,
+            allow_backfill=args.allow_backfill,
+        )
+        print(
+            f"{dataset.label}の履歴を更新しました（調査日 {survey_date}）: "
+            f"{dataset.history_path}"
+        )
+        if summary["replaced_demo"]:
+            print("  デモ履歴を削除し、実データで初期化しました")
+        print(
+            f"  新規行 {summary['added_rows']} / 金利変更 {summary['changed']} / "
+            f"据え置き {summary['unchanged']}"
+        )
 
 
 if __name__ == "__main__":

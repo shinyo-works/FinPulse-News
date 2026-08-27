@@ -296,7 +296,7 @@
 <body>
   <header class="site-header">
     <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>金利履歴ビューアー</div>
-    <p id="subtitle"><span class="subtitle-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。</span><span class="subtitle-short">左が最新、右が過去です。</span></p>
+    <p id="subtitle"><span class="subtitle-full" id="subtitleFull">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。</span><span class="subtitle-short">左が最新、右が過去です。</span></p>
   </header>
 
   <div class="controls">
@@ -319,7 +319,7 @@
     <div class="table-scroll" id="tableScroll">
       <div class="scrolling-notes">
         <div class="info-line"><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）　<span class="up"><b>↑</b> 前回調査より上昇</span>　<span class="down"><b>↓</b> 前回調査より低下</span>　<b>変更なし</b>＝表示中の全商品で金利が動いていない期間</div>
-        <div class="info-line"><b>掲載範囲</b>＝公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）　<span id="coverage"></span></div>
+        <div class="info-line"><b>掲載範囲</b>＝<span id="coverageScope">公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）</span>　<span id="coverage"></span></div>
         <div id="sourceNote" class="info-line"></div>
       </div>
       <div id="matrix" aria-live="polite">
@@ -334,7 +334,28 @@
     // iframe 内（タブ表示）かどうか。単体で開いたときは従来どおり見出しを出す。
     if (window.self !== window.top) document.body.classList.add("embedded");
 
-    const DATA_URL = "./data/rate-history.json";
+    // 表示するローン種別は ?dataset= で切り替える。定義済みの種別だけを受け付け、
+    // 未知の値や指定なしは住宅ローンに落とす（URLの値をそのまま取得先にしない）。
+    const DATASETS = {
+      housing: {
+        dataUrl: "./data/rate-history.json",
+        title: "十勝金融機関News｜金利情報",
+        subtitleFull: "帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。",
+        coverageScope: "公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）",
+      },
+      car: {
+        dataUrl: "./data/car-loan-history.json",
+        title: "十勝金融機関News｜マイカーローン金利情報",
+        subtitleFull: "帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。左が最新、右が過去です。",
+        coverageScope: "公式サイトでマイカーローンの優遇後金利を公表している機関のみ（窓口確認の機関は対象外）",
+      },
+    };
+    const DATASET_KEY = new URLSearchParams(location.search).get("dataset");
+    const DATASET = DATASETS[DATASET_KEY] || DATASETS.housing;
+    const DATA_URL = DATASET.dataUrl;
+    document.title = DATASET.title;
+    document.getElementById("subtitleFull").textContent = DATASET.subtitleFull;
+    document.getElementById("coverageScope").textContent = DATASET.coverageScope;
     const state = {
       data: null,
       search: "",
@@ -673,7 +694,7 @@
         buildBankFilters();
         render();
       } catch (_e) {
-        el.matrix.innerHTML = '<div class="empty-state"><strong>データを読み込めませんでした</strong>HTTPサーバー経由で開いているか、data/rate-history.json があるかご確認ください。</div>';
+        el.matrix.innerHTML = `<div class="empty-state"><strong>データを読み込めませんでした</strong>HTTPサーバー経由で開いているか、${escapeHtml(DATA_URL)} があるかご確認ください。</div>`;
       }
     }
 

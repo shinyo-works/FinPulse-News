@@ -5,9 +5,14 @@ import unittest
 from pathlib import Path
 
 from scripts.update_rate_history import (
+    CAR_DATASET,
+    HOUSING_DATASET,
     RATE_KEY_MAP,
     REPORT_RATE_CONTRACT_VERSION,
     SCHEMA_VERSION,
+    expected_rate_contract_metadata,
+    expected_rate_contract_metadata_with_car,
+    report_has_dataset,
     update_history,
     validate_history,
     write_history_atomic,
@@ -361,6 +366,119 @@ class UpdateRateHistoryTest(unittest.TestCase):
             history = rebuild_history([path, path])
 
         self.assertEqual(["2026-08-01"], history["observation_dates"])
+
+
+class CarLoanHistoryTest(unittest.TestCase):
+    """マイカーローン金利を住宅ローンと同じ仕組みで積み上げられることを確認する。"""
+
+    def setUp(self):
+        self.report = {
+            "rate_contract": expected_rate_contract_metadata_with_car(),
+            "loan_table": [{
+                "bank_id": "test-bank",
+                "bank_name": "テスト銀行",
+                "product_id": "test-jutaku",
+                "product_name": "住宅ローン",
+                "loan_variable": 1.25,
+            }],
+            "car_loan_table": [{
+                "bank_id": "test-bank",
+                "bank_name": "テスト銀行",
+                "product_id": "test-mycar",
+                "product_name": "マイカーローン",
+                "url": "https://example.com/mycar",
+                "car_loan_variable": 1.8,
+                "car_loan_fixed": 2.4,
+            }],
+        }
+
+    def car_history(self):
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "rate_type_order": list(CAR_DATASET.rate_type_order),
+            "rate_type_labels": dict(CAR_DATASET.rate_type_labels),
+            "observation_dates": [],
+            "rows": [],
+        }
+
+    def test_car_rates_are_stored_as_variable_and_fixed(self):
+        history = self.car_history()
+        update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET)
+
+        rows = {row["rate_type"]: row for row in history["rows"]}
+        self.assertEqual({"variable", "fixed"}, set(rows))
+        self.assertEqual(1.8, rows["variable"]["history"][0]["rate"])
+        self.assertEqual(2.4, rows["fixed"]["history"][0]["rate"])
+        self.assertEqual("マイカーローン", rows["variable"]["product_name"])
+        self.assertEqual("https://example.com/mycar", rows["variable"]["url"])
+
+    def test_car_and_housing_histories_do_not_mix(self):
+        car = self.car_history()
+        housing = {
+            "schema_version": SCHEMA_VERSION,
+            "rate_type_order": list(HOUSING_DATASET.rate_type_order),
+            "rate_type_labels": dict(HOUSING_DATASET.rate_type_labels),
+            "observation_dates": [],
+            "rows": [],
+        }
+        update_history(car, self.report, "2026-08-24", dataset=CAR_DATASET)
+        update_history(housing, self.report, "2026-08-24")
+
+        self.assertEqual(["test-mycar"], sorted({row["product_id"] for row in car["rows"]}))
+        self.assertEqual(
+            ["test-jutaku"], sorted({row["product_id"] for row in housing["rows"]})
+        )
+        self.assertNotEqual(CAR_DATASET.history_path, HOUSING_DATASET.history_path)
+
+    def test_car_rates_accumulate_by_survey_date(self):
+        history = self.car_history()
+        update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET)
+        changed = copy.deepcopy(self.report)
+        changed["car_loan_table"][0]["car_loan_variable"] = 1.7
+        update_history(history, changed, "2026-08-31", dataset=CAR_DATASET)
+
+        entries = next(
+            row for row in history["rows"] if row["rate_type"] == "variable"
+        )["history"]
+        self.assertEqual(
+            [("2026-08-31", 1.7), ("2026-08-24", 1.8)],
+            [(entry["observed_on"], entry["rate"]) for entry in entries],
+        )
+
+    def test_old_contract_is_still_accepted_for_housing(self):
+        # 上流が version 1 のままでも住宅ローンの取り込みは止めない（移行期間）。
+        legacy = copy.deepcopy(self.report)
+        legacy["rate_contract"] = expected_rate_contract_metadata()
+        legacy.pop("car_loan_table")
+        housing = {
+            "schema_version": SCHEMA_VERSION,
+            "rate_type_order": list(HOUSING_DATASET.rate_type_order),
+            "rate_type_labels": dict(HOUSING_DATASET.rate_type_labels),
+            "observation_dates": [],
+            "rows": [],
+        }
+        update_history(housing, legacy, "2026-08-24")
+
+        self.assertEqual(1, len(housing["rows"]))
+        self.assertFalse(report_has_dataset(legacy, CAR_DATASET))
+        self.assertTrue(report_has_dataset(self.report, CAR_DATASET))
+
+    def test_car_needs_the_contract_to_declare_car_fields(self):
+        legacy = copy.deepcopy(self.report)
+        legacy["rate_contract"] = expected_rate_contract_metadata()
+        with self.assertRaisesRegex(ValueError, "car_loan_rate_fields"):
+            update_history(self.car_history(), legacy, "2026-08-24", dataset=CAR_DATASET)
+
+    def test_repository_car_history_is_valid(self):
+        history = json.loads(
+            (Path(__file__).resolve().parents[1] / "docs/data/car-loan-history.json")
+            .read_text(encoding="utf-8")
+        )
+
+        validate_history(history)
+        self.assertEqual(SCHEMA_VERSION, history["schema_version"])
+        self.assertEqual(list(CAR_DATASET.rate_type_order), history["rate_type_order"])
+        self.assertFalse(history.get("is_demo"))
 
 
 if __name__ == "__main__":
