@@ -522,6 +522,45 @@ def scrape_ja_obihirokawanisi(html, base_url):
     return items
 
 
+def scrape_ja_kino(html, base_url):
+    """JA木野の新着情報一覧から記事名・日付・URLを個別に抽出する。
+    記事1件が1リンクに日付・カテゴリ・記事名を並べる構造で、汎用抽出では
+    「2026.08.10JAバンク/貯める貯金金利の引き上げについて」と連結されるため専用化する。"""
+    soup = BeautifulSoup(html, "html.parser")
+    rows = soup.select(".l-news-list ul.news > li")
+    if not rows:
+        raise ExtractionError("JA木野のニュース一覧が見つかりませんでした。")
+
+    items = []
+    for row in rows:
+        link = row.find("a", href=True)
+        title_element = row.select_one(".title")
+        date_element = row.select_one(".meta .date")
+        if not link or not title_element:
+            continue
+
+        title = title_element.get_text(" ", strip=True)
+        href = link.get("href", "").strip()
+        if not title or not href or href.startswith(("#", "javascript", "mailto", "tel")):
+            continue
+
+        # URL側の日付（jakino_info_20260824.pdf）はPDF自体の日付で、掲載日と
+        # ずれることがあるため補完に使わない。掲載日はDOMの .date だけを正とする。
+        date_text = date_element.get_text(" ", strip=True) if date_element else ""
+        items.append({
+            "date": extract_date_from_text(date_text),
+            "title": title,
+            "url": urljoin(base_url, href),
+            "date_inferred": False,
+        })
+
+    if not items:
+        raise ExtractionError("JA木野のニュース記事を抽出できませんでした。")
+    if not any(item["date"] for item in items):
+        raise ExtractionError("JA木野のニュース記事から日付を抽出できませんでした。")
+    return items
+
+
 def scrape_hokuyo_xml(base_url):
     """北洋銀行: 新着情報は JS で年別XMLフィード（announcement/{year}.xml）から描画される。
     静的HTMLには記事タイトルが無いため、XMLを直接取得して解析する。
@@ -593,12 +632,18 @@ def _scrape_ja_obihirokawanisi_institution(institution, url):
     return scrape_ja_obihirokawanisi(html, url)
 
 
+def _scrape_ja_kino_institution(institution, url):
+    html = fetch_page(url, encoding=institution.get("encoding"))
+    return scrape_ja_kino(html, url)
+
+
 # スクレイパーの登録簿。設定検証（VALID_SCRAPERS）とディスパッチが自動で揃うよう、
 # 新方式を追加する場合はこの辞書へ1エントリ足すだけにする。
 SCRAPERS = {
     "programmatic": _scrape_programmatic_institution,
     "hokuyo_xml": _scrape_hokuyo_institution,
     "ja_obihirokawanisi": _scrape_ja_obihirokawanisi_institution,
+    "ja_kino": _scrape_ja_kino_institution,
 }
 VALID_SCRAPERS = set(SCRAPERS)
 

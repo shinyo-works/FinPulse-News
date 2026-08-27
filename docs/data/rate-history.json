@@ -2128,7 +2128,7 @@
       "bank_id": "hokkaido_rokin",
       "bank_name": "北海道労働金庫",
       "product_id": "rokin_jutaku",
-      "product_name": "住宅ローン",
+      "product_name": "住宅ローン（定額型）",
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "variable",
       "history": [
@@ -2186,7 +2186,7 @@
       "bank_id": "hokkaido_rokin",
       "bank_name": "北海道労働金庫",
       "product_id": "rokin_jutaku",
-      "product_name": "住宅ローン",
+      "product_name": "住宅ローン（定額型）",
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_3y",
       "history": [
@@ -2244,7 +2244,7 @@
       "bank_id": "hokkaido_rokin",
       "bank_name": "北海道労働金庫",
       "product_id": "rokin_jutaku",
-      "product_name": "住宅ローン",
+      "product_name": "住宅ローン（定額型）",
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_5y",
       "history": [
@@ -2302,7 +2302,7 @@
       "bank_id": "hokkaido_rokin",
       "bank_name": "北海道労働金庫",
       "product_id": "rokin_jutaku",
-      "product_name": "住宅ローン",
+      "product_name": "住宅ローン（定額型）",
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_10y",
       "history": [
@@ -2766,7 +2766,7 @@
       "bank_id": "hokkaido_rokin",
       "bank_name": "北海道労働金庫",
       "product_id": "rokin_smile",
-      "product_name": "すまいる上手",
+      "product_name": "すまいる上手（定率型）",
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_3y",
       "history": [

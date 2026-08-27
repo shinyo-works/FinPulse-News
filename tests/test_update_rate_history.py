@@ -37,6 +37,38 @@ class UpdateRateHistoryTest(unittest.TestCase):
             }]
         }
 
+    def test_product_name_override_survives_upstream_names(self):
+        report = copy.deepcopy(self.report)
+        report["loan_table"] = [{
+            "bank_id": "hokkaido_rokin",
+            "bank_name": "北海道労働金庫",
+            "product_id": "rokin_jutaku",
+            "product_name": "住宅ローン",
+            "loan_variable": 3.325,
+        }]
+        update_history(self.history, report, "2026-08-24")
+        self.assertEqual("住宅ローン（定額型）", self.history["rows"][0]["product_name"])
+
+        # 翌週も上流が旧名称のままでも、履歴側の表示名は戻らない。
+        update_history(self.history, report, "2026-08-31")
+        self.assertEqual("住宅ローン（定額型）", self.history["rows"][0]["product_name"])
+
+    def test_product_name_without_override_follows_upstream(self):
+        update_history(self.history, self.report, "2026-08-24")
+        self.assertEqual("テスト商品", self.history["rows"][0]["product_name"])
+
+    def test_repository_history_uses_the_overridden_product_names(self):
+        history = json.loads(
+            (Path(__file__).resolve().parents[1] / "docs" / "data" / "rate-history.json")
+            .read_text(encoding="utf-8")
+        )
+        names = {
+            (row["bank_id"], row["product_id"]): row["product_name"]
+            for row in history["rows"]
+        }
+        self.assertEqual("住宅ローン（定額型）", names[("hokkaido_rokin", "rokin_jutaku")])
+        self.assertEqual("すまいる上手（定率型）", names[("hokkaido_rokin", "rokin_smile")])
+
     def test_manual_products_are_not_stored(self):
         report = copy.deepcopy(self.report)
         report["loan_table"].append({

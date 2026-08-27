@@ -41,6 +41,20 @@ def expected_rate_contract_metadata() -> dict:
         "loan_rate_fields": list(RATE_KEY_MAP),
     }
 
+# 上流の報告自動化ツールが渡す商品名が、実サイト上の区分を表さない場合の表示名。
+# 北海道労働金庫は定額型・定率型で金利体系が別なのに、上流の名称では見分けられない。
+# 上流を直さずに済むよう、履歴へ書く直前にこの表で置き換える。
+PRODUCT_NAME_OVERRIDES = {
+    ("hokkaido_rokin", "rokin_jutaku"): "住宅ローン（定額型）",
+    ("hokkaido_rokin", "rokin_smile"): "すまいる上手（定率型）",
+}
+
+
+def resolve_product_name(bank_id: str, product_id: str, product_name: str) -> str:
+    """履歴へ保存する商品名を返す。上書き対象なら固定の表示名を使う。"""
+    return PRODUCT_NAME_OVERRIDES.get((bank_id, product_id), product_name)
+
+
 DEFAULT_LABELS = {
     "variable": "変動",
     "fixed_3y": "固定3年",
@@ -329,7 +343,9 @@ def update_history(
                     "bank_id": bank_id,
                     "bank_name": loan.get("bank_name", ""),
                     "product_id": product_id,
-                    "product_name": loan.get("product_name", ""),
+                    "product_name": resolve_product_name(
+                        bank_id, product_id, loan.get("product_name", "")
+                    ),
                     "url": loan.get("url"),
                     "rate_type": rate_type,
                     "history": [{"rate": value, "observed_on": survey_date}],
@@ -346,7 +362,11 @@ def update_history(
             if not row_latest_date or survey_date >= row_latest_date:
                 # 過去データの投入で現在の商品名・URLを巻き戻さない。
                 row["bank_name"] = loan.get("bank_name", row.get("bank_name", ""))
-                row["product_name"] = loan.get("product_name", row.get("product_name", ""))
+                row["product_name"] = resolve_product_name(
+                    bank_id,
+                    product_id,
+                    loan.get("product_name", row.get("product_name", "")),
+                )
                 if loan.get("url"):
                     row["url"] = loan.get("url")
 

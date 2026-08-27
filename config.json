@@ -107,7 +107,8 @@
     {
       "name": "JA木野",
       "url": "https://ja-kino.com/news/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "ローン"],
+      "scraper": "ja_kino",
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "ローン", "プライムレート"],
       "exclude_rules": [
         { "keyword": "組合だより" },
         { "keyword": "組合長あいさつ" },

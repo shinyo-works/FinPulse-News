@@ -88,6 +88,80 @@ JA_OBIHIROKAWANISI_HTML = """
 """
 
 
+JA_KINO_HTML = """
+<section class="l-news-list">
+  <ul class="news">
+    <li id="post_833">
+      <a href="/wp-content/uploads/2026/08/jakino_info_20260824.pdf">
+        <div class="text-block">
+          <div class="meta">
+            <div class="date">2026.08.25</div>
+            <div class="category">JAバンク/借りる</div>
+          </div>
+          <div class="title">短期プライムレートおよび住宅ローンプライムレートの見直しについて</div>
+        </div>
+      </a>
+    </li>
+    <li id="post_829">
+      <a href="/wp-content/uploads/2026/08/jakino_info_20260810.pdf">
+        <div class="text-block">
+          <div class="meta">
+            <div class="date">2026.08.10</div>
+            <div class="category">JAバンク/貯める</div>
+          </div>
+          <div class="title">貯金金利の引き上げについて</div>
+        </div>
+      </a>
+    </li>
+    <li id="post_824">
+      <a href="/wp-content/uploads/2026/07/jakino_info_20260728.pdf">
+        <div class="text-block">
+          <div class="meta">
+            <div class="date">2026.07.28</div>
+            <div class="category">JAバンク/貯める</div>
+          </div>
+          <div class="title">手形・小切手の全面的な電子化に向けた対応について</div>
+        </div>
+      </a>
+    </li>
+    <li id="post_820">
+      <a href="/wp-content/uploads/2026/07/jakino_info_20260723.pdf">
+        <div class="text-block">
+          <div class="meta">
+            <div class="date">2026.07.23</div>
+            <div class="category">JAバンク/借りる</div>
+          </div>
+          <div class="title">JA木野住宅ローン借換キャンペーン実施中！</div>
+        </div>
+      </a>
+    </li>
+    <li id="post_815">
+      <a href="/about/#letter">
+        <div class="text-block">
+          <div class="meta">
+            <div class="date">2026.07.21</div>
+            <div class="category">お知らせ</div>
+          </div>
+          <div class="title">組合だよりを更新しました！</div>
+        </div>
+      </a>
+    </li>
+    <li id="post_790">
+      <a href="/wp-content/uploads/2026/02/jakino_info_20260206.pdf">
+        <div class="text-block">
+          <div class="meta">
+            <div class="date">2026.02.06</div>
+            <div class="category">JAバンク/借りる</div>
+          </div>
+          <div class="title">短期プライムレートの引き上げについて</div>
+        </div>
+      </a>
+    </li>
+  </ul>
+</section>
+"""
+
+
 class ValidationTest(unittest.TestCase):
     def test_accepts_current_config_shape(self):
         collector.validate_config(minimal_config())
@@ -516,6 +590,113 @@ class JaObihirokawanisiTest(unittest.TestCase):
         items = collector.scrape_ja_obihirokawanisi(html, self.institution["url"])
 
         self.assertEqual("2026-08-20", items[0]["date"])
+
+
+class JaKinoTest(unittest.TestCase):
+    def setUp(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        config = json.loads(
+            (repository_root / "config.json").read_text(encoding="utf-8")
+        )
+        self.config = config
+        self.institution = next(
+            item for item in config["institutions"] if item["name"] == "JA木野"
+        )
+
+    def test_extracts_clean_titles_without_date_or_category(self):
+        items = collector.scrape_ja_kino(JA_KINO_HTML, self.institution["url"])
+
+        self.assertEqual(6, len(items))
+        self.assertEqual(
+            "短期プライムレートおよび住宅ローンプライムレートの見直しについて",
+            items[0]["title"],
+        )
+        self.assertEqual("2026-08-25", items[0]["date"])
+        self.assertEqual(
+            "https://ja-kino.com/wp-content/uploads/2026/08/jakino_info_20260824.pdf",
+            items[0]["url"],
+        )
+        # 汎用抽出では日付とパンくずが記事名へ連結されていた。
+        for item in items:
+            self.assertNotIn("JAバンク", item["title"])
+            self.assertNotIn("2026.", item["title"])
+        self.assertEqual("ja_kino", self.institution["scraper"])
+
+    def test_filters_judge_the_article_name_only(self):
+        items = collector.scrape_ja_kino(JA_KINO_HTML, self.institution["url"])
+
+        passed, excluded = collector.apply_filters(
+            items,
+            self.institution,
+            self.config["star_keywords"],
+        )
+
+        self.assertEqual(
+            [
+                "短期プライムレートおよび住宅ローンプライムレートの見直しについて",
+                "貯金金利の引き上げについて",
+                "JA木野住宅ローン借換キャンペーン実施中！",
+                # 「ローン」を含まないプライムレート記事も通過させる。
+                "短期プライムレートの引き上げについて",
+            ],
+            [item["title"] for item in passed],
+        )
+        self.assertEqual(
+            [
+                "手形・小切手の全面的な電子化に向けた対応について",
+                "組合だよりを更新しました！",
+            ],
+            [item["title"] for item in excluded],
+        )
+        self.assertEqual("組合だより", excluded[1]["exclude_keyword"])
+        self.assertIn("プライムレート", self.institution["include_keywords"])
+
+    def test_missing_news_structure_is_reported_as_extraction_failure(self):
+        with self.assertRaisesRegex(collector.ExtractionError, "ニュース一覧"):
+            collector.scrape_ja_kino(
+                "<html><body>ニュース領域なし</body></html>",
+                self.institution["url"],
+            )
+
+        with mock.patch.object(
+            collector,
+            "fetch_page",
+            return_value="<html><body>ニュース領域なし</body></html>",
+        ):
+            result, _ = collector.collect_institution(
+                self.institution,
+                90,
+                self.config["star_keywords"],
+            )
+
+        self.assertEqual("extract_failed", result.status)
+        self.assertEqual("記事一覧を抽出できませんでした。", result.error)
+
+    def test_all_missing_dates_are_reported_as_structure_failure(self):
+        html_without_dates = re.sub(
+            r'<div class="date">.*?</div>',
+            "",
+            JA_KINO_HTML,
+        )
+
+        with self.assertRaisesRegex(collector.ExtractionError, "日付"):
+            collector.scrape_ja_kino(html_without_dates, self.institution["url"])
+
+    def test_partial_missing_dates_keep_the_existing_fail_open_behavior(self):
+        html_with_one_missing_date = JA_KINO_HTML.replace(
+            '<div class="date">2026.08.10</div>',
+            "",
+            1,
+        )
+
+        items = collector.scrape_ja_kino(
+            html_with_one_missing_date,
+            self.institution["url"],
+        )
+
+        # URL内の 20260810 は掲載日ではないため補完に使わない。
+        self.assertEqual("", items[1]["date"])
+        self.assertTrue(any(item["date"] for item in items))
 
 
 class FilteringTest(unittest.TestCase):
