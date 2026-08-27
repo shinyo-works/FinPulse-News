@@ -445,6 +445,42 @@ class CarLoanHistoryTest(unittest.TestCase):
             [(entry["observed_on"], entry["rate"]) for entry in entries],
         )
 
+    def test_guarantee_note_is_carried_and_cleared_with_the_report(self):
+        """保証料の注記は上流の値に追従し、消えた週は履歴からも消す。"""
+        history = self.car_history()
+        with_note = copy.deepcopy(self.report)
+        with_note["car_loan_table"][0]["guarantee_note"] = "オリコ保証になった場合は別途 年1.60% が上乗せ"
+        update_history(history, with_note, "2026-08-24", dataset=CAR_DATASET)
+
+        self.assertTrue(
+            all(row["guarantee_note"].startswith("オリコ保証") for row in history["rows"])
+        )
+
+        update_history(history, self.report, "2026-08-31", dataset=CAR_DATASET)
+        self.assertTrue(all("guarantee_note" not in row for row in history["rows"]))
+        validate_history(history)
+
+    def test_guarantee_note_is_normalized_and_length_checked(self):
+        """改行混じり・長すぎる注記でも表示が壊れない形に整える。"""
+        history = self.car_history()
+        noisy = copy.deepcopy(self.report)
+        noisy["car_loan_table"][0]["guarantee_note"] = "  上乗せ\nあり\t（条件）  " + "長" * 200
+        update_history(history, noisy, "2026-08-24", dataset=CAR_DATASET)
+
+        note = history["rows"][0]["guarantee_note"]
+        self.assertNotIn("\n", note)
+        self.assertTrue(note.startswith("上乗せ あり （条件）"))
+        self.assertLessEqual(len(note), 80)
+        # 整形後の値は履歴の検証も通る（画面へ出す前にここで止める）
+        validate_history(history)
+
+    def test_invalid_guarantee_note_is_rejected_by_validation(self):
+        history = self.car_history()
+        update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET)
+        history["rows"][0]["guarantee_note"] = "長" * 81
+        with self.assertRaises(ValueError):
+            validate_history(history)
+
     def test_old_contract_is_still_accepted_for_housing(self):
         # 上流が version 1 のままでも住宅ローンの取り込みは止めない（移行期間）。
         legacy = copy.deepcopy(self.report)

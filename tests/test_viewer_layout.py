@@ -117,6 +117,22 @@ class ViewerLayoutTest(unittest.TestCase):
             'const DATASET = DATASETS[DATASET_KEY] || DATASETS.housing;', self.rate_html
         )
 
+    def test_guarantee_fee_is_stated_for_car_loans_only(self):
+        """マイカーローンは表の上で保証料込を断り、例外は機関名の下に出す。"""
+        datasets = re.search(
+            r"const DATASETS = \{.*?\n    \};", self.rate_html, re.DOTALL
+        ).group(0)
+        car_block = datasets[datasets.index("car: {"):]
+        housing_block = datasets[datasets.index("housing: {"):datasets.index("car: {")]
+        # 住宅ローンは機関ごとに保証料の扱いが分かれるため凡例を出さない
+        self.assertIn("guaranteeNote:", car_block)
+        self.assertNotIn("guaranteeNote:", housing_block)
+        self.assertIn("保証料込", car_block)
+        # 例外のある機関は機関名セルの中で断る
+        self.assertIn('<div class="guarantee-note">', self.rate_html)
+        self.assertIn("row.guarantee_note", self.rate_html)
+        self.assertIn(".guarantee-note {", self.rate_html)
+
     def test_titles_use_the_japanese_site_name(self):
         # ブラウザのタブ名・ブックマーク名は画面上の見出しと同じ名前に揃える
         self.assertIn("<title>十勝金融機関News｜金利情報</title>", self.html)

@@ -35,7 +35,7 @@ class RateHistoryLayoutTest(unittest.TestCase):
             r"tbody td\s*\{[^}]*padding:\s*6px 8px;",
         )
 
-    def test_three_notes_scroll_inside_the_table_frame(self):
+    def test_notes_scroll_inside_the_table_frame(self):
         frame_start = self.html.index('<div class="table-scroll" id="tableScroll">')
         notes_start = self.html.index('<div class="scrolling-notes">', frame_start)
         matrix_start = self.html.index('<div id="matrix"', notes_start)
@@ -43,9 +43,12 @@ class RateHistoryLayoutTest(unittest.TestCase):
         self.assertLess(frame_start, notes_start)
         self.assertLess(notes_start, matrix_start)
         notes = self.html[notes_start:matrix_start]
-        self.assertEqual(3, notes.count('class="info-line"'))
+        # 凡例は表と一緒にスクロールさせる（見出しだけ残って表が動く形にしない）。
+        # 保証料の凡例はマイカーローンのときだけ表示されるため既定は hidden。
+        self.assertEqual(4, notes.count('class="info-line"'))
         self.assertIn("各セル", notes)
         self.assertIn("掲載範囲", notes)
+        self.assertIn('id="guaranteeNote"', notes)
         self.assertIn('id="sourceNote"', notes)
         self.assertIn("overflow: auto;", self.html)
         self.assertNotIn(

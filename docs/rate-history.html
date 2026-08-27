@@ -234,6 +234,7 @@
     .bank-name a { color: var(--navy-800); text-decoration: none; }
     .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
     .product-name { margin-top: 1px; color: var(--muted); font-size: 0.71rem; white-space: normal; line-height: 1.25; }
+    .guarantee-note { margin-top: 2px; color: #b91c1c; font-size: 0.68rem; font-weight: 600; white-space: normal; line-height: 1.2; }
 
     .type-badge {
       display: inline-block; padding: 2px 6px; border-radius: 999px;
@@ -320,6 +321,7 @@
       <div class="scrolling-notes">
         <div class="info-line"><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）　<span class="up"><b>↑</b> 前回調査より上昇</span>　<span class="down"><b>↓</b> 前回調査より低下</span>　<b>変更なし</b>＝表示中の全商品で金利が動いていない期間</div>
         <div class="info-line"><b>掲載範囲</b>＝<span id="coverageScope">公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）</span>　<span id="coverage"></span></div>
+        <div id="guaranteeNote" class="info-line" hidden></div>
         <div id="sourceNote" class="info-line"></div>
       </div>
       <div id="matrix" aria-live="polite">
@@ -348,6 +350,9 @@
         title: "十勝金融機関News｜マイカーローン金利情報",
         subtitleFull: "帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。左が最新、右が過去です。",
         coverageScope: "公式サイトでマイカーローンの優遇後金利を公表している機関のみ（窓口確認の機関は対象外）",
+        // 住宅ローンは機関ごとに保証料の扱いが分かれる（JAは保証料別）ため凡例を出さない。
+        // マイカーローンは9機関すべてが保証料込を明記しているので、表の上で一度だけ断る。
+        guaranteeNote: "表示金利はすべて保証料込です（金利に保証料を含む）。上乗せがある機関は機関名の下に注記しています。",
       },
     };
     const DATASET_KEY = new URLSearchParams(location.search).get("dataset");
@@ -356,6 +361,11 @@
     document.title = DATASET.title;
     document.getElementById("subtitleFull").textContent = DATASET.subtitleFull;
     document.getElementById("coverageScope").textContent = DATASET.coverageScope;
+    if (DATASET.guaranteeNote) {
+      const guaranteeEl = document.getElementById("guaranteeNote");
+      guaranteeEl.textContent = `■ ${DATASET.guaranteeNote}`;
+      guaranteeEl.hidden = false;
+    }
     const state = {
       data: null,
       search: "",
@@ -587,9 +597,14 @@
           const bankHtml = url
             ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(row.bank_name)}</a>`
             : escapeHtml(row.bank_name);
+          // 保証料の上乗せがある機関だけ、機関名の下で断る（凡例だけでは行単位で伝わらない）
+          const guaranteeHtml = row.guarantee_note
+            ? `<div class="guarantee-note">※${escapeHtml(row.guarantee_note)}</div>`
+            : "";
           bankCell = `<td class="col-bank" rowspan="${span}">
             <div class="bank-name">${bankHtml}</div>
             <div class="product-name">${escapeHtml(row.product_name || "")}</div>
+            ${guaranteeHtml}
           </td>`;
         }
 

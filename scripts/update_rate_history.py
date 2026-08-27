@@ -111,6 +111,8 @@ CAR_DEFAULT_LABELS = {
 }
 CAR_DEFAULT_ORDER = ["variable", "fixed"]
 MAX_RATE_PERCENT = 100.0
+# 保証料注記の上限文字数。表の1セルに収める前提で、長文が来ても画面を壊さない。
+MAX_GUARANTEE_NOTE_CHARS = 80
 SCHEMA_VERSION = 2
 
 HOUSING_DATASET = Dataset(
@@ -165,6 +167,18 @@ def validate_id(value, field_name: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} は空でない文字列にしてください。")
     return value.strip()
+
+
+def normalize_guarantee_note(value) -> str:
+    """保証料の注記を、表示に耐える短い1行の文字列へ整える。
+
+    上流の設定ファイル由来の自由文なので、型と長さだけをここで確定させる。
+    改行やタブが混ざると表の1セルが崩れるため空白に潰す。
+    """
+    if not isinstance(value, str):
+        return ""
+    text = " ".join(value.split())
+    return text[:MAX_GUARANTEE_NOTE_CHARS]
 
 
 def validate_rate(value, field_name: str) -> float:
@@ -297,6 +311,16 @@ def validate_history(history: dict) -> None:
         rate_type = row.get("rate_type")
         if rate_type not in rate_type_order:
             raise ValueError(f"rows[{index}].rate_type が不正です: {rate_type!r}")
+        guarantee_note = row.get("guarantee_note")
+        if guarantee_note is not None and (
+            not isinstance(guarantee_note, str)
+            or not guarantee_note.strip()
+            or len(guarantee_note) > MAX_GUARANTEE_NOTE_CHARS
+        ):
+            raise ValueError(
+                f"rows[{index}].guarantee_note は{MAX_GUARANTEE_NOTE_CHARS}文字以内の"
+                "空でない文字列にしてください。"
+            )
         key = row_key(bank_id, product_id, rate_type)
         if key in seen_rows:
             raise ValueError(f"履歴行が重複しています: {'/'.join(key)}")
@@ -437,6 +461,9 @@ def update_history(
                     "rate_type": rate_type,
                     "history": [{"rate": value, "observed_on": survey_date}],
                 }
+                guarantee_note = normalize_guarantee_note(loan.get("guarantee_note"))
+                if guarantee_note:
+                    row["guarantee_note"] = guarantee_note
                 if loan.get("is_legacy"):
                     row["is_legacy"] = True
                 history["rows"].append(row)
@@ -456,6 +483,12 @@ def update_history(
                 )
                 if loan.get("url"):
                     row["url"] = loan.get("url")
+                # 保証料の条件が消えた週は注記も消す（古い断り書きを残さない）
+                guarantee_note = normalize_guarantee_note(loan.get("guarantee_note"))
+                if guarantee_note:
+                    row["guarantee_note"] = guarantee_note
+                else:
+                    row.pop("guarantee_note", None)
 
             same_day = next(
                 (entry for entry in hist if entry.get("observed_on") == survey_date),
