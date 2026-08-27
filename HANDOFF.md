@@ -1,20 +1,20 @@
 # HANDOFF.md
 
-> 最終更新: 2026-08-27（マイカーローン金利タブの新設・上流ツールへの週次収集追加。未コミット・未pushの作業ツリーあり）
+> 最終更新: 2026-08-27（マイカーローン金利タブの新設・上流ツールへの週次収集追加。両リポジトリともコミット済み・未push）
 >
 > このファイルは現在地と残課題だけを置くライブ状態の正。恒久的な設計・規律は `CLAUDE.md`、完了履歴は git log を参照する。
 
 ## 現在地
 
-### マイカーローン金利タブ（2026-08-27・両リポジトリとも未コミット）
+### マイカーローン金利タブ（2026-08-27・両リポジトリともコミット済み／未push）
 
 - 方針: 収集は上流 `報告自動化ツール`（金利調査ツール）に追加し、FinPulseは取り込みと表示だけを持つ。金利種別は変動・固定の2種。ユーザー確認済み。
-- FinPulse側（作業ツリーに未コミットで存在）:
+- FinPulse側（コミット `fa4209e`）:
   - `scripts/update_rate_history.py` を `Dataset` で住宅ローン／マイカーローンの2系統に一般化。`car_loan_table` を `docs/data/car-loan-history.json` へ積み上げる。既定は `--dataset all`（レポートに含まれる種別をすべて更新）。
   - `rate_contract` は version 1・2 の両方を受け入れる。version 1（住宅ローンのみ）が来た週はマイカーローンを更新しない。
   - `docs/index.html` に3つ目のタブ「マイカーローン金利情報」を追加（ハッシュは `#car`）。`docs/rate-history.html` は `?dataset=car` で読むJSON・タイトル・説明・掲載範囲を切り替える。既知のデータセット名だけを受け付ける。
   - `docs/data/car-loan-history.json` は空（rows 0件）で新規追加。初回の週次実行までは画面に「金利データがありません」が出る。
-- 上流側（`../報告自動化ツール` の作業ツリーに未コミットで存在）:
+- 上流側（`../報告自動化ツール` ・コミット `bff3008`）:
   - `rate_contract.py` を version 2 にし `car_loan_rate_fields` を追加。`scraper.py`・`gemini_extraction.py`・`compare.py`・`check_output.py`・`rate_validation.py` にマイカーローン経路を追加。金利抽出の商品名照合は住宅ローンと共通化した。
   - `config/banks.json` に7機関の `car_loan_products` を追加（実サイトで確認済み・下表）。
   - `weekly_report.yml` の反映ステップで `docs/data/car-loan-history.json` も `git add` する。
@@ -35,7 +35,7 @@
   - FinPulse 98件・上流58件のunittestを実行。FinPulseの `test_pre_commit_hook` 1件だけエラーだが、これは変更前（HEAD）でも同じく失敗するこの環境のcp932デコード問題で、今回の変更とは無関係。
   - 上流の `build_report_data` で作った実際の `report_data_*.json` を FinPulse の `update_rate_history.py` に通し、契約v2 → `car-loan-history.json` → 画面表示まで通ることを確認した（確認後、履歴JSONは元の空の状態へ戻した）。
   - ブラウザーで `docs/index.html` を開き、タブ切替・タイトル・説明文・空状態・データ投入時の表（変動／固定チップ、最安バッジ）を実機確認した。
-- 次の一手: (1) 両リポジトリのコミット・push（未実施。ユーザー判断待ち）、(2) 上流の週次実行後にマイカーローン7機関の抽出結果を実サイトと突き合わせる。
+- 次の一手: (1) push（未実施）。**FinPulseを先にpushしてから上流をpushする**（逆順だと、上流だけ version 2 になった週にマイカーローンを取り込めない）。(2) 上流の週次実行後にマイカーローン7機関の抽出結果を実サイトと突き合わせる。
 
 - 8/24の週次自動実行を本番確認済み。`main` はリモートと同期（最新コミットは `git log -1` を見る）。
   - Actions run `32664037601`「週次金融機関新着情報レポート」は success。後続のPagesビルドも success。自動コミット2本（レポート・金利履歴）まで到達した。
