@@ -25,6 +25,9 @@
       --canvas: #f4f7f8;
       --shadow: 0 10px 30px rgba(11, 31, 51, 0.08);
       --radius: 14px;
+      /* 「金融機関・商品」列の幅。ヘッダー右端のハンドルで変更し、localStorage に残す。
+         種別列の sticky 位置もこの値に追従させるので、変更はこの1か所だけで済ませる。 */
+      --bank-col-w: 142px;
     }
 
     * { box-sizing: border-box; }
@@ -224,11 +227,27 @@
     tbody tr:hover td { background: #fbfdfd; }
 
     /* 左側の固定列（機関・商品・種別）。横スクロールしても残る */
-    .col-bank { position: sticky; left: 0; z-index: 4; width: 142px; min-width: 142px; padding: 6px 7px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
-    .col-type { position: sticky; left: 142px; z-index: 4; width: 58px; min-width: 58px; padding: 6px 3px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
-    thead th.col-bank { left: 0; padding: 7px; background: #f7fafa; }
-    thead th.col-type { left: 142px; padding: 7px 3px; background: #f7fafa; }
+    .col-bank { position: sticky; left: 0; z-index: 4; width: var(--bank-col-w); min-width: var(--bank-col-w); max-width: var(--bank-col-w); padding: 6px 7px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    .col-type { position: sticky; left: var(--bank-col-w); z-index: 4; width: 58px; min-width: 58px; padding: 6px 3px; text-align: left; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    thead th.col-bank { left: 0; padding: 7px 12px 7px 7px; background: #f7fafa; }
+    thead th.col-type { left: var(--bank-col-w); padding: 7px 3px; background: #f7fafa; }
     tbody tr:hover .col-bank, tbody tr:hover .col-type { background: #fbfdfd; }
+
+    /* 幅の変更ハンドル。列の境目に重ねるので、掴める幅（9px）だけ確保して見た目は線1本にする。 */
+    .col-resizer {
+      position: absolute; top: 0; right: -4px; z-index: 8;
+      width: 9px; height: 100%;
+      padding: 0; background: none; border: 0;
+      cursor: col-resize; touch-action: none;
+    }
+    .col-resizer::before {
+      content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px;
+      width: 2px; border-radius: 2px; background: #c3d0d8;
+    }
+    .col-resizer:hover::before, .col-resizer:focus-visible::before, .col-resizer.dragging::before { background: var(--teal-600); }
+    .col-resizer:focus-visible { outline: 2px solid var(--teal-600); outline-offset: 1px; }
+    /* ドラッグ中は表側のテキスト選択が始まらないようにする */
+    body.resizing-col { cursor: col-resize; user-select: none; }
 
     .bank-name { font-weight: 700; color: var(--navy-900); font-size: 0.82rem; white-space: normal; line-height: 1.25; }
     .bank-name a { color: var(--navy-800); text-decoration: none; }
@@ -288,9 +307,9 @@
     body.embedded .site-header { display: none; }
 
     @media (max-width: 640px) {
-      .col-bank { width: 112px; min-width: 112px; }
-      .col-type { left: 112px; width: 50px; min-width: 50px; }
-      thead th.col-type { left: 112px; }
+      /* 幅を自分で決めていない端末だけ既定値を狭める（明示指定はインライン変数が優先される） */
+      :root { --bank-col-w: 112px; }
+      .col-type { width: 50px; min-width: 50px; }
       .site-header { gap: 10px; padding-inline: 10px; }
       .subtitle-full { display: none; }
       .subtitle-short { display: inline; }
@@ -394,6 +413,112 @@
       coverage: document.getElementById("coverage"),
       sourceNote: document.getElementById("sourceNote"),
     };
+
+    // ---- 「金融機関・商品」列の幅調整 --------------------------------------
+    // 機関名も商品名も長さがまちまちで、折り返しの見やすい幅は人によって違う。
+    // ヘッダー右端のハンドルをドラッグ（キーボードなら矢印キー）で変え、
+    // データセット別に localStorage へ残す。ダブルクリックで既定へ戻す。
+    const BANK_COL = {
+      min: 90,
+      max: 460,
+      step: 8,
+      storageKey: `finpulse.rateHistory.bankColWidth.${DATASETS[DATASET_KEY] ? DATASET_KEY : "housing"}`,
+    };
+
+    function defaultBankColWidth() {
+      // 既定値は CSS 側（画面幅で変わる）を正とする。インライン指定を外してから読む。
+      const inline = document.documentElement.style.getPropertyValue("--bank-col-w");
+      document.documentElement.style.removeProperty("--bank-col-w");
+      const value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bank-col-w"));
+      if (inline) document.documentElement.style.setProperty("--bank-col-w", inline);
+      return Number.isFinite(value) ? value : 142;
+    }
+
+    function currentBankColWidth() {
+      const value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bank-col-w"));
+      return Number.isFinite(value) ? value : defaultBankColWidth();
+    }
+
+    function applyBankColWidth(width, persist) {
+      const clamped = Math.round(Math.min(BANK_COL.max, Math.max(BANK_COL.min, width)));
+      document.documentElement.style.setProperty("--bank-col-w", `${clamped}px`);
+      const handle = el.matrix.querySelector(".col-resizer");
+      if (handle) handle.setAttribute("aria-valuenow", String(clamped));
+      if (persist) {
+        try { localStorage.setItem(BANK_COL.storageKey, String(clamped)); } catch (_e) { /* 保存できなくても操作は続けられる */ }
+      }
+      return clamped;
+    }
+
+    function resetBankColWidth() {
+      document.documentElement.style.removeProperty("--bank-col-w");
+      try { localStorage.removeItem(BANK_COL.storageKey); } catch (_e) { /* noop */ }
+      const handle = el.matrix.querySelector(".col-resizer");
+      if (handle) handle.setAttribute("aria-valuenow", String(Math.round(currentBankColWidth())));
+    }
+
+    function restoreBankColWidth() {
+      let saved = null;
+      try { saved = localStorage.getItem(BANK_COL.storageKey); } catch (_e) { saved = null; }
+      const width = parseFloat(saved ?? "");
+      if (Number.isFinite(width)) applyBankColWidth(width, false);
+    }
+
+    function resizerHtml() {
+      const width = Math.round(currentBankColWidth());
+      return `<button type="button" class="col-resizer" role="separator" aria-orientation="vertical"
+        aria-label="金融機関・商品の列幅を変更（矢印キーで調整、ダブルクリックで既定に戻す）"
+        aria-valuemin="${BANK_COL.min}" aria-valuemax="${BANK_COL.max}" aria-valuenow="${width}"
+        title="ドラッグで列幅を変更（ダブルクリックで既定に戻す）"></button>`;
+    }
+
+    function startBankColResize(event) {
+      const handle = event.target.closest(".col-resizer");
+      if (!handle || event.button !== 0) return;
+      event.preventDefault();
+      const startX = event.clientX;
+      const startWidth = currentBankColWidth();
+      handle.classList.add("dragging");
+      document.body.classList.add("resizing-col");
+
+      const onMove = (moveEvent) => applyBankColWidth(startWidth + (moveEvent.clientX - startX), false);
+      const onEnd = (endEvent) => {
+        applyBankColWidth(startWidth + (endEvent.clientX - startX), true);
+        handle.classList.remove("dragging");
+        document.body.classList.remove("resizing-col");
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onEnd);
+        window.removeEventListener("pointercancel", onCancel);
+      };
+      const onCancel = () => {
+        applyBankColWidth(startWidth, false);
+        handle.classList.remove("dragging");
+        document.body.classList.remove("resizing-col");
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onEnd);
+        window.removeEventListener("pointercancel", onCancel);
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onEnd);
+      window.addEventListener("pointercancel", onCancel);
+    }
+
+    // 表は render() ごとに作り直されるので、ハンドルの操作は matrix への委譲で受ける。
+    el.matrix.addEventListener("pointerdown", startBankColResize);
+    el.matrix.addEventListener("dblclick", (event) => {
+      if (event.target.closest(".col-resizer")) resetBankColWidth();
+    });
+    el.matrix.addEventListener("keydown", (event) => {
+      if (!event.target.closest(".col-resizer")) return;
+      const step = event.shiftKey ? BANK_COL.step * 3 : BANK_COL.step;
+      if (event.key === "ArrowLeft") applyBankColWidth(currentBankColWidth() - step, true);
+      else if (event.key === "ArrowRight") applyBankColWidth(currentBankColWidth() + step, true);
+      else if (event.key === "Home" || event.key === "Escape") resetBankColWidth();
+      else return;
+      event.preventDefault();
+    });
+    restoreBankColWidth();
+    // ------------------------------------------------------------------------
 
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>'"]/g, (c) => ({
@@ -583,7 +708,7 @@
       const columns = buildColumns(rows, dates);
 
       const thead = `<tr>
-        <th class="col-bank">金融機関・商品</th>
+        <th class="col-bank">金融機関・商品${resizerHtml()}</th>
         <th class="col-type">種別</th>
         ${columns.map((col) => col.kind === "date"
           ? `<th class="col-date${col.index === 0 ? "" : " past"}">${fmtHeaderDate(col.date)}</th>`

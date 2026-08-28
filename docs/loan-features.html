@@ -22,6 +22,10 @@
       --canvas: #f4f7f8;
       --shadow: 0 10px 30px rgba(11, 31, 51, 0.08);
       --radius: 14px;
+      /* 列幅の既定値。実際の幅は --cw-bank / --cw-col-<項目> が指定されていればそちらを使う
+         （ヘッダー右端のハンドルで変更し、localStorage に残す）。既定値そのものは上書きしない。 */
+      --cw-bank-default: 168px;
+      --cw-value-default: 210px;
     }
 
     * { box-sizing: border-box; }
@@ -177,10 +181,27 @@
       text-align: left; white-space: nowrap;
       border-bottom: 1px solid var(--line);
     }
-    thead th.col-bank { left: 0; z-index: 7; padding: 7px; }
-    /* 条件は長い文章になるため、金利表よりも列を広く取り、折り返して読ませる */
-    thead th.col-value { min-width: 210px; }
+    thead th.col-bank { left: 0; z-index: 7; padding: 7px 12px 7px 7px; }
+    /* 条件は長い文章になるため、金利表よりも列を広く取り、折り返して読ませる。
+       列ごとの実際の幅は render() が書き出す #colWidths の規則で決まる。 */
+    thead th.col-value { padding: 7px 12px 7px 8px; }
     .group-label { display: block; margin-top: 1px; color: #93a3ae; font-size: 0.62rem; font-weight: 650; }
+
+    /* 幅の変更ハンドル。列の境目に重ねるので、掴める幅（9px）だけ確保して見た目は線1本にする。 */
+    .col-resizer {
+      position: absolute; top: 0; right: -4px; z-index: 8;
+      width: 9px; height: 100%;
+      padding: 0; background: none; border: 0;
+      cursor: col-resize; touch-action: none;
+    }
+    .col-resizer::before {
+      content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px;
+      width: 2px; border-radius: 2px; background: #c3d0d8;
+    }
+    .col-resizer:hover::before, .col-resizer:focus-visible::before, .col-resizer.dragging::before { background: var(--teal-600); }
+    .col-resizer:focus-visible { outline: 2px solid var(--teal-600); outline-offset: 1px; }
+    /* ドラッグ中は表側のテキスト選択が始まらないようにする */
+    body.resizing-col { cursor: col-resize; user-select: none; }
 
     thead th.col-spacer, tbody td.col-spacer {
       width: 100%; min-width: 0; padding: 0; background: transparent;
@@ -193,11 +214,19 @@
       font-size: 0.76rem;
       line-height: 1.45;
       white-space: normal;
+      /* 列幅を狭めたときに長いURLや英数字が列を押し広げないようにする */
+      overflow-wrap: anywhere;
     }
     tbody tr:last-child td { border-bottom: 0; }
     tbody tr:hover td { background: #fbfdfd; }
 
-    .col-bank { position: sticky; left: 0; z-index: 4; width: 168px; min-width: 168px; padding: 7px; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    .col-bank {
+      position: sticky; left: 0; z-index: 4;
+      width: var(--cw-bank, var(--cw-bank-default));
+      min-width: var(--cw-bank, var(--cw-bank-default));
+      max-width: var(--cw-bank, var(--cw-bank-default));
+      padding: 7px; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2);
+    }
     thead th.col-bank { background: #f7fafa; }
     tbody tr:hover .col-bank { background: #fbfdfd; }
 
@@ -224,8 +253,8 @@
     body.embedded .site-header { display: none; }
 
     @media (max-width: 640px) {
-      .col-bank { width: 128px; min-width: 128px; }
-      thead th.col-value { min-width: 176px; }
+      /* 幅を自分で決めていない列だけ既定値を狭める */
+      :root { --cw-bank-default: 128px; --cw-value-default: 176px; }
       .site-header { gap: 10px; padding-inline: 10px; }
       .subtitle-full { display: none; }
       .subtitle-short { display: inline; }
@@ -281,6 +310,8 @@
       // 項目グループは「すべて」または1グループだけを表示する（null = すべて）
       selectedGroup: null,
       selectedBanks: new Set(),
+      // 列ID（bank または項目キー）→ 利用者が決めた幅(px)。未設定の列はCSSの既定値。
+      colWidths: new Map(),
     };
 
     const el = {
@@ -308,6 +339,146 @@
         return "";
       }
     }
+
+    // ---- 列幅の調整 --------------------------------------------------------
+    // 12項目それぞれ、読みたい情報量が人によって違う（保証料は長文、団信は短文など）。
+    // 各見出しの右端のハンドルをドラッグ（キーボードなら矢印キー）で変え、列ごとに
+    // localStorage へ残す。ダブルクリック・Home・Esc で既定に戻す。
+    const COL_SIZING = {
+      min: 90,
+      max: 560,
+      step: 8,
+      storageKey: "finpulse.loanFeatures.colWidths",
+    };
+
+    // CSS カスタムプロパティ名に使えるよう、項目キーを英数字と _ - に丸める。
+    function colId(key) {
+      return String(key).replace(/[^a-zA-Z0-9_-]/g, "_");
+    }
+
+    function colVarName(id) {
+      return id === "bank" ? "--cw-bank" : `--cw-col-${id}`;
+    }
+
+    function loadColWidths() {
+      try {
+        const raw = localStorage.getItem(COL_SIZING.storageKey);
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (!parsed || typeof parsed !== "object") return;
+        for (const [id, width] of Object.entries(parsed)) {
+          if (Number.isFinite(width)) state.colWidths.set(id, width);
+        }
+      } catch (_e) {
+        state.colWidths.clear();
+      }
+    }
+
+    function saveColWidths() {
+      try {
+        localStorage.setItem(COL_SIZING.storageKey, JSON.stringify(Object.fromEntries(state.colWidths)));
+      } catch (_e) { /* 保存できなくても操作は続けられる */ }
+    }
+
+    // 保存済みの幅を CSS 変数として当てる。未設定の列は CSS 側の既定値のままにする。
+    function applyStoredColWidths() {
+      for (const [id, width] of state.colWidths) {
+        document.documentElement.style.setProperty(colVarName(id), `${width}px`);
+      }
+    }
+
+    function setColWidth(id, width, persist) {
+      const clamped = Math.round(Math.min(COL_SIZING.max, Math.max(COL_SIZING.min, width)));
+      document.documentElement.style.setProperty(colVarName(id), `${clamped}px`);
+      state.colWidths.set(id, clamped);
+      const handle = el.matrix.querySelector(`.col-resizer[data-col="${id}"]`);
+      if (handle) handle.setAttribute("aria-valuenow", String(clamped));
+      if (persist) saveColWidths();
+      return clamped;
+    }
+
+    function resetColWidth(id) {
+      document.documentElement.style.removeProperty(colVarName(id));
+      state.colWidths.delete(id);
+      saveColWidths();
+      const handle = el.matrix.querySelector(`.col-resizer[data-col="${id}"]`);
+      if (handle) handle.setAttribute("aria-valuenow", String(Math.round(measuredWidth(handle))));
+    }
+
+    // 現在の幅は実際の見出しセルから測る（既定値が画面幅で変わるため）。
+    function measuredWidth(handle) {
+      const cell = handle.closest("th");
+      return cell ? cell.getBoundingClientRect().width : COL_SIZING.min;
+    }
+
+    function resizerHtml(id, label) {
+      const stored = state.colWidths.get(id);
+      const valueNow = Number.isFinite(stored) ? ` aria-valuenow="${stored}"` : "";
+      return `<button type="button" class="col-resizer" data-col="${escapeHtml(id)}" role="separator" aria-orientation="vertical"
+        aria-label="${escapeHtml(label)}の列幅を変更（矢印キーで調整、ダブルクリックで既定に戻す）"
+        aria-valuemin="${COL_SIZING.min}" aria-valuemax="${COL_SIZING.max}"${valueNow}
+        title="ドラッグで列幅を変更（ダブルクリックで既定に戻す）"></button>`;
+    }
+
+    // 項目列の幅は、この規則で列全体（見出しと本文）に効かせる。
+    function colWidthStyleHtml(columns) {
+      const rules = columns.map((column) => {
+        const id = colId(column.key);
+        const size = `var(${colVarName(id)}, var(--cw-value-default))`;
+        return `th.cv-${id}, td.cv-${id} { width: ${size}; min-width: ${size}; max-width: ${size}; }`;
+      });
+      return `<style>${rules.join("\n")}</style>`;
+    }
+
+    function startColResize(event) {
+      const handle = event.target.closest(".col-resizer");
+      if (!handle || event.button !== 0) return;
+      event.preventDefault();
+      const id = handle.dataset.col;
+      const startX = event.clientX;
+      const startWidth = measuredWidth(handle);
+      const hadWidth = state.colWidths.has(id);
+      handle.classList.add("dragging");
+      document.body.classList.add("resizing-col");
+
+      const stop = () => {
+        handle.classList.remove("dragging");
+        document.body.classList.remove("resizing-col");
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onEnd);
+        window.removeEventListener("pointercancel", onCancel);
+      };
+      const onMove = (moveEvent) => setColWidth(id, startWidth + (moveEvent.clientX - startX), false);
+      const onEnd = (endEvent) => { setColWidth(id, startWidth + (endEvent.clientX - startX), true); stop(); };
+      const onCancel = () => {
+        if (hadWidth) setColWidth(id, startWidth, false);
+        else resetColWidth(id);
+        stop();
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onEnd);
+      window.addEventListener("pointercancel", onCancel);
+    }
+
+    // 表は render() ごとに作り直されるので、ハンドルの操作は matrix への委譲で受ける。
+    el.matrix.addEventListener("pointerdown", startColResize);
+    el.matrix.addEventListener("dblclick", (event) => {
+      const handle = event.target.closest(".col-resizer");
+      if (handle) resetColWidth(handle.dataset.col);
+    });
+    el.matrix.addEventListener("keydown", (event) => {
+      const handle = event.target.closest(".col-resizer");
+      if (!handle) return;
+      const id = handle.dataset.col;
+      const step = event.shiftKey ? COL_SIZING.step * 3 : COL_SIZING.step;
+      if (event.key === "ArrowLeft") setColWidth(id, measuredWidth(handle) - step, true);
+      else if (event.key === "ArrowRight") setColWidth(id, measuredWidth(handle) + step, true);
+      else if (event.key === "Home" || event.key === "Escape") resetColWidth(id);
+      else return;
+      event.preventDefault();
+    });
+    loadColWidths();
+    applyStoredColWidths();
+    // ------------------------------------------------------------------------
 
     function bankOrder() {
       // 表示順はJSONの並び順が正。ビューアー側では並べ替えない。
@@ -350,8 +521,8 @@
       }
 
       const thead = `<tr>
-        <th class="col-bank">金融機関・商品</th>
-        ${columns.map((column) => `<th class="col-value">${escapeHtml(column.label)}<span class="group-label">${escapeHtml(groupLabel(column.group))}</span></th>`).join("")}
+        <th class="col-bank">金融機関・商品${resizerHtml("bank", "金融機関・商品")}</th>
+        ${columns.map((column) => `<th class="col-value cv-${colId(column.key)}">${escapeHtml(column.label)}<span class="group-label">${escapeHtml(groupLabel(column.group))}</span>${resizerHtml(colId(column.key), column.label)}</th>`).join("")}
         <th class="col-spacer" aria-hidden="true"></th>
       </tr>`;
 
@@ -368,7 +539,7 @@
           // 保証料が別途かかる商品は、保証料の欄だけ色を変えて見落としを防ぐ
           const warn = column.key === "guarantee" && product.guarantee_warn === true;
           const missing = !text || text.includes("記載なし") || text.includes("非公表");
-          const cls = ["col-value"];
+          const cls = ["col-value", `cv-${colId(column.key)}`];
           if (warn) cls.push("warn");
           if (!warn && missing) cls.push("missing");
           return `<td class="${cls.join(" ")}">${text ? escapeHtml(text) : "—"}</td>`;
@@ -383,7 +554,7 @@
         </tr>`;
       }).join("");
 
-      el.matrix.innerHTML = `<table><thead>${thead}</thead><tbody>${body}</tbody></table>`;
+      el.matrix.innerHTML = `${colWidthStyleHtml(columns)}<table><thead>${thead}</thead><tbody>${body}</tbody></table>`;
     }
 
     function buildGroupChips() {
