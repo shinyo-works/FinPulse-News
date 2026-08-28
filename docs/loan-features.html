@@ -15,6 +15,7 @@
       --teal-600: #138484;
       --teal-100: #dff3f1;
       --warn: #b91c1c;
+      --caution: #a4530a;
       --ink: #172b3a;
       --muted: #647684;
       --line: #d9e2e8;
@@ -155,6 +156,8 @@
     }
     .info-line + .info-line { margin-top: 2px; }
     .info-line b { font-weight: 700; }
+    .info-line .legend-warn { color: var(--warn); }
+    .info-line .legend-caution { color: var(--caution); }
 
     .content {
       flex: 1 1 auto;
@@ -236,9 +239,12 @@
     .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
     .product-name { margin-top: 1px; color: var(--muted); font-size: 0.71rem; line-height: 1.25; }
 
-    /* 保証料が別途かかる商品は、金利だけの比較で見落とされやすいので色で立てる */
+    /* 保証料が別途かかる商品は、金利だけの比較で見落とされやすいので色で立てる。
+       条件次第で別途負担が生じる商品・公式に記載がなく不明な商品は橙で、赤より弱く示す */
     td.warn { color: var(--warn); font-weight: 650; background: #fef4f4; }
     tbody tr:hover td.warn { background: #fdeeee; }
+    td.caution { color: var(--caution); font-weight: 650; background: #fff8ef; }
+    tbody tr:hover td.caution { background: #fdf2e3; }
     .missing { color: #93a3ae; }
 
     tbody tr.bank-start > td { border-top: 2px solid #8aa0af; }
@@ -288,7 +294,7 @@
     <div class="table-scroll" id="tableScroll">
       <div class="scrolling-notes">
         <div class="info-line"><b>この表</b>＝各機関の公式サイトの商品ページと商品概要説明書から、金利以外の条件を書き写したものです。<b>金利は「住宅ローン金利情報」タブ</b>をご覧ください。</div>
-        <div class="info-line"><b>赤い欄</b>＝保証料が金利に含まれず別途かかる商品。金利表の数字だけでは見えない負担があります。</div>
+        <div class="info-line"><b class="legend-warn">赤い欄</b>＝保証料が金利に含まれず必ず別途かかる商品。<b class="legend-caution">橙の欄</b>＝会員かどうかや審査で別途負担が生じうる商品、または公式に記載がなく不明な商品。いずれも金利表の数字だけでは見えない負担があります。</div>
         <div class="info-line" id="verifiedNote"></div>
       </div>
       <div id="matrix" aria-live="polite">
@@ -537,12 +543,17 @@
         const cells = columns.map((column) => {
           const raw = (product.values || {})[column.key];
           const text = String(raw ?? "").trim();
-          // 保証料が別途かかる商品は、保証料の欄だけ色を変えて見落としを防ぐ
-          const warn = column.key === "guarantee" && product.guarantee_warn === true;
+          // 保証料の欄だけ色を変えて見落としを防ぐ。
+          // separate=赤（必ず別途）／conditional=橙（条件次第・記載がなく不明）／included=既定色
+          // 値が欠けている・知らない値のときは既定色（警告なし）に落とさず橙に寄せる。
+          const isGuarantee = column.key === "guarantee";
+          const warn = isGuarantee && product.guarantee_status === "separate";
+          const caution = isGuarantee && !warn && product.guarantee_status !== "included";
           const missing = !text || text.includes("記載なし") || text.includes("非公表");
           const cls = ["col-value", `cv-${colId(column.key)}`];
           if (warn) cls.push("warn");
-          if (!warn && missing) cls.push("missing");
+          if (caution) cls.push("caution");
+          if (!warn && !caution && missing) cls.push("missing");
           return `<td class="${cls.join(" ")}">${text ? escapeHtml(text) : "—"}</td>`;
         });
         return `<tr${isBankStart ? ' class="bank-start"' : ""}>

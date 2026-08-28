@@ -255,9 +255,11 @@
     .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
     .product-name { margin-top: 1px; color: var(--muted); font-size: 0.71rem; white-space: normal; line-height: 1.25; }
     .guarantee-note { margin-top: 2px; color: #b91c1c; font-size: 0.68rem; font-weight: 600; white-space: normal; line-height: 1.2; }
-    /* 住宅ローンの保証料・事務手数料。既定は控えめにし、保証料が別途の商品だけ赤で立てる */
+    /* 住宅ローンの保証料・事務手数料。既定は控えめにし、保証料が別途の商品を赤、
+       条件次第で別途負担が生じる商品・記載が無く不明な商品を橙で立てる */
     .feature-note { margin-top: 2px; color: #5c6f7c; font-size: 0.66rem; font-weight: 600; white-space: normal; line-height: 1.2; }
     .feature-note.warn { color: #b91c1c; }
+    .feature-note.caution { color: #a4530a; }
 
     .type-badge {
       display: inline-block; padding: 2px 6px; border-radius: 999px;
@@ -587,7 +589,13 @@
       if (!feature) return "";
       const lines = [];
       if (feature.guarantee_note) {
-        const cls = feature.guarantee_warn ? "feature-note warn" : "feature-note";
+        // included=灰（負担なし）／separate=赤（必ず別途）／conditional=橙（条件次第・不明）。
+        // 値が欠けている・知らない値のときは灰（警告なし）に落とさず橙に寄せる。
+        // 古い形のJSONを読んだときに、別途負担の注意が黙って消えるほうが危ない。
+        const status = feature.guarantee_status;
+        const cls = status === "separate" ? "feature-note warn"
+          : status === "included" ? "feature-note"
+          : "feature-note caution";
         lines.push(`<div class="${cls}">${escapeHtml(feature.guarantee_note)}</div>`);
       }
       if (feature.fee_note) {

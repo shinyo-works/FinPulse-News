@@ -11,10 +11,13 @@ from pathlib import Path
 
 DOCS = Path(__file__).resolve().parents[1] / "docs"
 
-# 機関名セルは幅142ページピクセル（狭い画面は112）しかないため、
-# 長い注記を入れると行が伸びて金利の比較が読みにくくなる。
+# 機関名セルの既定幅は142ページピクセル（狭い画面は112）。利用者がドラッグで広げられる
+# ようになったが、既定のまま見る人のために、長い注記で行を伸ばさない上限は残す。
 MAX_GUARANTEE_NOTE_CHARS = 20
 MAX_FEE_NOTE_CHARS = 30
+
+# 保証料の扱い。included=金利に含む／separate=必ず別途／conditional=条件次第・記載がなく不明
+GUARANTEE_STATUSES = ("included", "separate", "conditional")
 
 
 class LoanFeaturesDataTest(unittest.TestCase):
@@ -92,16 +95,44 @@ class LoanFeaturesDataTest(unittest.TestCase):
                     len(note), limit, f"{product['product_id']} の {key} が長すぎる: {note}"
                 )
 
-    def test_guarantee_warn_marks_only_products_paying_the_fee_separately(self):
+    def test_guarantee_status_matches_the_wording_of_each_product(self):
+        """保証料の色分けは3値。included=灰・separate=赤・conditional=橙。"""
         for product in self.features["products"]:
-            warn = product["guarantee_warn"]
-            self.assertIsInstance(warn, bool)
+            status = product["guarantee_status"]
+            self.assertIn(status, GUARANTEE_STATUSES, product["product_id"])
+            # 旧2値のキーは残さない（どちらを見るべきか迷わせないため）
+            self.assertNotIn("guarantee_warn", product)
             guarantee = product["values"]["guarantee"]
-            if warn:
-                # 赤で立てるのは「金利に含まれない」商品だけ
+            if status == "separate":
+                # 赤で立てるのは「必ず別途かかる」商品だけ
                 self.assertNotIn("金利に含む", guarantee)
-            else:
+            elif status == "included":
                 self.assertNotIn("別途", guarantee[:6])
+                # 「会員だけ無料」「審査によっては前払い」のような条件付きを灰色に戻さない
+                for word in ("会員は", "場合あり", "選択制"):
+                    self.assertNotIn(
+                        word, guarantee, f"{product['product_id']} は conditional では"
+                    )
+            else:
+                # 橙にするのは、条件次第・審査次第・記載がなく不明のいずれかが読み取れるもの
+                self.assertTrue(
+                    any(
+                        word in guarantee
+                        for word in ("会員", "場合あり", "選択制", "記載がな")
+                    ),
+                    f"{product['product_id']} の guarantee に条件付きの根拠がない",
+                )
+
+    def test_values_do_not_rank_institutions_against_each_other(self):
+        """比較の断定は書かない。機関を足すたびに全セルの再検証が要るのを避ける。"""
+        # 「最高3,000万円」「合計3点以上」のような正当な語とは衝突しない範囲で広く禁じる
+        banned = ("最も", "唯一", "他行より", "10機関", "最安値")
+        for product in self.features["products"]:
+            for key, value in product["values"].items():
+                for word in banned:
+                    self.assertNotIn(
+                        word, value, f"{product['product_id']} の {key}: {value}"
+                    )
 
     def test_urls_are_http_or_https(self):
         for product in self.features["products"]:
@@ -109,7 +140,7 @@ class LoanFeaturesDataTest(unittest.TestCase):
 
     def test_verified_date_is_recorded(self):
         self.assertRegex(self.features["verified_date"], r"^\d{4}-\d{2}-\d{2}$")
-        self.assertEqual(1, self.features["schema_version"])
+        self.assertEqual(2, self.features["schema_version"])
 
 
 class LoanFeaturesViewerTest(unittest.TestCase):
@@ -144,6 +175,10 @@ class LoanFeaturesViewerTest(unittest.TestCase):
         self.assertIn("${featureNotesHtml(row)}", self.rate_html)
         self.assertIn(".feature-note {", self.rate_html)
         self.assertIn(".feature-note.warn {", self.rate_html)
+        self.assertIn(".feature-note.caution {", self.rate_html)
+        # 色分けは3値の guarantee_status を見る（旧2値のキーは参照しない）
+        self.assertIn("feature.guarantee_status", self.rate_html)
+        self.assertNotIn("guarantee_warn", self.rate_html)
         # 注記は必ずエスケープしてから差し込む
         self.assertIn("escapeHtml(feature.guarantee_note)", self.rate_html)
         self.assertIn("escapeHtml(feature.fee_note)", self.rate_html)
@@ -169,6 +204,13 @@ class LoanFeaturesViewerTest(unittest.TestCase):
         self.assertIn("safeUrl(product.url)", self.features_html)
         # 表示順はJSONの並び順が正。ビューアーでは並べ替えない。
         self.assertNotIn(".sort(", self.features_html)
+        # 保証料の色分けは3値。赤と橙の両方を凡例で説明する。
+        self.assertIn('product.guarantee_status === "separate"', self.features_html)
+        # 値が欠けていても既定色（警告なし）に落とさない
+        self.assertIn('product.guarantee_status !== "included"', self.features_html)
+        self.assertNotIn("guarantee_warn", self.features_html)
+        self.assertIn("td.caution {", self.features_html)
+        self.assertIn("橙の欄", self.features_html)
 
     def test_comparison_viewer_points_back_to_the_rate_tab(self):
         self.assertIn("住宅ローン金利情報", self.features_html)
