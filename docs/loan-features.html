@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="帯広エリアの金融機関の住宅ローンについて、保証料・手数料・団信・借入条件など金利以外の条件を並べて比較できる一覧">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b1f33'/><path d='M16 5 L28 12 H4 Z' fill='%2355d6c9'/><rect x='7' y='14' width='3.4' height='9' fill='%2355d6c9'/><rect x='14.3' y='14' width='3.4' height='9' fill='%2355d6c9'/><rect x='21.6' y='14' width='3.4' height='9' fill='%2355d6c9'/><rect x='5' y='24.5' width='22' height='3' rx='1.2' fill='%2355d6c9'/></svg>">
+  <title>十勝金融機関News｜住宅ローンの条件比較</title>
+  <style>
+    :root {
+      --navy-950: #0b1f33;
+      --navy-900: #102a43;
+      --navy-800: #173e5e;
+      --teal-700: #0d6e6e;
+      --teal-600: #138484;
+      --teal-100: #dff3f1;
+      --warn: #b91c1c;
+      --ink: #172b3a;
+      --muted: #647684;
+      --line: #d9e2e8;
+      --paper: #ffffff;
+      --canvas: #f4f7f8;
+      --shadow: 0 10px 30px rgba(11, 31, 51, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html { color-scheme: light; }
+    /* 金利タブと同じく、ページ全体は固定して表の中だけをスクロールさせる。 */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+      line-height: 1.4;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .site-header {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px clamp(12px, 3vw, 36px);
+      color: #eef7fa;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(32, 144, 139, 0.32), transparent 34%),
+        var(--navy-950);
+    }
+    .brand-mark {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.02rem;
+      font-weight: 750;
+      letter-spacing: 0.02em;
+    }
+    .pulse-dot {
+      width: 11px; height: 11px; border-radius: 50%;
+      background: #55d6c9; box-shadow: 0 0 0 5px rgba(85, 214, 201, 0.15);
+    }
+    .site-header p {
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      color: #a9c0ce;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls {
+      flex: none;
+      z-index: 20;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 5px clamp(12px, 3vw, 36px);
+      background: rgba(244, 247, 248, 0.95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+    .search-wrap { position: relative; flex: 0 1 190px; min-width: 132px; }
+    .search-icon {
+      position: absolute; left: 11px; top: 50%;
+      color: var(--muted); transform: translateY(-50%); pointer-events: none;
+    }
+    #searchInput {
+      width: 100%;
+      height: 30px;
+      padding: 3px 10px 3px 31px;
+      color: var(--ink); background: var(--paper);
+      border: 1px solid var(--line); border-radius: 9px; outline: none;
+      font-size: 0.84rem;
+    }
+    #searchInput:focus { border-color: var(--teal-600); box-shadow: 0 0 0 3px rgba(19,132,132,0.13); }
+
+    .group-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chip {
+      padding: 4px 10px;
+      color: var(--navy-800); background: var(--paper);
+      border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+      font-size: 0.85rem; font-weight: 700;
+    }
+    .chip.active { color: #fff; background: var(--teal-700); border-color: var(--teal-700); }
+
+    .filter-menu { position: relative; }
+    .control-button {
+      display: inline-flex; align-items: center; gap: 7px;
+      min-height: 30px; padding: 4px 10px; white-space: nowrap;
+      background: var(--paper); border: 1px solid var(--line); border-radius: 9px; cursor: pointer;
+      font-size: 0.84rem;
+    }
+    .control-button:hover { border-color: #a9bbc7; }
+    .filter-popover {
+      position: absolute; right: 0; top: calc(100% + 8px); z-index: 40;
+      display: none; width: 250px; max-height: 320px; overflow-y: auto;
+      padding: 10px; background: var(--paper);
+      border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+    }
+    .filter-popover.open { display: block; }
+    .filter-option { display: flex; align-items: center; gap: 9px; padding: 4px 3px; cursor: pointer; font-size: 0.88rem; }
+    .filter-option input { accent-color: var(--teal-700); }
+
+    .scrolling-notes {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      width: 100%;
+      padding: 5px 10px 4px;
+      color: var(--muted);
+      background: #fbfdfd;
+      border-bottom: 1px solid #e8eef1;
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+    .info-line {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .info-line + .info-line { margin-top: 2px; }
+    .info-line b { font-weight: 700; }
+
+    .content {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      padding: 6px clamp(10px, 2vw, 24px) 8px;
+    }
+    #matrix { min-width: 100%; }
+
+    .table-scroll {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 18px rgba(11, 31, 51, 0.045);
+    }
+    table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; }
+    thead th {
+      position: sticky; top: 0; z-index: 5;
+      padding: 7px 8px;
+      color: var(--muted); background: #f7fafa;
+      font-size: 0.74rem; font-weight: 750; letter-spacing: 0.03em;
+      text-align: left; white-space: nowrap;
+      border-bottom: 1px solid var(--line);
+    }
+    thead th.col-bank { left: 0; z-index: 7; padding: 7px; }
+    /* 条件は長い文章になるため、金利表よりも列を広く取り、折り返して読ませる */
+    thead th.col-value { min-width: 210px; }
+    .group-label { display: block; margin-top: 1px; color: #93a3ae; font-size: 0.62rem; font-weight: 650; }
+
+    thead th.col-spacer, tbody td.col-spacer {
+      width: 100%; min-width: 0; padding: 0; background: transparent;
+    }
+    tbody td {
+      padding: 7px 8px; vertical-align: top;
+      border-bottom: 1px solid #eef2f4;
+      text-align: left;
+      color: var(--ink);
+      font-size: 0.76rem;
+      line-height: 1.45;
+      white-space: normal;
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: #fbfdfd; }
+
+    .col-bank { position: sticky; left: 0; z-index: 4; width: 168px; min-width: 168px; padding: 7px; background: var(--paper); box-shadow: 6px 0 10px -10px rgba(15,23,42,0.2); }
+    thead th.col-bank { background: #f7fafa; }
+    tbody tr:hover .col-bank { background: #fbfdfd; }
+
+    .bank-name { font-weight: 700; color: var(--navy-900); font-size: 0.82rem; line-height: 1.25; }
+    .bank-name a { color: var(--navy-800); text-decoration: none; }
+    .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
+    .product-name { margin-top: 1px; color: var(--muted); font-size: 0.71rem; line-height: 1.25; }
+
+    /* 保証料が別途かかる商品は、金利だけの比較で見落とされやすいので色で立てる */
+    td.warn { color: var(--warn); font-weight: 650; background: #fef4f4; }
+    tbody tr:hover td.warn { background: #fdeeee; }
+    .missing { color: #93a3ae; }
+
+    tbody tr.bank-start > td { border-top: 2px solid #8aa0af; }
+
+    .empty-state, .loading-state {
+      align-self: flex-start; width: 100%;
+      padding: 40px 20px; text-align: center; color: var(--muted);
+      background: var(--paper); border: 1px dashed #b9c8d1; border-radius: var(--radius);
+    }
+    .empty-state strong, .loading-state strong { display: block; margin-bottom: 5px; color: var(--navy-900); font-size: 1rem; }
+
+    .subtitle-short { display: none; }
+    body.embedded .site-header { display: none; }
+
+    @media (max-width: 640px) {
+      .col-bank { width: 128px; min-width: 128px; }
+      thead th.col-value { min-width: 176px; }
+      .site-header { gap: 10px; padding-inline: 10px; }
+      .subtitle-full { display: none; }
+      .subtitle-short { display: inline; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-mark"><span class="pulse-dot" aria-hidden="true"></span>住宅ローンの条件比較</div>
+    <p><span class="subtitle-full">帯広エリア 金融機関の住宅ローンについて、金利以外の条件を同じ項目で並べています。</span><span class="subtitle-short">金利以外の条件を並べています。</span></p>
+  </header>
+
+  <div class="controls">
+    <label class="search-wrap">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input id="searchInput" type="search" placeholder="金融機関・商品名で検索" aria-label="金融機関・商品名で検索" autocomplete="off">
+    </label>
+    <div class="group-chips" id="groupChips" role="group" aria-label="表示する項目のグループ切替"></div>
+    <div class="filter-menu" id="bankFilterWrap">
+      <button class="control-button" id="filterButton" type="button" aria-expanded="false" aria-controls="filterPopover">
+        機関を絞り込む <span id="filterCount"></span>
+      </button>
+      <div class="filter-popover" id="filterPopover">
+        <div id="bankFilters"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="table-scroll" id="tableScroll">
+      <div class="scrolling-notes">
+        <div class="info-line"><b>この表</b>＝各機関の公式サイトの商品ページと商品概要説明書から、金利以外の条件を書き写したものです。<b>金利は「住宅ローン金利情報」タブ</b>をご覧ください。</div>
+        <div class="info-line"><b>赤い欄</b>＝保証料が金利に含まれず別途かかる商品。金利表の数字だけでは見えない負担があります。</div>
+        <div class="info-line" id="verifiedNote"></div>
+      </div>
+      <div id="matrix" aria-live="polite">
+        <div class="loading-state"><strong>データを読み込んでいます</strong>しばらくお待ちください。</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    // iframe 内（タブ表示）かどうか。単体で開いたときは従来どおり見出しを出す。
+    if (window.self !== window.top) document.body.classList.add("embedded");
+
+    const DATA_URL = "./data/loan-features.json";
+
+    const state = {
+      data: null,
+      search: "",
+      // 項目グループは「すべて」または1グループだけを表示する（null = すべて）
+      selectedGroup: null,
+      selectedBanks: new Set(),
+    };
+
+    const el = {
+      matrix: document.getElementById("matrix"),
+      searchInput: document.getElementById("searchInput"),
+      groupChips: document.getElementById("groupChips"),
+      bankFilters: document.getElementById("bankFilters"),
+      filterButton: document.getElementById("filterButton"),
+      filterPopover: document.getElementById("filterPopover"),
+      filterCount: document.getElementById("filterCount"),
+      verifiedNote: document.getElementById("verifiedNote"),
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      })[c]);
+    }
+
+    function safeUrl(value) {
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol) ? escapeHtml(url.href) : "";
+      } catch (_e) {
+        return "";
+      }
+    }
+
+    function bankOrder() {
+      // 表示順はJSONの並び順が正。ビューアー側では並べ替えない。
+      const order = [];
+      for (const product of state.data.products) {
+        if (!order.includes(product.bank_id)) order.push(product.bank_id);
+      }
+      return order;
+    }
+
+    function visibleProducts() {
+      const q = state.search.trim().toLocaleLowerCase("ja");
+      return state.data.products.filter((product) => {
+        if (!state.selectedBanks.has(product.bank_id)) return false;
+        if (!q) return true;
+        return (
+          String(product.bank_name ?? "").toLocaleLowerCase("ja").includes(q) ||
+          String(product.product_name ?? "").toLocaleLowerCase("ja").includes(q)
+        );
+      });
+    }
+
+    function visibleColumns() {
+      const columns = state.data.columns || [];
+      if (!state.selectedGroup) return columns;
+      return columns.filter((column) => column.group === state.selectedGroup);
+    }
+
+    function groupLabel(key) {
+      const group = (state.data.groups || []).find((item) => item.key === key);
+      return group ? group.label : key;
+    }
+
+    function render() {
+      const products = visibleProducts();
+      const columns = visibleColumns();
+      if (!products.length || !columns.length) {
+        el.matrix.innerHTML = `<div class="empty-state"><strong>表示できる商品がありません</strong>検索条件や絞り込みを見直してください。</div>`;
+        return;
+      }
+
+      const thead = `<tr>
+        <th class="col-bank">金融機関・商品</th>
+        ${columns.map((column) => `<th class="col-value">${escapeHtml(column.label)}<span class="group-label">${escapeHtml(groupLabel(column.group))}</span></th>`).join("")}
+        <th class="col-spacer" aria-hidden="true"></th>
+      </tr>`;
+
+      const body = products.map((product, idx) => {
+        const prev = products[idx - 1];
+        const isBankStart = Boolean(prev) && prev.bank_id !== product.bank_id;
+        const url = product.url ? safeUrl(product.url) : "";
+        const bankHtml = url
+          ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(product.bank_name)}</a>`
+          : escapeHtml(product.bank_name);
+        const cells = columns.map((column) => {
+          const raw = (product.values || {})[column.key];
+          const text = String(raw ?? "").trim();
+          // 保証料が別途かかる商品は、保証料の欄だけ色を変えて見落としを防ぐ
+          const warn = column.key === "guarantee" && product.guarantee_warn === true;
+          const missing = !text || text.includes("記載なし") || text.includes("非公表");
+          const cls = ["col-value"];
+          if (warn) cls.push("warn");
+          if (!warn && missing) cls.push("missing");
+          return `<td class="${cls.join(" ")}">${text ? escapeHtml(text) : "—"}</td>`;
+        });
+        return `<tr${isBankStart ? ' class="bank-start"' : ""}>
+          <td class="col-bank">
+            <div class="bank-name">${bankHtml}</div>
+            <div class="product-name">${escapeHtml(product.product_name || "")}</div>
+          </td>
+          ${cells.join("")}
+          <td class="col-spacer"></td>
+        </tr>`;
+      }).join("");
+
+      el.matrix.innerHTML = `<table><thead>${thead}</thead><tbody>${body}</tbody></table>`;
+    }
+
+    function buildGroupChips() {
+      const groups = state.data.groups || [];
+      state.selectedGroup = null;
+      const chips = [`<button type="button" class="chip active" data-group="">すべて</button>`];
+      for (const group of groups) {
+        chips.push(`<button type="button" class="chip" data-group="${escapeHtml(group.key)}">${escapeHtml(group.label)}</button>`);
+      }
+      el.groupChips.innerHTML = chips.join("");
+    }
+
+    function syncGroupChips() {
+      el.groupChips.querySelectorAll("[data-group]").forEach((chip) => {
+        chip.classList.toggle("active", (chip.dataset.group || null) === state.selectedGroup);
+      });
+    }
+
+    function buildBankFilters() {
+      const banks = [];
+      for (const product of state.data.products) {
+        if (!banks.some((bank) => bank.id === product.bank_id)) {
+          banks.push({ id: product.bank_id, name: product.bank_name });
+        }
+      }
+      state.selectedBanks = new Set(banks.map((bank) => bank.id));
+      el.bankFilters.innerHTML = banks.map((bank) => `
+        <label class="filter-option">
+          <input type="checkbox" value="${escapeHtml(bank.id)}" checked>
+          <span>${escapeHtml(bank.name)}</span>
+        </label>`).join("");
+      syncFilterCount(banks.length);
+    }
+
+    function syncFilterCount(total) {
+      const count = state.selectedBanks.size;
+      el.filterCount.textContent = count === total ? "（すべて）" : `（${count}/${total}）`;
+    }
+
+    async function initialize() {
+      try {
+        const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        state.data = await response.json();
+      } catch (error) {
+        el.matrix.innerHTML = `<div class="empty-state"><strong>データを読み込めませんでした</strong>${escapeHtml(error.message)}</div>`;
+        return;
+      }
+      if (!state.data || !Array.isArray(state.data.products) || !state.data.products.length) {
+        el.matrix.innerHTML = `<div class="empty-state"><strong>条件データがありません</strong>調査結果がまだ登録されていません。</div>`;
+        return;
+      }
+      bankOrder();
+      buildGroupChips();
+      buildBankFilters();
+      const verified = String(state.data.verified_date || "").replaceAll("-", "/");
+      el.verifiedNote.textContent = verified
+        ? `■ 確認日 ${verified}（各機関の公式ページを直接確認）。週次で自動更新される表ではないため、実際に申し込む前に最新の商品概要説明書をご確認ください。`
+        : "";
+      render();
+    }
+
+    el.searchInput.addEventListener("input", (event) => {
+      state.search = event.target.value;
+      render();
+    });
+
+    el.groupChips.addEventListener("click", (event) => {
+      const chip = event.target.closest("[data-group]");
+      if (!chip) return;
+      state.selectedGroup = chip.dataset.group || null;
+      syncGroupChips();
+      render();
+    });
+
+    el.bankFilters.addEventListener("change", (event) => {
+      const input = event.target.closest("input[type=checkbox]");
+      if (!input) return;
+      if (input.checked) state.selectedBanks.add(input.value);
+      else state.selectedBanks.delete(input.value);
+      syncFilterCount(el.bankFilters.querySelectorAll("input[type=checkbox]").length);
+      render();
+    });
+
+    el.filterButton.addEventListener("click", () => {
+      const open = el.filterPopover.classList.toggle("open");
+      el.filterButton.setAttribute("aria-expanded", String(open));
+    });
+
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("#bankFilterWrap")) return;
+      el.filterPopover.classList.remove("open");
+      el.filterButton.setAttribute("aria-expanded", "false");
+    });
+
+    initialize();
+  </script>
+</body>
+</html>

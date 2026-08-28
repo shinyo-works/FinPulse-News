@@ -39,7 +39,8 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertRegex(
             self.html,
             r'body\[data-view="news"\]\s*\.tab-note,\s*\n\s*body\[data-view="rate"\]\s*\.tab-note,'
-            r'\s*\n\s*body\[data-view="car"\]\s*\.tab-note\s*\{[^}]*display:\s*flex;',
+            r'\s*\n\s*body\[data-view="car"\]\s*\.tab-note,'
+            r'\s*\n\s*body\[data-view="features"\]\s*\.tab-note\s*\{[^}]*display:\s*flex;',
         )
         self.assertRegex(
             self.html,
@@ -49,13 +50,16 @@ class ViewerLayoutTest(unittest.TestCase):
             self.html,
             r'body\[data-view="rate"\]\s*\.tab-brand,\s*\n\s*body\[data-view="rate"\]\s*\.note-heading,'
             r'\s*\n\s*body\[data-view="car"\]\s*\.tab-brand,'
-            r'\s*\n\s*body\[data-view="car"\]\s*\.note-heading\s*\{\s*display:\s*none;\s*\}',
+            r'\s*\n\s*body\[data-view="car"\]\s*\.note-heading,'
+            r'\s*\n\s*body\[data-view="features"\]\s*\.tab-brand,'
+            r'\s*\n\s*body\[data-view="features"\]\s*\.note-heading\s*\{\s*display:\s*none;\s*\}',
         )
         # 説明文はローン種別ごとに違うので、既定は非表示で表示中のタブのものだけ出す
         self.assertRegex(self.html, r"\.note-text\s*\{\s*display:\s*none;\s*\}")
         self.assertRegex(
             self.html,
-            r'body\[data-view="rate"\]\s*\.note-rate,\s*\n\s*body\[data-view="car"\]\s*\.note-car\s*\{\s*display:\s*inline;\s*\}',
+            r'body\[data-view="rate"\]\s*\.note-rate,\s*\n\s*body\[data-view="car"\]\s*\.note-car,'
+            r'\s*\n\s*body\[data-view="features"\]\s*\.note-features\s*\{\s*display:\s*inline;\s*\}',
         )
         # iframe 側の見出しは重複するので、埋め込み時だけ隠す
         self.assertRegex(

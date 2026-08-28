@@ -532,8 +532,11 @@
       gap: 6px;
       height: 44px;
       padding: 0 16px;
-      /* タブは縮めない方針のため、拡大表示ではみ出しても横スクロールを出さず切り取る */
-      overflow: hidden;
+      /* タブは縮めない方針。4つ並ぶと狭い画面では収まらないため、切り取らず横に流す
+         （切り取ると最後のタブに手が届かなくなる）。スクロールバーは出さない。 */
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
       background: var(--navy-950);
       border-bottom: 1px solid rgba(255, 255, 255, 0.09);
     }
@@ -549,6 +552,8 @@
       font-weight: 700;
       font-size: 0.9rem;
     }
+
+    .product-tabs::-webkit-scrollbar { display: none; }
 
     .product-tab:hover { background: rgba(255, 255, 255, 0.07); }
 
@@ -603,19 +608,23 @@
     /* 新着ニュース表示中はサイト名だけ、金利タブ表示中は説明だけを出す。 */
     body[data-view="news"] .tab-note,
     body[data-view="rate"] .tab-note,
-    body[data-view="car"] .tab-note { display: flex; }
+    body[data-view="car"] .tab-note,
+    body[data-view="features"] .tab-note { display: flex; }
 
     body[data-view="news"] .note-heading { display: none; }
 
     body[data-view="rate"] .tab-brand,
     body[data-view="rate"] .note-heading,
     body[data-view="car"] .tab-brand,
-    body[data-view="car"] .note-heading { display: none; }
+    body[data-view="car"] .note-heading,
+    body[data-view="features"] .tab-brand,
+    body[data-view="features"] .note-heading { display: none; }
 
     /* 説明文はローン種別ごとに違うので、表示中のタブのものだけを出す。 */
     .note-text { display: none; }
     body[data-view="rate"] .note-rate,
-    body[data-view="car"] .note-car { display: inline; }
+    body[data-view="car"] .note-car,
+    body[data-view="features"] .note-features { display: inline; }
 
     /* 製品タブ44pxぶん全体を下げる */
     body { padding-top: 44px; }
@@ -633,12 +642,15 @@
     }
 
     body[data-view="rate"] #newsView,
-    body[data-view="car"] #newsView { display: none; }
+    body[data-view="car"] #newsView,
+    body[data-view="features"] #newsView { display: none; }
     body[data-view="rate"] #rateView,
-    body[data-view="car"] #carView { display: block; }
+    body[data-view="car"] #carView,
+    body[data-view="features"] #featuresView { display: block; }
     /* 金利レポート表示中はニュース用モバイルタブが無いので44pxのみ */
     body[data-view="rate"],
-    body[data-view="car"] { padding-top: 44px !important; }
+    body[data-view="car"],
+    body[data-view="features"] { padding-top: 44px !important; }
 
     @media (max-width: 920px) {
       :root { --sidebar-width: 245px; }
@@ -743,7 +755,8 @@
     <button class="product-tab" type="button" data-view="news">新着ニュース</button>
     <button class="product-tab active" type="button" data-view="rate">住宅ローン金利情報</button>
     <button class="product-tab" type="button" data-view="car">マイカーローン金利情報</button>
-    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text note-rate"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-car"><span class="note-full">帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span></p>
+    <button class="product-tab" type="button" data-view="features">住宅ローンの条件比較</button>
+    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text note-rate"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-car"><span class="note-full">帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-features"><span class="note-full">帯広エリア 金融機関の住宅ローンについて、保証料・手数料・団信・借入条件など金利以外の条件を並べています。</span>金利は住宅ローン金利情報タブへ。</span></p>
   </nav>
 
   <div id="newsView">
@@ -818,6 +831,10 @@
 
   <div id="carView" class="report-view">
     <iframe id="carFrame" class="report-frame" title="マイカーローン金利情報" loading="lazy"></iframe>
+  </div>
+
+  <div id="featuresView" class="report-view">
+    <iframe id="featuresFrame" class="report-frame" title="住宅ローンの条件比較" loading="lazy"></iframe>
   </div>
 
   <script>
@@ -1430,10 +1447,13 @@
     const NEWS_TITLE = "十勝金融機関News｜新着ニュース";
     const RATE_TITLE = "十勝金融機関News｜金利情報";
     const CAR_TITLE = "十勝金融機関News｜マイカーローン金利情報";
+    const FEATURES_TITLE = "十勝金融機関News｜住宅ローンの条件比較";
     // ローン種別ごとの金利タブ。表示するのは同じビューアーで、読むJSONだけが違う。
+    // 条件比較タブだけは金利履歴ではなく別ページ（更新のしかたが違うため分けている）。
     const REPORT_VIEWS = {
       rate: { frameId: "rateFrame", src: "./rate-history.html", title: RATE_TITLE },
       car: { frameId: "carFrame", src: "./rate-history.html?dataset=car", title: CAR_TITLE },
+      features: { frameId: "featuresFrame", src: "./loan-features.html", title: FEATURES_TITLE },
     };
     const loadedReportViews = new Set();
 

@@ -235,6 +235,9 @@
     .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
     .product-name { margin-top: 1px; color: var(--muted); font-size: 0.71rem; white-space: normal; line-height: 1.25; }
     .guarantee-note { margin-top: 2px; color: #b91c1c; font-size: 0.68rem; font-weight: 600; white-space: normal; line-height: 1.2; }
+    /* 住宅ローンの保証料・事務手数料。既定は控えめにし、保証料が別途の商品だけ赤で立てる */
+    .feature-note { margin-top: 2px; color: #5c6f7c; font-size: 0.66rem; font-weight: 600; white-space: normal; line-height: 1.2; }
+    .feature-note.warn { color: #b91c1c; }
 
     .type-badge {
       display: inline-block; padding: 2px 6px; border-radius: 999px;
@@ -344,6 +347,10 @@
         title: "十勝金融機関News｜金利情報",
         subtitleFull: "帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。",
         coverageScope: "公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）",
+        // 住宅ローンは保証料の扱いが機関ごとに割れる（同じ北陸銀行でも定額型は別途・定率型は込み）。
+        // 金利だけを並べると実質の負担を読み違えるため、商品ごとの条件を機関名の下に添える。
+        featuresUrl: "./data/loan-features.json",
+        featuresNote: "機関名の下の2行＝保証料の扱いと事務手数料。詳しい条件は「住宅ローンの条件比較」タブをご覧ください。",
       },
       car: {
         dataUrl: "./data/car-loan-history.json",
@@ -361,9 +368,9 @@
     document.title = DATASET.title;
     document.getElementById("subtitleFull").textContent = DATASET.subtitleFull;
     document.getElementById("coverageScope").textContent = DATASET.coverageScope;
-    if (DATASET.guaranteeNote) {
+    if (DATASET.guaranteeNote || DATASET.featuresNote) {
       const guaranteeEl = document.getElementById("guaranteeNote");
-      guaranteeEl.textContent = `■ ${DATASET.guaranteeNote}`;
+      guaranteeEl.textContent = `■ ${DATASET.guaranteeNote || DATASET.featuresNote}`;
       guaranteeEl.hidden = false;
     }
     const state = {
@@ -372,6 +379,8 @@
       // 金利種別は「すべて」または1種別だけを表示する（null = すべて）
       selectedType: null,
       selectedBanks: new Set(),
+      // product_id をキーにした商品条件（保証料・事務手数料）。読めなくても金利表は出す。
+      features: new Map(),
     };
 
     const el = {
@@ -444,6 +453,21 @@
         if (!order.includes(row.bank_id)) order.push(row.bank_id);
       }
       return order;
+    }
+
+    // 機関名の下に出す2行（保証料の扱い・事務手数料）。条件データが無い商品では何も出さない。
+    function featureNotesHtml(row) {
+      const feature = state.features.get(row.product_id);
+      if (!feature) return "";
+      const lines = [];
+      if (feature.guarantee_note) {
+        const cls = feature.guarantee_warn ? "feature-note warn" : "feature-note";
+        lines.push(`<div class="${cls}">${escapeHtml(feature.guarantee_note)}</div>`);
+      }
+      if (feature.fee_note) {
+        lines.push(`<div class="feature-note">${escapeHtml(feature.fee_note)}</div>`);
+      }
+      return lines.join("");
     }
 
     function sortedRows(rows) {
@@ -605,6 +629,7 @@
             <div class="bank-name">${bankHtml}</div>
             <div class="product-name">${escapeHtml(row.product_name || "")}</div>
             ${guaranteeHtml}
+            ${featureNotesHtml(row)}
           </td>`;
         }
 
@@ -696,6 +721,22 @@
       el.filterButton.focus();
     });
 
+    // 商品条件（保証料・事務手数料）の読み込み。金利表の付随情報なので、
+    // 失敗しても表そのものは出す（注記が消えるだけにする）。
+    async function loadFeatures() {
+      if (!DATASET.featuresUrl) return;
+      try {
+        const response = await fetch(DATASET.featuresUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        for (const product of data.products || []) {
+          if (product && product.product_id) state.features.set(product.product_id, product);
+        }
+      } catch (_e) {
+        state.features.clear();
+      }
+    }
+
     async function initialize() {
       try {
         const response = await fetch(DATA_URL);
@@ -705,6 +746,7 @@
           el.matrix.innerHTML = '<div class="empty-state"><strong>金利データがありません</strong>データが蓄積されると、ここに履歴が表示されます。</div>';
           return;
         }
+        await loadFeatures();
         buildTypeChips();
         buildBankFilters();
         render();
