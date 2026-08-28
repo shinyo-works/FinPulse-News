@@ -268,6 +268,8 @@
     }
 
     .control-button:hover, .toggle-label:hover { border-color: #a9bbc7; }
+    /* 「金融機関を絞り込む（n/m）」が窮屈に見えないよう、絞り込みボタンだけ幅を確保する */
+    #filterButton { min-width: 200px; justify-content: center; padding-inline: 16px; }
 
     .filter-popover {
       position: absolute;
@@ -753,9 +755,9 @@
 <body data-mobile-pane="nav" data-view="rate">
   <nav class="product-tabs" aria-label="表示するレポートの切替">
     <button class="product-tab" type="button" data-view="news">新着ニュース</button>
+    <button class="product-tab" type="button" data-view="features">住宅ローンの条件比較</button>
     <button class="product-tab active" type="button" data-view="rate">住宅ローン金利情報</button>
     <button class="product-tab" type="button" data-view="car">マイカーローン金利情報</button>
-    <button class="product-tab" type="button" data-view="features">住宅ローンの条件比較</button>
     <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text note-rate"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-car"><span class="note-full">帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-features"><span class="note-full">帯広エリア 金融機関の住宅ローンについて、保証料・手数料・団信・借入条件など金利以外の条件を並べています。</span>金利は住宅ローン金利情報タブへ。</span></p>
   </nav>
 
@@ -793,7 +795,7 @@
 
           <div class="filter-menu" id="institutionFilterWrap">
             <button class="control-button" id="filterButton" type="button" aria-expanded="false" aria-controls="filterPopover">
-              機関を絞り込む <span id="filterCount"></span>
+              金融機関を絞り込む <span id="filterCount"></span>
             </button>
             <div class="filter-popover" id="filterPopover">
               <p>表示する金融機関</p>

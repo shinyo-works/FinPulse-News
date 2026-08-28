@@ -119,12 +119,15 @@ class LoanFeaturesViewerTest(unittest.TestCase):
         cls.rate_html = (DOCS / "rate-history.html").read_text(encoding="utf-8")
         cls.features_html = (DOCS / "loan-features.html").read_text(encoding="utf-8")
 
-    def test_comparison_tab_is_added_after_the_rate_tabs(self):
+    def test_comparison_tab_sits_between_the_news_and_rate_tabs(self):
+        """条件比較は新着ニュースのすぐ右。金利2タブはその後ろに並べる。"""
         tabs = re.search(
             r'<nav class="product-tabs".*?</nav>', self.index_html, re.DOTALL
         ).group(0)
         self.assertIn('data-view="features"', tabs)
-        self.assertLess(tabs.index('data-view="car"'), tabs.index('data-view="features"'))
+        self.assertLess(tabs.index('data-view="news"'), tabs.index('data-view="features"'))
+        self.assertLess(tabs.index('data-view="features"'), tabs.index('data-view="rate"'))
+        self.assertLess(tabs.index('data-view="rate"'), tabs.index('data-view="car"'))
         self.assertIn('src: "./loan-features.html"', self.index_html)
         self.assertIn('<iframe id="featuresFrame" class="report-frame"', self.index_html)
 

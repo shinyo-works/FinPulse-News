@@ -96,7 +96,8 @@
       border-bottom: 1px solid var(--line);
       backdrop-filter: blur(10px);
     }
-    .search-wrap { position: relative; flex: 0 1 190px; min-width: 132px; }
+    /* プレースホルダ「金融機関・商品名で検索」を末尾まで出せる幅を確保する */
+    .search-wrap { position: relative; flex: 0 1 250px; min-width: 215px; }
     .search-icon {
       position: absolute; left: 11px; top: 50%;
       color: var(--muted); transform: translateY(-50%); pointer-events: none;
@@ -122,15 +123,15 @@
 
     .filter-menu { position: relative; }
     .control-button {
-      display: inline-flex; align-items: center; gap: 7px;
-      min-height: 30px; padding: 4px 10px; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 30px; min-width: 190px; padding: 4px 16px; white-space: nowrap;
       background: var(--paper); border: 1px solid var(--line); border-radius: 9px; cursor: pointer;
       font-size: 0.84rem;
     }
     .control-button:hover { border-color: #a9bbc7; }
     .filter-popover {
       position: absolute; right: 0; top: calc(100% + 8px); z-index: 40;
-      display: none; width: 250px; max-height: 320px; overflow-y: auto;
+      display: none; width: 280px; max-height: 320px; overflow-y: auto;
       padding: 10px; background: var(--paper);
       border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
     }
@@ -330,7 +331,7 @@
     <div class="type-chips" id="typeChips" role="group" aria-label="金利種別の切替（1つだけ表示）"></div>
     <div class="filter-menu" id="bankFilterWrap">
       <button class="control-button" id="filterButton" type="button" aria-expanded="false" aria-controls="filterPopover">
-        機関を絞り込む <span id="filterCount"></span>
+        金融機関を絞り込む <span id="filterCount"></span>
       </button>
       <div class="filter-popover" id="filterPopover">
         <div id="bankFilters"></div>
@@ -790,7 +791,8 @@
 
     function buildBankFilters() {
       const seen = new Map();
-      for (const row of state.data.rows) {
+      // 金利データが1件も無い週でも種別ボタンと一緒に呼ばれるので、rows が無い形も受ける。
+      for (const row of state.data.rows || []) {
         if (!seen.has(row.bank_id)) seen.set(row.bank_id, row.bank_name);
       }
       state.selectedBanks = new Set(seen.keys());
@@ -801,7 +803,7 @@
     }
 
     function updateFilterCount() {
-      const total = new Set(state.data.rows.map((r) => r.bank_id)).size;
+      const total = new Set((state.data.rows || []).map((r) => r.bank_id)).size;
       el.filterCount.textContent = total ? `(${state.selectedBanks.size}/${total})` : "";
     }
 
@@ -867,13 +869,15 @@
         const response = await fetch(DATA_URL);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         state.data = await response.json();
+        // 金利種別（変動・固定）の切替は rate_type_order だけで作れる。データが1件も無い週でも
+        // 切替ボタンは出しておく（ボタンごと消えると「この商品には固定が無い」と誤読される）。
+        buildTypeChips();
+        buildBankFilters();
         if (!state.data.rows || !state.data.rows.length) {
           el.matrix.innerHTML = '<div class="empty-state"><strong>金利データがありません</strong>データが蓄積されると、ここに履歴が表示されます。</div>';
           return;
         }
         await loadFeatures();
-        buildTypeChips();
-        buildBankFilters();
         render();
       } catch (_e) {
         el.matrix.innerHTML = `<div class="empty-state"><strong>データを読み込めませんでした</strong>HTTPサーバー経由で開いているか、${escapeHtml(DATA_URL)} があるかご確認ください。</div>`;
