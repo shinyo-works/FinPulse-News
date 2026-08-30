@@ -5,6 +5,17 @@
       "name": "帯広信用金庫",
       "items": [
         {
+          "date": "2026-08-26",
+          "title": "預金金利の引き上げについて",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.08.26-yokinrate_teiki-muki.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-31"
+          ]
+        },
+        {
           "date": "2026-08-19",
           "title": "「しんきん（個⼈）（法⼈）ワンタイムパスワードアプリ」バージョンアップのお知らせ",
           "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.08.19-onetimeverupinfo-muki.pdf",
@@ -12,6 +23,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24"
           ]
         },
@@ -23,6 +35,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -37,6 +50,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10"
@@ -50,6 +64,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -65,6 +80,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -80,6 +96,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -112,6 +129,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -356,6 +374,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24"
           ]
         },
@@ -367,6 +386,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -451,6 +471,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24"
           ]
         },
@@ -462,6 +483,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17"
           ]
@@ -474,6 +496,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -489,6 +512,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10"
@@ -502,6 +526,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -518,6 +543,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -535,6 +561,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -552,6 +579,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10"
@@ -659,6 +687,17 @@
       "name": "十勝信用組合",
       "items": [
         {
+          "date": "2026-08-26",
+          "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance05.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-31"
+          ]
+        },
+        {
           "date": "2026-08-10",
           "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
           "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance04.html",
@@ -689,6 +728,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10"
@@ -702,6 +742,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -750,6 +791,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -1003,6 +1045,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17"
           ]
@@ -1015,6 +1058,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10"
@@ -1184,6 +1228,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -1212,6 +1257,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
@@ -1399,6 +1445,28 @@
       "name": "JA木野",
       "items": [
         {
+          "date": "2026-08-25",
+          "title": "短期プライムレートおよび住宅ローンプライムレートの見直しについて",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/08/jakino_info_20260824.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-31"
+          ]
+        },
+        {
+          "date": "2026-08-10",
+          "title": "貯金金利の引き上げについて",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/08/jakino_info_20260810.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-31"
+          ]
+        },
+        {
           "date": "2026-08-10",
           "title": "2026.08.10JAバンク/貯める貯金金利の引き上げについて",
           "url": "https://ja-kino.com/wp-content/uploads/2026/08/jakino_info_20260810.pdf",
@@ -1408,6 +1476,17 @@
           "reports": [
             "2026-08-24",
             "2026-08-17"
+          ]
+        },
+        {
+          "date": "2026-07-23",
+          "title": "JA木野住宅ローン借換キャンペーン実施中！",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/07/jakino_info_20260723.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-31"
           ]
         },
         {
@@ -1549,7 +1628,19 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24"
+          ]
+        },
+        {
+          "date": "2026-07-01",
+          "title": "マイカーローン金利情報",
+          "url": "https://www.jaobihirokawanisi.or.jp/wp/archives/1565",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-08-31"
           ]
         },
         {
@@ -1560,6 +1651,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-08-31",
             "2026-08-24"
           ]
         }
