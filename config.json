@@ -7,7 +7,7 @@
     {
       "name": "帯広信用金庫",
       "url": "https://www.shinkin.co.jp/obishin/news/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "メンテナンス" },
         { "keyword": "採用" },
@@ -23,7 +23,7 @@
     {
       "name": "北海道銀行",
       "url": "https://www.hokkaidobank.co.jp/info/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "投資信託" },
         { "keyword": "規定" },
@@ -46,7 +46,7 @@
       "name": "北洋銀行",
       "url": "https://www.hokuyobank.co.jp/announcement/",
       "scraper": "hokuyo_xml",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手数料"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手数料", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "採用" },
         { "keyword": "詐欺" },
@@ -59,7 +59,7 @@
     {
       "name": "十勝信用組合",
       "url": "https://www.tokachishinkumi.com/info/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手数料", "取扱開始", "取り扱い", "提携"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "手数料", "取扱開始", "取り扱い", "提携", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "奨学金" },
         { "keyword": "採用" },
@@ -77,7 +77,7 @@
     {
       "name": "JAおとふけ",
       "url": "https://www.ja-otofuke.jp/newslist/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "営業"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "営業", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "燃料" },
         { "keyword": "入札" },
@@ -93,7 +93,7 @@
     {
       "name": "JAめむろ",
       "url": "https://www.ja-memuro.or.jp/category/finance_info/",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "定型約款" },
         { "keyword": "ATM稼働日程" },
@@ -110,7 +110,7 @@
       "name": "JA木野",
       "url": "https://ja-kino.com/news/",
       "scraper": "ja_kino",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "ローン", "プライムレート"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "ローン", "プライムレート", "手形", "小切手"],
       "exclude_rules": [
         { "keyword": "組合だより" },
         { "keyword": "組合長あいさつ" },
@@ -129,7 +129,7 @@
       "url": "https://www.jaobihirokawanisi.or.jp/service/bank/",
       "encoding": "utf-8",
       "scraper": "ja_obihirokawanisi",
-      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "貯金", "ローン", "手数料"],
+      "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "貯金", "ローン", "手数料", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "キャンペーン情報" },
         { "keyword": "商品一覧" },

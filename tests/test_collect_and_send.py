@@ -755,6 +755,9 @@ class JaKinoTest(unittest.TestCase):
             [
                 "短期プライムレートおよび住宅ローンプライムレートの見直しについて",
                 "貯金金利の引き上げについて",
+                # 「金利」も「ローン」も含まないが、手形・小切手の電子化は
+                # 当座勘定を持つ利用者に直接影響するため通過させる。
+                "手形・小切手の全面的な電子化に向けた対応について",
                 "JA木野住宅ローン借換キャンペーン実施中！",
                 # 「ローン」を含まないプライムレート記事も通過させる。
                 "短期プライムレートの引き上げについて",
@@ -762,14 +765,12 @@ class JaKinoTest(unittest.TestCase):
             [item["title"] for item in passed],
         )
         self.assertEqual(
-            [
-                "手形・小切手の全面的な電子化に向けた対応について",
-                "組合だよりを更新しました！",
-            ],
+            ["組合だよりを更新しました！"],
             [item["title"] for item in excluded],
         )
-        self.assertEqual("組合だより", excluded[1]["exclude_keyword"])
+        self.assertEqual("組合だより", excluded[0]["exclude_keyword"])
         self.assertIn("プライムレート", self.institution["include_keywords"])
+        self.assertIn("手形", self.institution["include_keywords"])
 
     def test_missing_news_structure_is_reported_as_extraction_failure(self):
         with self.assertRaisesRegex(collector.ExtractionError, "ニュース一覧"):
