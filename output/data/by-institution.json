@@ -12,6 +12,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31"
           ]
         },
@@ -23,8 +24,20 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24"
+          ]
+        },
+        {
+          "date": "2026-08-13",
+          "title": "手形・小切手の全面的な電子化に向けた対応について",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.08.13-tegatasupport-2027.03.31.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
           ]
         },
         {
@@ -35,6 +48,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -50,6 +64,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -64,6 +79,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -80,6 +96,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -96,6 +113,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -129,6 +147,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -374,6 +393,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24"
           ]
@@ -386,11 +406,23 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10",
             "2026-08-03"
+          ]
+        },
+        {
+          "date": "2026-07-27",
+          "title": "2026.07.27個人のお客さま法人のお客さま手形・小切手振出期限のご案内と振出日ご記入のお願いについて",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/0ff4824a129680c23606acefd0d7332b.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
           ]
         },
         {
@@ -464,6 +496,17 @@
       "name": "北洋銀行",
       "items": [
         {
+          "date": "2026-09-04",
+          "title": "8月20日に発生した「北洋銀行アプリ」の障害による手数料返戻のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260904_076847.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
           "date": "2026-08-17",
           "title": "「事前登録口座の申込み」機能追加のお知らせ",
           "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260817_076812.pdf",
@@ -471,6 +514,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24"
           ]
@@ -483,9 +527,21 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17"
+          ]
+        },
+        {
+          "date": "2026-08-05",
+          "title": "手形・小切手の全面的な電子化に向けた対応について",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260805_076788.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
           ]
         },
         {
@@ -496,6 +552,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -512,6 +569,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -526,6 +584,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -543,6 +602,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -561,6 +621,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -579,6 +640,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -687,6 +749,45 @@
       "name": "十勝信用組合",
       "items": [
         {
+          "date": "2026-09-04",
+          "title": "預金金利の引き上げについて（定期性）",
+          "url": "https://www.tokachishinkumi.com/common/pdf/202609_yokinkinri.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
+          "date": "2026-09-01",
+          "title": "今月のローン金利",
+          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
+          "star": true,
+          "fallback": false,
+          "date_inferred": true,
+          "reports": [
+            "2026-09-07",
+            "2026-08-31",
+            "2026-08-24",
+            "2026-08-17",
+            "2026-08-10",
+            "2026-08-03",
+            "2026-07-27",
+            "2026-07-20",
+            "2026-07-13",
+            "2026-07-06",
+            "2026-06-29",
+            "2026-06-22",
+            "2026-06-15",
+            "2026-06-08",
+            "2026-06-01",
+            "2026-05-31",
+            "2026-05-28",
+            "2026-05-25"
+          ]
+        },
+        {
           "date": "2026-08-26",
           "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
           "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance05.html",
@@ -694,6 +795,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31"
           ]
         },
@@ -722,43 +824,28 @@
         },
         {
           "date": "2026-08-03",
+          "title": "短期プライムレートの引き上げについて",
+          "url": "https://www.tokachishinkumi.com/common/pdf/20260803_prime.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
+          "date": "2026-08-03",
           "title": "預金金利の引き上げについて",
           "url": "https://www.tokachishinkumi.com/common/pdf/20260803_kinri.pdf",
           "star": true,
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10"
-          ]
-        },
-        {
-          "date": "2026-08-01",
-          "title": "今月のローン金利",
-          "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
-          "star": true,
-          "fallback": false,
-          "date_inferred": true,
-          "reports": [
-            "2026-08-31",
-            "2026-08-24",
-            "2026-08-17",
-            "2026-08-10",
-            "2026-08-03",
-            "2026-07-27",
-            "2026-07-20",
-            "2026-07-13",
-            "2026-07-06",
-            "2026-06-29",
-            "2026-06-22",
-            "2026-06-15",
-            "2026-06-08",
-            "2026-06-01",
-            "2026-05-31",
-            "2026-05-28",
-            "2026-05-25"
           ]
         },
         {
@@ -791,6 +878,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -1026,6 +1114,50 @@
       "name": "JAおとふけ",
       "items": [
         {
+          "date": "2026-09-04",
+          "title": "ホクレン灯油定期配送キャンペーンのお知らせ",
+          "url": "https://www.ja-otofuke.jp/2023/13123/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
+          "date": "2026-09-01",
+          "title": "手形・小切手の全面的な電子化に向けた対応について",
+          "url": "https://www.ja-otofuke.jp/2023/13106/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
+          "date": "2026-09-01",
+          "title": "金利改定のご案内（貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/13103/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
+          "date": "2026-08-31",
+          "title": "リニューアルオープン1周年記念キャンペーンのお知らせ",
+          "url": "https://www.ja-otofuke.jp/2023/13109/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
           "date": "2026-08-11",
           "title": "【イベント】ウェルカムキャンペーンのお知らせ",
           "url": "https://www.ja-otofuke.jp/2023/13065/",
@@ -1045,6 +1177,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17"
@@ -1058,10 +1191,22 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
             "2026-08-10"
+          ]
+        },
+        {
+          "date": "2026-08-01",
+          "title": "手形・小切手の全面的な電子化に向けた対応について",
+          "url": "https://www.ja-otofuke.jp/shinyonews/13035/",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
           ]
         },
         {
@@ -1221,6 +1366,39 @@
       "name": "JAめむろ",
       "items": [
         {
+          "date": "2026-08-31",
+          "title": "2026.08.31重要なお知らせ定額小為替証書の取扱終了について（お知らせ）NEW",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/08/【ひな形】顧客通知文書（定額小為替証書の受付停止）.docx",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
+          "date": "2026-08-31",
+          "title": "2026.08.31重要なお知らせ振替払出証書の取扱終了について（お知らせ)NEW",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/08/【ひな形】顧客通知文書（振替払出証書の受付停止）.docx",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
+          "date": "2026-08-31",
+          "title": "2026.08.31お知らせ株式配当金領収証の店頭での取扱停止についてNEW",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/08/【ひな形】顧客通知文書（株式配当金領収証の受付停止）.docx",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
           "date": "2026-07-01",
           "title": "2026.07.01お知らせ夏の定期貯金キャンペーンの実施について",
           "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/07/定期貯金キャンペーン.pdf",
@@ -1228,6 +1406,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -1257,6 +1436,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24",
             "2026-08-17",
@@ -1452,6 +1632,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31"
           ]
         },
@@ -1463,6 +1644,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31"
           ]
         },
@@ -1479,6 +1661,17 @@
           ]
         },
         {
+          "date": "2026-07-28",
+          "title": "手形・小切手の全面的な電子化に向けた対応について",
+          "url": "https://ja-kino.com/wp-content/uploads/2026/07/jakino_info_20260728.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-07"
+          ]
+        },
+        {
           "date": "2026-07-23",
           "title": "JA木野住宅ローン借換キャンペーン実施中！",
           "url": "https://ja-kino.com/wp-content/uploads/2026/07/jakino_info_20260723.pdf",
@@ -1486,6 +1679,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31"
           ]
         },
@@ -1628,6 +1822,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24"
           ]
@@ -1640,6 +1835,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31"
           ]
         },
@@ -1651,6 +1847,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-07",
             "2026-08-31",
             "2026-08-24"
           ]
