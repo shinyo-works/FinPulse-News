@@ -5,6 +5,17 @@
       "name": "帯広信用金庫",
       "items": [
         {
+          "date": "2026-09-15",
+          "title": "おびしんふれあいギャラリー「書朋会書展」開催のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.09.15-fureaigallery-2026.10.09.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-21"
+          ]
+        },
+        {
           "date": "2026-09-14",
           "title": "創業110周年記念キャンペーン実施のお知らせ（創業110周記念定期預金）",
           "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.09.14-tokachipremium110-2026.12.30.pdf",
@@ -12,6 +23,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14"
           ]
         },
@@ -23,6 +35,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31"
@@ -36,6 +49,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -50,6 +64,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -62,6 +77,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -79,6 +95,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -95,6 +112,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -113,6 +131,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -131,6 +150,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -166,6 +186,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -406,6 +427,17 @@
       "name": "北海道銀行",
       "items": [
         {
+          "date": "2026-09-14",
+          "title": "2026.09.14個人のお客さま変動金利型ローン商品の基準金利改定について",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161_1.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-21"
+          ]
+        },
+        {
           "date": "2026-08-21",
           "title": "2026.08.21個人のお客さま「口座開設プラザ」のシルバーウィーク営業のお知らせ",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/bf2e809592939e72fdf7d73e1ebc3afd.pdf",
@@ -413,6 +445,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -427,6 +460,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -444,6 +478,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -519,6 +554,28 @@
       "name": "北洋銀行",
       "items": [
         {
+          "date": "2026-09-15",
+          "title": "「ほっくースポーツ応援定期預金 -レバンガコース- 」キャンペーンの実施について",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260915_076875.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-21"
+          ]
+        },
+        {
+          "date": "2026-09-14",
+          "title": "でんさいネット主催「手形・小切手の全面的な電子化セミナー」オンライン開催のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/detail/20260914_076869.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-21"
+          ]
+        },
+        {
           "date": "2026-09-04",
           "title": "8月20日に発生した「北洋銀行アプリ」の障害による手数料返戻のお知らせ",
           "url": "https://www.hokuyobank.co.jp/announcement/detail/20260904_076847.html",
@@ -526,6 +583,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -538,6 +596,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -552,6 +611,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -567,6 +627,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -579,6 +640,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -597,6 +659,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -613,6 +676,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -632,6 +696,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -652,6 +717,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -672,6 +738,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -789,6 +856,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -801,6 +869,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -830,6 +899,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31"
@@ -866,6 +936,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -878,6 +949,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -916,6 +988,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -1411,6 +1484,17 @@
       "name": "JAめむろ",
       "items": [
         {
+          "date": "2026-09-14",
+          "title": "2026.09.14重要なお知らせ貯金商品一覧「金利表」を更新しましたNEW",
+          "url": "https://www.ja-memuro.or.jp/important/3484/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-21"
+          ]
+        },
+        {
           "date": "2026-08-31",
           "title": "2026.08.31重要なお知らせ定額小為替証書の取扱終了について（お知らせ）",
           "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/08/【ひな形】顧客通知文書（定額小為替証書の受付停止）.docx",
@@ -1418,6 +1502,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14"
           ]
         },
@@ -1429,6 +1514,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14"
           ]
         },
@@ -1440,6 +1526,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14"
           ]
         },
@@ -1484,6 +1571,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -1711,6 +1799,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31"
@@ -1724,6 +1813,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31"
@@ -1749,6 +1839,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -1761,6 +1852,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31"
@@ -1905,6 +1997,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -1919,6 +2012,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-21",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31"
