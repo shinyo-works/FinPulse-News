@@ -12,6 +12,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21"
           ]
         },
@@ -23,6 +24,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14"
           ]
@@ -35,6 +37,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -49,6 +52,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -64,6 +68,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07"
@@ -77,6 +82,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -95,6 +101,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -112,6 +119,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -131,6 +139,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -150,6 +159,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -186,6 +196,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -434,6 +445,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21"
           ]
         },
@@ -460,6 +472,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -478,6 +491,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07"
@@ -561,6 +575,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21"
           ]
         },
@@ -572,6 +587,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21"
           ]
         },
@@ -583,6 +599,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07"
@@ -596,6 +613,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -611,6 +629,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -627,6 +646,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07"
@@ -640,6 +660,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -659,6 +680,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -676,6 +698,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -696,6 +719,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -717,6 +741,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -849,6 +874,28 @@
       "name": "十勝信用組合",
       "items": [
         {
+          "date": "2026-09-25",
+          "title": "個人ローン商品の基準金利改定について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/personal_loans_202609.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-28"
+          ]
+        },
+        {
+          "date": "2026-09-24",
+          "title": "住宅ローン基準金利についてのお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/mortgage_loan_202609.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-28"
+          ]
+        },
+        {
           "date": "2026-09-04",
           "title": "預金金利の引き上げについて（定期性）",
           "url": "https://www.tokachishinkumi.com/common/pdf/202609_yokinkinri.pdf",
@@ -856,6 +903,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07"
@@ -869,6 +917,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -899,6 +948,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -936,6 +986,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07"
@@ -949,6 +1000,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -988,6 +1040,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -1245,6 +1298,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -1257,6 +1311,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -1292,6 +1347,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -1307,6 +1363,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-14",
             "2026-09-07",
             "2026-08-31",
@@ -1323,6 +1380,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-14",
             "2026-09-07"
           ]
@@ -1485,6 +1543,17 @@
       "items": [
         {
           "date": "2026-09-14",
+          "title": "2026.09.14重要なお知らせ貯金商品一覧「金利表」を更新しました",
+          "url": "https://www.ja-memuro.or.jp/important/3484/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-09-28"
+          ]
+        },
+        {
+          "date": "2026-09-14",
           "title": "2026.09.14重要なお知らせ貯金商品一覧「金利表」を更新しましたNEW",
           "url": "https://www.ja-memuro.or.jp/important/3484/",
           "star": true,
@@ -1502,6 +1571,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14"
           ]
@@ -1514,6 +1584,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14"
           ]
@@ -1526,6 +1597,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14"
           ]
@@ -1571,6 +1643,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -1799,6 +1872,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -1813,6 +1887,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -1839,6 +1914,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07"
@@ -1852,6 +1928,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -1997,6 +2074,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
@@ -2012,6 +2090,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-09-28",
             "2026-09-21",
             "2026-09-14",
             "2026-09-07",
