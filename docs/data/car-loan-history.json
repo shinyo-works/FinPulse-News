@@ -9,6 +9,7 @@
     "fixed": "固定"
   },
   "observation_dates": [
+    "2026-09-28",
     "2026-09-21",
     "2026-09-14",
     "2026-09-07",
@@ -17,7 +18,7 @@
   "data_sources": [
     {
       "period_start": "",
-      "period_end": "2026-09-21",
+      "period_end": "2026-09-28",
       "kind": "financial_report_tool",
       "repository": "金利調査ツール",
       "description": "報告自動化ツールの週次JSON（GitHub Actions実行のArtifactを含む）"
@@ -33,6 +34,10 @@
       "url": "https://www.hokugin.co.jp/kinri/loan.html",
       "rate_type": "fixed",
       "history": [
+        {
+          "rate": 2.2,
+          "observed_on": "2026-09-28"
+        },
         {
           "rate": 2.2,
           "observed_on": "2026-09-21"
@@ -62,6 +67,10 @@
       "history": [
         {
           "rate": 3.075,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 3.075,
           "observed_on": "2026-09-21"
         },
         {
@@ -86,6 +95,10 @@
       "url": "https://www.hokkaidobank.co.jp/kinri/new_loan.html",
       "rate_type": "fixed",
       "history": [
+        {
+          "rate": 3.65,
+          "observed_on": "2026-09-28"
+        },
         {
           "rate": 3.65,
           "observed_on": "2026-09-21"
@@ -114,6 +127,10 @@
       "history": [
         {
           "rate": 3.2,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 3.2,
           "observed_on": "2026-09-21"
         },
         {
@@ -138,6 +155,10 @@
       "url": "https://www.hokuyobank.co.jp/person/loan/mycar/",
       "rate_type": "fixed",
       "history": [
+        {
+          "rate": 3.8,
+          "observed_on": "2026-09-28"
+        },
         {
           "rate": 3.8,
           "observed_on": "2026-09-21"
@@ -166,6 +187,10 @@
       "history": [
         {
           "rate": 2.8,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 2.8,
           "observed_on": "2026-09-21"
         },
         {
@@ -190,6 +215,10 @@
       "url": "https://www.shinkin.co.jp/obishin/personal/loan/carlife/",
       "rate_type": "variable",
       "history": [
+        {
+          "rate": 3.1,
+          "observed_on": "2026-09-28"
+        },
         {
           "rate": 3.1,
           "observed_on": "2026-09-21"
@@ -218,6 +247,10 @@
       "history": [
         {
           "rate": 2.45,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 2.45,
           "observed_on": "2026-09-21"
         },
         {
@@ -242,6 +275,10 @@
       "url": "https://www.shinkin.co.jp/kitami/info/carloan.html",
       "rate_type": "fixed",
       "history": [
+        {
+          "rate": 2.28,
+          "observed_on": "2026-09-28"
+        },
         {
           "rate": 2.28,
           "observed_on": "2026-09-21"
@@ -270,6 +307,10 @@
       "history": [
         {
           "rate": 2.78,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 2.78,
           "observed_on": "2026-09-21"
         },
         {
@@ -294,6 +335,10 @@
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "variable",
       "history": [
+        {
+          "rate": 3.1,
+          "observed_on": "2026-09-28"
+        },
         {
           "rate": 3.1,
           "observed_on": "2026-09-21"
@@ -322,6 +367,10 @@
       "history": [
         {
           "rate": 3.9,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 3.9,
           "observed_on": "2026-09-21"
         },
         {
@@ -346,6 +395,10 @@
       "url": "https://www.tokachishinkumi.com/customer/loan/mycar_loan.html",
       "rate_type": "fixed",
       "history": [
+        {
+          "rate": 1.95,
+          "observed_on": "2026-09-28"
+        },
         {
           "rate": 1.95,
           "observed_on": "2026-09-21"
@@ -374,6 +427,10 @@
       "history": [
         {
           "rate": 2.5,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 2.5,
           "observed_on": "2026-09-21"
         },
         {
@@ -400,6 +457,10 @@
       "history": [
         {
           "rate": 4.0,
+          "observed_on": "2026-09-28"
+        },
+        {
+          "rate": 4.0,
           "observed_on": "2026-09-21"
         },
         {
@@ -417,5 +478,5 @@
       ]
     }
   ],
-  "generated_at": "2026-09-21"
+  "generated_at": "2026-09-28"
 }
