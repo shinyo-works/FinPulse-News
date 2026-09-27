@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import tempfile
@@ -28,7 +29,9 @@ class PreCommitHookTest(unittest.TestCase):
             cwd=directory,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
+            # 親と子のUTF-8設定が異なっても、日本語の診断を同じ文字コードで読む。
+            env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+            encoding="utf-8",
         )
 
     def test_checks_staged_blob_instead_of_working_tree(self):
