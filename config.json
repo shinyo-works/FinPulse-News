@@ -80,6 +80,7 @@
       "include_keywords": ["キャンペーン", "金利", "お知らせ", "金融", "営業", "手形", "小切手", "プライムレート"],
       "exclude_rules": [
         { "keyword": "燃料" },
+        { "keyword": "灯油" },
         { "keyword": "入札" },
         { "keyword": "ガソリン" },
         { "keyword": "共済" },

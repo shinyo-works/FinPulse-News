@@ -596,8 +596,9 @@ class JaOtofukeExcludeTest(unittest.TestCase):
     """JAおとふけはホクレン給油所の記事が金融の記事と同じ一覧に混ざる。
     記事名だけでは分けられないため、URL照合の除外ルールと併用する。"""
 
-    # 実レポート（output/data/*.json）に通過として残っていた12本。
+    # 実レポート（output/data/*.json）に通過として残っていた13本。
     REAL_PASSED_ARTICLES = [
+        ("2026-09-04", "ホクレン灯油定期配送キャンペーンのお知らせ", "/2023/13123/", False),
         ("2026-08-11", "【イベント】ウェルカムキャンペーンのお知らせ", "/2023/13065/", False),
         ("2026-08-10", "金利改定のご案内（貯金）", "/2023/13055/", True),
         ("2026-08-03", "金利改定のご案内（貯金・貸付金）", "/2023/13045/", True),
@@ -653,7 +654,7 @@ class JaOtofukeExcludeTest(unittest.TestCase):
             [item["title"] for item in passed],
         )
         self.assertEqual(
-            ["【イベント】", "/hokurennews/", "【イベント】", "/hokurennews/"],
+            ["灯油", "【イベント】", "/hokurennews/", "【イベント】", "/hokurennews/"],
             [item["exclude_keyword"] for item in excluded],
         )
 
