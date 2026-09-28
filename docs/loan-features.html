@@ -487,15 +487,6 @@
     applyStoredColWidths();
     // ------------------------------------------------------------------------
 
-    function bankOrder() {
-      // 表示順はJSONの並び順が正。ビューアー側では並べ替えない。
-      const order = [];
-      for (const product of state.data.products) {
-        if (!order.includes(product.bank_id)) order.push(product.bank_id);
-      }
-      return order;
-    }
-
     function visibleProducts() {
       const q = state.search.trim().toLocaleLowerCase("ja");
       return state.data.products.filter((product) => {
@@ -520,6 +511,8 @@
     }
 
     function render() {
+      // 読み込み失敗・データ0件のときは案内表示を残し、検索や絞り込みで上書きしない。
+      if (!state.data || !Array.isArray(state.data.products) || !state.data.products.length) return;
       const products = visibleProducts();
       const columns = visibleColumns();
       if (!products.length || !columns.length) {
@@ -619,7 +612,6 @@
         el.matrix.innerHTML = `<div class="empty-state"><strong>条件データがありません</strong>調査結果がまだ登録されていません。</div>`;
         return;
       }
-      bankOrder();
       buildGroupChips();
       buildBankFilters();
       const verified = String(state.data.verified_date || "").replaceAll("-", "/");

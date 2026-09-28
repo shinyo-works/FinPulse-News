@@ -4,7 +4,9 @@ GitHub Actions で週次実行される
 
 収集方式:
   - 標準サイト: BeautifulSoup（プログラム解析）
-  - 複雑サイト: Claude API（config.json で use_claude: true を指定）
+  - サイト固有の構造: SCRAPERS 登録簿の専用抽出（北洋XML・JA帯広かわにし・JA木野）
+  - Claude API 経路はコードのみ温存・凍結中（use_claude: true は設定検証で拒否する。
+    再有効化の条件は CLAUDE.md の設計決定事項を参照）
 """
 import os
 import json
@@ -61,6 +63,7 @@ EXCLUDE_TARGETS = (EXCLUDE_TARGET_TITLE, EXCLUDE_TARGET_URL)
 MAX_HTML_BYTES = 5 * 1024 * 1024
 MAX_XML_BYTES = 5 * 1024 * 1024
 REQUEST_TIMEOUT = (5, 30)  # 接続待ち・読取無通信の上限（秒）
+MAX_PROGRAMMATIC_ITEMS = 60  # 汎用抽出が1ページから採る記事数の上限
 VIEWER_READY_MARKER_NAME = "viewer-json-ready.txt"
 FAILED_STATUSES = {"fetch_failed", "parse_failed", "extract_failed"}
 
@@ -110,6 +113,12 @@ def validate_config(config):
     ):
         raise ValueError("star_keywords は空でない文字列の配列にしてください。")
 
+    common_include_keywords = config.get("common_include_keywords", [])
+    if not isinstance(common_include_keywords, list) or not all(
+        isinstance(value, str) and value for value in common_include_keywords
+    ):
+        raise ValueError("common_include_keywords は空でない文字列の配列にしてください。")
+
     institutions = config.get("institutions")
     if not isinstance(institutions, list) or not institutions:
         raise ValueError("institutions は1件以上の配列にしてください。")
@@ -135,6 +144,12 @@ def validate_config(config):
             raise ValueError(f"{name} の scraper が未対応です: {scraper}")
         if not isinstance(institution.get("use_claude", False), bool):
             raise ValueError(f"{name} の use_claude は真偽値にしてください。")
+        if institution.get("use_claude"):
+            # 凍結中の経路は出力検証・期間判定・タイムアウトが未整備。設定1行で動かさない。
+            raise ValueError(
+                f"{name} の use_claude: true は指定できません。Claude抽出経路は凍結中です"
+                "（再有効化の条件は CLAUDE.md の設計決定事項を参照）。"
+            )
 
         include_keywords = institution.get("include_keywords", [])
         if not isinstance(include_keywords, list) or not all(
@@ -160,11 +175,22 @@ def validate_config(config):
                 )
 
 
+def normalize_config(config):
+    """全機関共通の通過語を各機関の include_keywords の先頭へ合成する。
+    共通語を8機関へ手で複写していた頃、写し漏れで同種の記事が機関ごとに通ったり
+    落ちたりした（HANDOFF 2026-08-31・JA木野）。apply_filters は合成後の値だけを読む。"""
+    common = config.get("common_include_keywords", [])
+    for institution in config["institutions"]:
+        own = institution.get("include_keywords", [])
+        institution["include_keywords"] = list(dict.fromkeys([*common, *own]))
+    return config
+
+
 def load_config():
     with open("config.json", encoding="utf-8") as f:
         config = json.load(f)
     validate_config(config)
-    return config
+    return normalize_config(config)
 
 
 def read_limited_response(response, *, max_bytes, allowed_content_types, url):
@@ -493,8 +519,10 @@ def scrape_news_programmatic(html, base_url):
             date_inferred = bool(date)
 
         items.append({"date": date, "title": title, "url": url, "date_inferred": date_inferred})
+        if len(items) >= MAX_PROGRAMMATIC_ITEMS:
+            break
 
-    return items[:60]
+    return items
 
 
 def scrape_ja_obihirokawanisi(html, base_url):
@@ -572,6 +600,20 @@ def scrape_ja_kino(html, base_url):
     return items
 
 
+def _is_new_year_feed_not_published(error, year, this_year):
+    """年明けに今年分の {year}.xml がまだ置かれていない状態（HTTP 404）かを判定する。
+    両年必須の厳格化（前年分の欠落や通信失敗を見逃さない）は保ち、例外は1月の今年分の
+    404だけに絞る。2月以降も404なら URL 変更などの異常として失敗させる。"""
+    response = getattr(error, "response", None)
+    return (
+        isinstance(error, requests.HTTPError)
+        and response is not None
+        and response.status_code == 404
+        and year == this_year
+        and now_jst().month == 1
+    )
+
+
 def scrape_hokuyo_xml(base_url):
     """北洋銀行: 新着情報は JS で年別XMLフィード（announcement/{year}.xml）から描画される。
     静的HTMLには記事タイトルが無いため、XMLを直接取得して解析する。
@@ -601,6 +643,9 @@ def scrape_hokuyo_xml(base_url):
                 )
             root = ET.fromstring(content)
         except Exception as e:
+            if _is_new_year_feed_not_published(e, year, this_year):
+                print(f"  今年分のXMLは未公開のため前年分だけで続行します（1月のみ許容）: {xml_url}")
+                continue
             print(f"  XML取得失敗 ({xml_url}): {e}")
             if isinstance(e, FetchError):
                 raise
@@ -630,7 +675,14 @@ def scrape_hokuyo_xml(base_url):
 
 def _scrape_programmatic_institution(institution, url):
     html = fetch_page(url, encoding=institution.get("encoding"))
-    return scrape_news_programmatic(html, url)
+    items = scrape_news_programmatic(html, url)
+    # 汎用抽出はメニュー等を含む8〜150字のリンクを全部拾うため、実在の一覧ページで0件に
+    # なるのは空応答・ボット対策ページ・全面改装などの異常時に限られる。専用抽出と同じく
+    # 失敗として扱う。ここで返す項目はタイトルが必ずあるので、sanitize_items で全件
+    # 落ちて0件になる経路は無い。ナビのリンクだけ残る改装はこの判定では検知できない。
+    if not items:
+        raise ExtractionError("汎用抽出で記事リンクを1件も取得できませんでした。")
+    return items
 
 
 def _scrape_hokuyo_institution(institution, url):

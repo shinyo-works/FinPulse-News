@@ -1211,7 +1211,7 @@
     function syncHash() {
       let hash = "";
       const view = document.body.dataset.view;
-      if (REPORT_VIEWS[view]) {
+      if (isReportView(view)) {
         hash = `#${view}`;
       } else if (state.mode === "institution" && state.selectedInstitution) {
         hash = `#inst/${encodeURIComponent(state.selectedInstitution)}`;
@@ -1226,7 +1226,7 @@
     /** URLのハッシュを解釈する。読み取れない場合は null を返し、呼び出し側の既定動作へ委ねる。 */
     function parseHash(raw = location.hash) {
       const reportView = raw.replace(/^#/, "");
-      if (REPORT_VIEWS[reportView]) return { view: reportView };
+      if (isReportView(reportView)) return { view: reportView };
       const dateMatch = raw.match(/^#date\/(\d{4}-\d{2}-\d{2})$/);
       if (dateMatch) return { view: "news", date: dateMatch[1] };
       const instMatch = raw.match(/^#inst\/(.+)$/);
@@ -1459,13 +1459,19 @@
     };
     const loadedReportViews = new Set();
 
+    // URLのハッシュ由来の名前は定義済みのタブだけを受け付ける。REPORT_VIEWS[name] の真偽で
+    // 判定すると #constructor など全オブジェクトが持つ名前まで通り、初期化が止まる。
+    function isReportView(view) {
+      return Object.hasOwn(REPORT_VIEWS, view ?? "");
+    }
+
     function switchView(view) {
       document.body.dataset.view = view;
       document.querySelectorAll(".product-tab").forEach((button) => {
         button.classList.toggle("active", button.dataset.view === view);
       });
       // 金利履歴は初回表示時にだけ読み込む（初期表示を軽くする）
-      const report = REPORT_VIEWS[view];
+      const report = isReportView(view) ? REPORT_VIEWS[view] : null;
       if (report && !loadedReportViews.has(view)) {
         document.getElementById(report.frameId).src = report.src;
         loadedReportViews.add(view);
@@ -1483,7 +1489,7 @@
     window.addEventListener("hashchange", () => {
       const requested = parseHash();
       if (!requested) return;
-      if (REPORT_VIEWS[requested.view]) {
+      if (isReportView(requested.view)) {
         switchView(requested.view);
         return;
       }
@@ -1498,9 +1504,16 @@
 
     // ニュース側の復元を終えてからタブを切り替える（金利タブのiframe遅延読み込みを保つ）。
     // 既定は住宅ローン金利タブ。URLが他のタブを指しているときだけそちらへ切り替える。
-    initialize().then(() => {
-      switchView(parseHash(INITIAL_HASH)?.view || "rate");
-    });
+    // ニュース側の初期化が想定外の例外で止まっても、失敗を示したうえで既定タブは開く。
+    initialize()
+      .catch((error) => {
+        console.error(error);
+        elements.pageTitle.textContent = "データを読み込めませんでした";
+        elements.reportContent.innerHTML = emptyState("データを読み込めませんでした", "少し時間を置いてから再度お試しください。");
+      })
+      .finally(() => {
+        switchView(parseHash(INITIAL_HASH)?.view || "rate");
+      });
   </script>
 </body>
 </html>

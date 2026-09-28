@@ -26,6 +26,7 @@ import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "docs" / "data"
 HISTORY_PATH = DATA_DIR / "rate-history.json"
@@ -101,6 +102,21 @@ PRODUCT_NAME_OVERRIDES = {
 def resolve_product_name(bank_id: str, product_id: str, product_name: str) -> str:
     """履歴へ保存する商品名を返す。上書き対象なら固定の表示名を使う。"""
     return PRODUCT_NAME_OVERRIDES.get((bank_id, product_id), product_name)
+
+
+def clean_display_name(value) -> str | None:
+    """上流の表示名を、空でない文字列のときだけ採用する（null・空欄・数値は None）。"""
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
+def is_http_url(value) -> bool:
+    """HTTP(S)の絶対URLか。画面側の safeUrl に頼らず、保存前にも絞る（多重防御）。"""
+    if not isinstance(value, str) or not value:
+        return False
+    parsed = urlparse(value)
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
 DEFAULT_LABELS = {
@@ -316,6 +332,12 @@ def validate_history(history: dict) -> None:
         rate_type = row.get("rate_type")
         if rate_type not in rate_type_order:
             raise ValueError(f"rows[{index}].rate_type が不正です: {rate_type!r}")
+        for name_key in ("bank_name", "product_name"):
+            if clean_display_name(row.get(name_key)) is None:
+                raise ValueError(f"rows[{index}].{name_key} は空でない文字列にしてください。")
+        row_url = row.get("url")
+        if row_url is not None and not is_http_url(row_url):
+            raise ValueError(f"rows[{index}].url はHTTP(S)の絶対URLかnullにしてください。")
         guarantee_note = row.get("guarantee_note")
         if guarantee_note is not None and (
             not isinstance(guarantee_note, str)
@@ -453,16 +475,24 @@ def update_history(
             value = validate_rate(value, loan_key)
             key = row_key(bank_id, product_id, rate_type)
             row = index.get(key)
+            loan_url = loan.get("url") if is_http_url(loan.get("url")) else None
             if row is None:
-                # 新規の(機関×商品×種別)。履歴を1件で作る。
+                # 新規の(機関×商品×種別)。履歴を1件で作る。名前が無い新商品は表に
+                # 名前の空いた行を作ってしまうため、その回の取り込みを止めて気づかせる。
+                bank_name = clean_display_name(loan.get("bank_name"))
+                product_name = clean_display_name(
+                    resolve_product_name(bank_id, product_id, loan.get("product_name"))
+                )
+                if bank_name is None or product_name is None:
+                    raise ValueError(
+                        f"新しい商品 {bank_id}/{product_id} に機関名・商品名がありません。"
+                    )
                 row = {
                     "bank_id": bank_id,
-                    "bank_name": loan.get("bank_name", ""),
+                    "bank_name": bank_name,
                     "product_id": product_id,
-                    "product_name": resolve_product_name(
-                        bank_id, product_id, loan.get("product_name", "")
-                    ),
-                    "url": loan.get("url"),
+                    "product_name": product_name,
+                    "url": loan_url,
                     "rate_type": rate_type,
                     "history": [{"rate": value, "observed_on": survey_date}],
                 }
@@ -480,14 +510,13 @@ def update_history(
             row_latest_date = hist[0].get("observed_on") if hist else ""
             if not row_latest_date or survey_date >= row_latest_date:
                 # 過去データの投入で現在の商品名・URLを巻き戻さない。
-                row["bank_name"] = loan.get("bank_name", row.get("bank_name", ""))
-                row["product_name"] = resolve_product_name(
-                    bank_id,
-                    product_id,
-                    loan.get("product_name", row.get("product_name", "")),
-                )
-                if loan.get("url"):
-                    row["url"] = loan.get("url")
+                # 上流の名前が欠けた週は前回の名前を保つ（1件の欠けで全体を止めない）。
+                row["bank_name"] = clean_display_name(loan.get("bank_name")) or row.get("bank_name")
+                row["product_name"] = clean_display_name(
+                    resolve_product_name(bank_id, product_id, loan.get("product_name"))
+                ) or row.get("product_name")
+                if loan_url:
+                    row["url"] = loan_url
                 # 保証料の条件が消えた週は注記も消す（古い断り書きを残さない）
                 guarantee_note = normalize_guarantee_note(loan.get("guarantee_note"))
                 if guarantee_note:
@@ -556,6 +585,26 @@ def write_history_atomic(history: dict, path: Path = HISTORY_PATH) -> None:
             temporary_path.unlink()
 
 
+def prepare_dataset_update(
+    report_data: dict,
+    survey_date: str,
+    dataset: Dataset,
+    *,
+    allow_backfill: bool = False,
+) -> tuple[dict, dict]:
+    """1つのローン種別の履歴をメモリ上で更新・検証し、(履歴, 変更サマリー) を返す。
+    ファイルには書かない。複数種別を扱う main は全種別の準備が通ってから書き込む。"""
+    history = load_history(dataset)
+    summary = update_history(
+        history,
+        report_data,
+        survey_date,
+        allow_backfill=allow_backfill,
+        dataset=dataset,
+    )
+    return history, summary
+
+
 def update_dataset_file(
     report_data: dict,
     survey_date: str,
@@ -564,13 +613,8 @@ def update_dataset_file(
     allow_backfill: bool = False,
 ) -> dict:
     """1つのローン種別の履歴ファイルを更新し、変更サマリーを返す。"""
-    history = load_history(dataset)
-    summary = update_history(
-        history,
-        report_data,
-        survey_date,
-        allow_backfill=allow_backfill,
-        dataset=dataset,
+    history, summary = prepare_dataset_update(
+        report_data, survey_date, dataset, allow_backfill=allow_backfill
     )
     write_history_atomic(history, dataset.history_path)
     return summary
@@ -612,13 +656,23 @@ def main() -> None:
     else:
         targets = [DATASETS[args.dataset]]
 
-    for dataset in targets:
-        summary = update_dataset_file(
-            report_data,
-            survey_date,
+    # 全種別をメモリ上で更新・検証してから書き込む。マイカー側の入力が不正な回に
+    # 住宅ローン側だけが新しい調査日になる部分更新を防ぐ（書き込み自体の途中失敗は対象外。
+    # 本番は上流 workflow が更新成功時だけ push するため、作業環境に残るだけで公開されない）。
+    prepared = [
+        (
             dataset,
-            allow_backfill=args.allow_backfill,
+            *prepare_dataset_update(
+                report_data,
+                survey_date,
+                dataset,
+                allow_backfill=args.allow_backfill,
+            ),
         )
+        for dataset in targets
+    ]
+    for dataset, history, summary in prepared:
+        write_history_atomic(history, dataset.history_path)
         print(
             f"{dataset.label}の履歴を更新しました（調査日 {survey_date}）: "
             f"{dataset.history_path}"

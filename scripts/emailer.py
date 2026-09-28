@@ -23,6 +23,18 @@ def load_dotenv(env_path=None):
             os.environ.setdefault(key.strip(), value.strip())
 
 
+def _is_already_sent_with_key(response):
+    """Resend の 409 のうち、冪等キーが既に別内容で使われた（＝その日は送信済み）ものか。
+    エラー本文には宛先などが含まれうるので、ログには出さず name だけを読む。"""
+    if response.status_code != 409:
+        return False
+    try:
+        data = response.json()
+    except ValueError:
+        return False
+    return isinstance(data, dict) and data.get("name") == "invalid_idempotent_request"
+
+
 def send_resend_email(
     subject,
     body,
@@ -75,6 +87,14 @@ def send_resend_email(
             json=payload,
             timeout=30,
         )
+        if idempotency_key and _is_already_sent_with_key(response):
+            # 同じ冪等キー（同じ配信日）で内容の違う依頼をした時の Resend の応答。
+            # 同日の重複送信を抑止する設計どおりの結果なので、送信失敗とは区別する。
+            print(
+                "本日分は同じ冪等キーで送信済みのため、自動では再送しません。"
+                "内容を送り直す場合は send_report.py で手動送信してください。"
+            )
+            return True
         if not response.ok:
             request_id = response.headers.get("x-request-id", "不明")
             print(f"Resend送信失敗: status={response.status_code}, request_id={request_id}")
@@ -82,6 +102,9 @@ def send_resend_email(
         try:
             response_data = response.json()
         except ValueError:
+            response_data = {}
+        if not isinstance(response_data, dict):
+            # ログ用のIDが読めないだけで、送信の成否はHTTP状態で決まっている。
             response_data = {}
         print(f"メール送信成功: ID={response_data.get('id', '不明')}")
         return True
