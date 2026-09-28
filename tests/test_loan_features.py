@@ -5,6 +5,7 @@
 """
 
 import json
+import os
 import re
 import unittest
 from pathlib import Path
@@ -18,6 +19,14 @@ MAX_FEE_NOTE_CHARS = 30
 
 # 保証料の扱い。included=金利に含む／separate=必ず別途／conditional=条件次第・記載がなく不明
 GUARANTEE_STATUSES = ("included", "separate", "conditional")
+
+# 上流（金利履歴）で住宅ローンの商品が増減した週は、人手で書く条件比較JSONとの突合が
+# 落ちる。週次ワークフローはこの環境変数で突合を配信前ゲートから外し、収集の後に
+# 警告だけの別ステップで実行する（ニュース配信まで止めないため）。
+skip_if_data_sync_deferred = unittest.skipIf(
+    os.environ.get("FINPULSE_DEFER_DATA_SYNC_TESTS") == "1",
+    "金利履歴との突合は週次ワークフローの後段ステップで実行する",
+)
 
 
 class LoanFeaturesDataTest(unittest.TestCase):
@@ -47,6 +56,7 @@ class LoanFeaturesDataTest(unittest.TestCase):
         for column in self.features["columns"]:
             self.assertIn(column["group"], group_keys)
 
+    @skip_if_data_sync_deferred
     def test_products_match_the_rate_history_exactly(self):
         """金利表に無い商品を載せない。金利表にある商品を落とさない。"""
         feature_ids = [product["product_id"] for product in self.features["products"]]
@@ -57,6 +67,7 @@ class LoanFeaturesDataTest(unittest.TestCase):
         self.assertEqual(sorted(history_ids), sorted(feature_ids))
         self.assertEqual(len(feature_ids), len(set(feature_ids)))
 
+    @skip_if_data_sync_deferred
     def test_bank_order_follows_the_rate_history(self):
         """表示順は config.json の機関順が正。ビューアーで並べ替えないので配列順を合わせる。"""
         def bank_order(ids):
@@ -71,6 +82,7 @@ class LoanFeaturesDataTest(unittest.TestCase):
             bank_order([p["bank_id"] for p in self.features["products"]]),
         )
 
+    @skip_if_data_sync_deferred
     def test_bank_and_product_names_match_the_rate_history(self):
         names = {
             row["product_id"]: (row["bank_name"], row["product_name"])
@@ -81,6 +93,24 @@ class LoanFeaturesDataTest(unittest.TestCase):
                 names[product["product_id"]],
                 (product["bank_name"], product["product_name"]),
             )
+
+    @skip_if_data_sync_deferred
+    def test_product_order_within_each_bank_follows_the_rate_history(self):
+        """機関内の商品の並びも金利履歴の初出順と揃える。金利タブは初出順で表示する。"""
+        def product_order(entries):
+            order = []
+            for bank_id, product_id in entries:
+                if (bank_id, product_id) not in order:
+                    order.append((bank_id, product_id))
+            by_bank = {}
+            for bank_id, product_id in order:
+                by_bank.setdefault(bank_id, []).append(product_id)
+            return by_bank
+
+        self.assertEqual(
+            product_order((row["bank_id"], row["product_id"]) for row in self.history["rows"]),
+            product_order((p["bank_id"], p["product_id"]) for p in self.features["products"]),
+        )
 
     def test_notes_are_short_enough_for_the_bank_cell(self):
         for product in self.features["products"]:

@@ -32,6 +32,10 @@ jobs:
         run: python -m pip install --require-hashes -r requirements.lock
 
       - name: 自動テスト
+        env:
+          # 金利履歴と条件比較の商品突合は、上流の商品増減で落ちてもニュース配信を
+          # 止めないよう、収集後の警告ステップへ回す。
+          FINPULSE_DEFER_DATA_SYNC_TESTS: '1'
         run: python -m unittest discover -s tests -v
 
       - name: 収集・レポート生成・送信
@@ -42,6 +46,15 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           REPORT_TO: ${{ secrets.REPORT_TO }}
         run: python scripts/collect_and_send.py
+
+      - name: 条件比較データと金利履歴の突合（失敗しても配信は止めない）
+        if: always()
+        continue-on-error: true
+        run: |
+          python -m unittest tests.test_loan_features -v || {
+            echo "::warning::金利履歴と条件比較データ（docs/data/loan-features.json）の商品が一致しません。上流で商品が増減した可能性があります。"
+            exit 1
+          }
 
       - name: 生成した成果物を一時保存
         if: always()

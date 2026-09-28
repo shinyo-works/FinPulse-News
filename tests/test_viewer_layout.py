@@ -96,10 +96,11 @@ class ViewerLayoutTest(unittest.TestCase):
             '<button class="product-tab active" type="button" data-view="rate">住宅ローン金利情報</button>',
             tabs,
         )
-        # URLが他のタブを指すときだけそちらへ切り替える
-        self.assertIn(
-            'switchView(parseHash(INITIAL_HASH)?.view || "rate");',
+        # URLが他のタブを指すときだけそちらへ切り替える。初期化が失敗しても既定タブは開く
+        self.assertRegex(
             self.html,
+            r'initialize\(\)\s*\.catch\([\s\S]*?\.finally\(\(\) => \{\s*'
+            r'switchView\(parseHash\(INITIAL_HASH\)\?\.view \|\| "rate"\);',
         )
 
     def test_car_loan_tab_shows_the_same_viewer_with_car_data(self):
@@ -117,9 +118,8 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn('<iframe id="carFrame" class="report-frame"', self.html)
         # ビューアー側は既知のデータセットだけを受け付ける
         self.assertIn('dataUrl: "./data/car-loan-history.json"', self.rate_html)
-        self.assertIn(
-            'const DATASET = DATASETS[DATASET_KEY] || DATASETS.housing;', self.rate_html
-        )
+        self.assertIn('return Object.hasOwn(DATASETS, key ?? "") ? key : "housing";', self.rate_html)
+        self.assertIn("const DATASET = DATASETS[DATASET_KEY];", self.rate_html)
 
     def test_guarantee_fee_is_stated_for_car_loans_only(self):
         """マイカーローンは表の上で保証料込を断り、例外は機関名の下に出す。"""
@@ -223,6 +223,46 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn("&lt;script&gt;", behavior["failed"])
         self.assertNotIn("<script>", behavior["failed"])
         self.assertEqual("", behavior["empty"])
+
+    def test_url_names_accept_only_defined_views_and_datasets(self):
+        """#constructor や ?dataset=__proto__ のような全オブジェクト共通の名前で壊れない。"""
+        datasets = re.search(
+            r"const DATASETS = \{.*?\n    \};", self.rate_html, re.DOTALL
+        ).group(0)
+        resolve = re.search(
+            r"    function resolveDatasetKey\([^\n]*\) \{[\s\S]*?\n    \}", self.rate_html
+        ).group(0)
+        report_views = re.search(
+            r"const REPORT_VIEWS = \{.*?\n    \};", self.html, re.DOTALL
+        ).group(0)
+        is_report_view = re.search(
+            r"    function isReportView\([^\n]*\) \{[\s\S]*?\n    \}", self.html
+        ).group(0)
+        script = (
+            'const RATE_TITLE = "r", CAR_TITLE = "c", FEATURES_TITLE = "f";\n'
+            + datasets + "\n" + resolve + "\n" + report_views + "\n" + is_report_view
+            + """
+            const names = ["constructor", "__proto__", "toString", "hasOwnProperty", "", null, "unknown"];
+            console.log(JSON.stringify({
+              datasets: names.map(resolveDatasetKey),
+              car: resolveDatasetKey("car"),
+              views: names.map(isReportView),
+              rate: isReportView("rate"),
+            }));
+            """
+        )
+        result = subprocess.run(
+            ["node", "-e", script],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        behavior = json.loads(result.stdout)
+        self.assertEqual(["housing"] * 7, behavior["datasets"])
+        self.assertEqual("car", behavior["car"])
+        self.assertEqual([False] * 7, behavior["views"])
+        self.assertTrue(behavior["rate"])
 
     def test_missing_rates_are_not_collapsed_as_unchanged(self):
         function_names = (

@@ -1,8 +1,12 @@
 import copy
+import dataclasses
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 from scripts.update_rate_history import (
     CAR_DATASET,
@@ -17,6 +21,7 @@ from scripts.update_rate_history import (
     validate_history,
     write_history_atomic,
 )
+from scripts import update_rate_history
 from scripts.backfill_rate_history import normalize_legacy_report, rebuild_history
 
 
@@ -250,6 +255,57 @@ class UpdateRateHistoryTest(unittest.TestCase):
                 ValueError, expected_error
             ):
                 update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+    def test_new_product_without_names_stops_the_import(self):
+        report = copy.deepcopy(self.report)
+        report["loan_table"][0]["bank_name"] = None
+        with self.assertRaisesRegex(ValueError, "機関名・商品名"):
+            update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+        report = copy.deepcopy(self.report)
+        report["loan_table"][0]["product_name"] = "  "
+        with self.assertRaisesRegex(ValueError, "機関名・商品名"):
+            update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+    def test_existing_row_keeps_previous_names_when_upstream_drops_them(self):
+        update_history(self.history, self.report, "2026-08-01")
+        report = copy.deepcopy(self.report)
+        report["loan_table"][0]["bank_name"] = None
+        del report["loan_table"][0]["product_name"]
+        report["loan_table"][0]["loan_variable"] = 1.3
+
+        update_history(self.history, report, "2026-08-08")
+
+        row = self.history["rows"][0]
+        self.assertEqual("テスト銀行", row["bank_name"])
+        self.assertEqual("テスト商品", row["product_name"])
+        self.assertEqual(1.3, row["history"][0]["rate"])
+
+    def test_only_http_urls_are_stored(self):
+        report = copy.deepcopy(self.report)
+        report["loan_table"][0]["url"] = "javascript:alert(1)"
+        update_history(self.history, report, "2026-08-01")
+        self.assertIsNone(self.history["rows"][0]["url"])
+
+        report["loan_table"][0]["url"] = "https://example.com/loan"
+        update_history(self.history, report, "2026-08-08")
+        self.assertEqual("https://example.com/loan", self.history["rows"][0]["url"])
+
+        report["loan_table"][0]["url"] = "ftp://example.com/loan"
+        update_history(self.history, report, "2026-08-15")
+        self.assertEqual("https://example.com/loan", self.history["rows"][0]["url"])
+
+    def test_validation_rejects_bad_names_and_urls_in_history(self):
+        update_history(self.history, self.report, "2026-08-01")
+        for key, value, message in (
+            ("bank_name", "", "bank_name"),
+            ("product_name", None, "product_name"),
+            ("url", "javascript:alert(1)", "url"),
+        ):
+            broken = copy.deepcopy(self.history)
+            broken["rows"][0][key] = value
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, message):
+                validate_history(broken)
 
     def test_rejects_invalid_rate_type_metadata(self):
         update_history(self.history, self.report, "2026-08-01")
@@ -504,6 +560,37 @@ class CarLoanHistoryTest(unittest.TestCase):
         legacy["rate_contract"] = expected_rate_contract_metadata()
         with self.assertRaisesRegex(ValueError, "car_loan_rate_fields"):
             update_history(self.car_history(), legacy, "2026-08-24", dataset=CAR_DATASET)
+
+    def test_invalid_car_table_leaves_the_housing_file_untouched(self):
+        report = copy.deepcopy(self.report)
+        report["car_loan_table"][0]["car_loan_variable"] = -1
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "report.json"
+            report_path.write_text(json.dumps(report, ensure_ascii=False), encoding="utf-8")
+            housing_path = Path(directory) / "rate-history.json"
+            car_path = Path(directory) / "car-loan-history.json"
+            datasets = {
+                "housing": dataclasses.replace(HOUSING_DATASET, history_path=housing_path),
+                "car": dataclasses.replace(CAR_DATASET, history_path=car_path),
+            }
+            with mock.patch.dict(update_rate_history.DATASETS, datasets), mock.patch(
+                "sys.argv",
+                ["update_rate_history.py", str(report_path), "--date", "2026-08-24"],
+            ), redirect_stdout(io.StringIO()), self.assertRaises(ValueError):
+                update_rate_history.main()
+
+            self.assertFalse(housing_path.exists())
+            self.assertFalse(car_path.exists())
+
+            # 正しい入力なら両方とも書かれる（分割後も通常経路が動くこと）
+            report_path.write_text(json.dumps(self.report, ensure_ascii=False), encoding="utf-8")
+            with mock.patch.dict(update_rate_history.DATASETS, datasets), mock.patch(
+                "sys.argv",
+                ["update_rate_history.py", str(report_path), "--date", "2026-08-24"],
+            ), redirect_stdout(io.StringIO()):
+                update_rate_history.main()
+            self.assertTrue(housing_path.exists())
+            self.assertTrue(car_path.exists())
 
     def test_repository_car_history_is_valid(self):
         history = json.loads(

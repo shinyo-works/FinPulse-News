@@ -24,13 +24,16 @@ def minimal_config():
 
 
 class FakeResponse:
-    def __init__(self, chunks, *, content_type="text/html", content_length=None):
+    def __init__(self, chunks, *, content_type="text/html", content_length=None, status_code=200):
         self._chunks = chunks
+        self.status_code = status_code
         self.headers = {"Content-Type": content_type}
         if content_length is not None:
             self.headers["Content-Length"] = str(content_length)
 
     def raise_for_status(self):
+        if self.status_code >= 400:
+            raise collector.requests.HTTPError(f"{self.status_code} error", response=self)
         return None
 
     def iter_content(self, chunk_size):
@@ -166,6 +169,40 @@ class ValidationTest(unittest.TestCase):
     def test_accepts_current_config_shape(self):
         collector.validate_config(minimal_config())
 
+    def test_frozen_claude_path_cannot_be_enabled_by_config(self):
+        config = minimal_config()
+        config["institutions"][0]["use_claude"] = True
+        with self.assertRaisesRegex(ValueError, "凍結中"):
+            collector.validate_config(config)
+
+        config["institutions"][0]["use_claude"] = False
+        collector.validate_config(config)
+
+    def test_common_include_keywords_are_merged_into_each_institution(self):
+        config = minimal_config()
+        config["common_include_keywords"] = ["お知らせ", "金利"]
+        config["institutions"][0]["include_keywords"] = ["金利", "手数料"]
+        collector.validate_config(config)
+        collector.normalize_config(config)
+        self.assertEqual(
+            ["お知らせ", "金利", "手数料"],
+            config["institutions"][0]["include_keywords"],
+        )
+
+        config["common_include_keywords"] = ["お知らせ", ""]
+        with self.assertRaisesRegex(ValueError, "common_include_keywords"):
+            collector.validate_config(config)
+
+    def test_repository_institutions_all_receive_common_keywords(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        config = json.loads((repository_root / "config.json").read_text(encoding="utf-8"))
+        common = config["common_include_keywords"]
+        self.assertTrue(common)
+        collector.normalize_config(config)
+        for institution in config["institutions"]:
+            # 合成後の通過語が空だと apply_filters は全件を通すため、必ず共通語を含む。
+            self.assertEqual(common, institution["include_keywords"][: len(common)])
+
     def test_rejects_duplicate_name_and_unknown_scraper(self):
         duplicate = minimal_config()
         duplicate["institutions"].append(dict(duplicate["institutions"][0]))
@@ -272,6 +309,15 @@ class CollectionStateTest(unittest.TestCase):
         self.assertEqual([], result.passed)
         self.assertIn("取得できません", result.error)
 
+    def test_programmatic_page_without_article_links_is_extraction_failure(self):
+        institution = minimal_config()["institutions"][0]
+        html = "<html><body><p>Access denied</p><a href='/'>TOP</a></body></html>"
+        with mock.patch.object(collector, "fetch_page", return_value=html):
+            result, _ = collector.collect_institution(institution, 30, ["金利"])
+
+        self.assertEqual("extract_failed", result.status)
+        self.assertIn(result.status, collector.FAILED_STATUSES)
+
     def test_partial_failure_keeps_outputs_and_returns_failure(self):
         failed = collector.InstitutionResult(
             "テスト銀行",
@@ -368,6 +414,18 @@ class ProgrammaticScraperTest(unittest.TestCase):
         )
 
 
+    def test_stops_at_the_item_limit(self):
+        html = "".join(
+            f'<a href="/news/{index}">住宅ローン金利のお知らせ{index:03d}</a>'
+            for index in range(collector.MAX_PROGRAMMATIC_ITEMS + 5)
+        )
+
+        items = collector.scrape_news_programmatic(html, "https://example.com/")
+
+        self.assertEqual(collector.MAX_PROGRAMMATIC_ITEMS, len(items))
+        self.assertEqual("https://example.com/news/0", items[0]["url"])
+
+
 class HokuyoXmlTest(unittest.TestCase):
     XML_WITH_ARTICLE = """<?xml version="1.0" encoding="UTF-8"?>
     <announcements><article><viewdate>2026.08.20</viewdate>
@@ -390,6 +448,26 @@ class HokuyoXmlTest(unittest.TestCase):
             collector.scrape_hokuyo_xml(
                 "https://www.hokuyobank.co.jp/announcement/"
             )
+
+    def not_found(self):
+        return FakeResponse([b""], content_type="text/html", status_code=404)
+
+    def scrape_at(self, month, responses):
+        with mock.patch.object(
+            collector, "now_jst", return_value=datetime(2027, month, 4, 5, 0)
+        ), mock.patch.object(collector.requests, "get", side_effect=responses):
+            return collector.scrape_hokuyo_xml("https://www.hokuyobank.co.jp/announcement/")
+
+    def test_this_years_feed_may_be_missing_only_in_january(self):
+        items = self.scrape_at(1, [self.not_found(), self.xml_response(self.XML_WITH_ARTICLE)])
+        self.assertEqual(["住宅ローン金利のお知らせ"], [item["title"] for item in items])
+
+        with self.assertRaisesRegex(collector.FetchError, "北洋銀行のXML"):
+            self.scrape_at(2, [self.not_found(), self.xml_response(self.XML_WITH_ARTICLE)])
+
+    def test_last_years_feed_is_still_required_in_january(self):
+        with self.assertRaisesRegex(collector.FetchError, "北洋銀行のXML"):
+            self.scrape_at(1, [self.xml_response(self.XML_WITH_ARTICLE), self.not_found()])
 
     def test_rejects_two_successful_but_empty_feeds(self):
         with mock.patch.object(
@@ -454,9 +532,9 @@ class SanitizeItemsTest(unittest.TestCase):
 class JaObihirokawanisiTest(unittest.TestCase):
     def setUp(self):
         repository_root = Path(__file__).resolve().parents[1]
-        config = json.loads(
+        config = collector.normalize_config(json.loads(
             (repository_root / "config.json").read_text(encoding="utf-8")
-        )
+        ))
         self.config = config
         self.institution = next(
             item
@@ -615,9 +693,9 @@ class JaOtofukeExcludeTest(unittest.TestCase):
 
     def setUp(self):
         repository_root = Path(__file__).resolve().parents[1]
-        config = json.loads(
+        config = collector.normalize_config(json.loads(
             (repository_root / "config.json").read_text(encoding="utf-8")
-        )
+        ))
         self.config = config
         self.institution = next(
             item for item in config["institutions"] if item["name"] == "JAおとふけ"
@@ -716,9 +794,9 @@ class JaOtofukeExcludeTest(unittest.TestCase):
 class JaKinoTest(unittest.TestCase):
     def setUp(self):
         repository_root = Path(__file__).resolve().parents[1]
-        config = json.loads(
+        config = collector.normalize_config(json.loads(
             (repository_root / "config.json").read_text(encoding="utf-8")
-        )
+        ))
         self.config = config
         self.institution = next(
             item for item in config["institutions"] if item["name"] == "JA木野"
@@ -805,10 +883,19 @@ class JaKinoTest(unittest.TestCase):
             collector.scrape_ja_kino(html_without_dates, self.institution["url"])
 
     def test_partial_missing_dates_keep_the_existing_fail_open_behavior(self):
+        # URL側は日付抽出の型（/8桁/）に一致させ、それでも補完しないことを確かめる。
         html_with_one_missing_date = JA_KINO_HTML.replace(
             '<div class="date">2026.08.10</div>',
             "",
             1,
+        ).replace(
+            "/2026/08/jakino_info_20260810.pdf",
+            "/2026/08/20260809/jakino_info.pdf",
+            1,
+        )
+        self.assertEqual(
+            "2026-08-09",
+            collector.extract_date_from_url("https://example.com/2026/08/20260809/jakino_info.pdf"),
         )
 
         items = collector.scrape_ja_kino(
@@ -816,7 +903,7 @@ class JaKinoTest(unittest.TestCase):
             self.institution["url"],
         )
 
-        # URL内の 20260810 は掲載日ではないため補完に使わない。
+        # JA木野のURL内の数字は掲載日ではないため補完に使わない。
         self.assertEqual("", items[1]["date"])
         self.assertTrue(any(item["date"] for item in items))
 

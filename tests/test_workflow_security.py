@@ -40,6 +40,18 @@ class WorkflowSecurityTest(unittest.TestCase):
         collect_job_header = self.workflow.split("steps:", 1)[0]
         self.assertNotIn("timeout-minutes", collect_job_header)
 
+    def test_data_sync_check_does_not_block_news_delivery(self):
+        # 上流の商品増減で条件比較との突合が落ちても、ニュース収集・送信は止めない。
+        self.assertRegex(
+            self.workflow,
+            r"- name: 自動テスト\s*\n\s*env:[\s\S]*?FINPULSE_DEFER_DATA_SYNC_TESTS: '1'",
+        )
+        self.assertRegex(
+            self.workflow,
+            r"- name: 条件比較データと金利履歴の突合[^\n]*\n\s*if: always\(\)\s*\n"
+            r"\s*continue-on-error: true\s*\n\s*run: \|\s*\n\s*python -m unittest tests.test_loan_features",
+        )
+
     def test_publish_push_retries_with_rebase(self):
         # 別リポジトリの自動pushとの競合時に、取り込み直して再pushするループがあること
         self.assertIn("git pull --rebase --autostash origin main", self.workflow)

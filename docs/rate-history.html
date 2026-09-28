@@ -384,8 +384,13 @@
         guaranteeNote: "表示金利はすべて保証料込です（金利に保証料を含む）。上乗せがある機関は機関名の下に注記しています。",
       },
     };
-    const DATASET_KEY = new URLSearchParams(location.search).get("dataset");
-    const DATASET = DATASETS[DATASET_KEY] || DATASETS.housing;
+    // 既知のデータセット名だけを受け付ける。DATASETS[key] の真偽で判定すると
+    // ?dataset=constructor のように全オブジェクトが持つ名前まで通ってしまう。
+    function resolveDatasetKey(key) {
+      return Object.hasOwn(DATASETS, key ?? "") ? key : "housing";
+    }
+    const DATASET_KEY = resolveDatasetKey(new URLSearchParams(location.search).get("dataset"));
+    const DATASET = DATASETS[DATASET_KEY];
     const DATA_URL = DATASET.dataUrl;
     document.title = DATASET.title;
     document.getElementById("subtitleFull").textContent = DATASET.subtitleFull;
@@ -425,7 +430,7 @@
       min: 90,
       max: 460,
       step: 8,
-      storageKey: `finpulse.rateHistory.bankColWidth.${DATASETS[DATASET_KEY] ? DATASET_KEY : "housing"}`,
+      storageKey: `finpulse.rateHistory.bankColWidth.${DATASET_KEY}`,
     };
 
     function defaultBankColWidth() {
@@ -604,13 +609,26 @@
       return lines.join("");
     }
 
+    function productOrder() {
+      // 機関内の商品もJSONでの初出順に並べる（条件比較タブと同じ順）。機関でまとめる
+      // 並べ替え自体は残す：履歴JSONは新商品を末尾へ追記するため（例: 労金のスマイル）。
+      const order = [];
+      for (const row of state.data.rows) {
+        const key = `${row.bank_id}/${row.product_id}`;
+        if (!order.includes(key)) order.push(key);
+      }
+      return order;
+    }
+
     function sortedRows(rows) {
       const banks = bankOrder();
+      const products = productOrder();
       const typeOrder = state.data.rate_type_order || [];
       return [...rows].sort((a, b) => {
         const bi = banks.indexOf(a.bank_id) - banks.indexOf(b.bank_id);
         if (bi !== 0) return bi;
-        if (a.product_id !== b.product_id) return String(a.product_id).localeCompare(String(b.product_id));
+        const pi = products.indexOf(`${a.bank_id}/${a.product_id}`) - products.indexOf(`${b.bank_id}/${b.product_id}`);
+        if (pi !== 0) return pi;
         return typeOrder.indexOf(a.rate_type) - typeOrder.indexOf(b.rate_type);
       });
     }
@@ -703,6 +721,8 @@
     }
 
     function render() {
+      // 読み込み失敗・データ0件のときは案内表示を残し、検索や絞り込みで上書きしない。
+      if (!state.data || !Array.isArray(state.data.rows) || !state.data.rows.length) return;
       const rows = sortedRows(visibleRows());
       if (!rows.length) {
         el.matrix.innerHTML = '<div class="empty-state"><strong>該当する金利がありません</strong>検索語・種別・機関の絞り込みを変えてください。</div>';
@@ -861,7 +881,8 @@
     async function loadFeatures() {
       if (!DATASET.featuresUrl) return;
       try {
-        const response = await fetch(DATASET.featuresUrl);
+        // 条件比較タブ（loan-features.html）と同じく、人手更新の直後に古い注記を出さない。
+        const response = await fetch(`${DATASET.featuresUrl}?v=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         for (const product of data.products || []) {
@@ -874,7 +895,7 @@
 
     async function initialize() {
       try {
-        const response = await fetch(DATA_URL);
+        const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         state.data = await response.json();
         // 金利種別（変動・固定）の切替は rate_type_order だけで作れる。データが1件も無い週でも
