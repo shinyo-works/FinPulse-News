@@ -114,7 +114,7 @@ payload = json.dumps({
 }).encode("utf-8")
 
 req = urllib.request.Request(
-    "https://api.github.com/repos/yoshiyukimano-hub/FinPulse-News/dispatches",
+    "https://api.github.com/repos/shinyo-works/FinPulse-News/dispatches",
     data=payload,
     headers={
         "Authorization": f"token {github_token}",

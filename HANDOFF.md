@@ -1,6 +1,8 @@
 # HANDOFF.md
 
-> 最終更新: 2026-09-29（公開ヴューアーの UI/UX レビュー（Codex・Claude両方）と再レビューの指摘14件を実装。絞り込みの3画面統一・画面外はみ出し・起動順・日付一覧・凡例の折り返し・条件比較との相互リンク。詳細は `docs/re-review-plan-2026-09-29-uiux.md`）
+> 最終更新: 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧 `yoshiyukimano-hub.github.io` は 404。Secrets・デプロイキー・Pages は引き継がれた）
+>
+> 2026-09-29（公開ヴューアーの UI/UX レビュー（Codex・Claude両方）と再レビューの指摘14件を実装。絞り込みの3画面統一・画面外はみ出し・起動順・日付一覧・凡例の折り返し・条件比較との相互リンク。詳細は `docs/re-review-plan-2026-09-29-uiux.md`）
 >
 > 2026-09-28（全体レビュー（Codex・Claude両方）と再レビューの指摘を実装。収集失敗の検知・北洋の年明け・同日再送・金利履歴の検証・画面のURL耐性・商品突合で配信を止めない構成。詳細は `docs/re-review-plan-2026-09-28.md`）
 >
@@ -11,6 +13,13 @@
 > このファイルは現在地と残課題だけを置くライブ状態の正。恒久的な設計・規律は `CLAUDE.md`、完了履歴は git log を参照する。
 
 ## 現在地
+
+### GitHub 組織 `shinyo-works` へ移管（2026-09-30）
+
+- 目的: 公開 URL から個人名（アカウント名）を消す。旧 URL は転送されないので、共有済みの相手には新 URL を伝え直す。
+- 移管後に確認: Pages（built・新 URL で本体とデータ JSON すべて 200）、Secrets 3件、上流用デプロイキー、`git push --dry-run`。
+- 上流（報告自動化ツール）の `weekly_report.yml` の checkout 先も `shinyo-works/FinPulse-News` に変更済み。
+- 残: Claude ルーチン「FinPulse-News（月曜：5時）」は dispatch 先が旧リポジトリ・fine-grained PAT は個人アカウント用。そもそも受け口の `repository_dispatch` は `05750ec` で外しており空振りしている。止めるか直すかは本人判断待ち。
 
 ### UI/UX レビューの指摘を実装（2026-09-29・push済み。公開画面の本人目視は未）
 
