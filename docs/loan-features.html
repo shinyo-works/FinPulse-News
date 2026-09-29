@@ -126,6 +126,8 @@
       font-size: 0.84rem;
     }
     .control-button:hover { border-color: #a9bbc7; }
+    /* 一部の機関だけ表示しているときは、外したままになっていることに気づけるよう枠を立てる */
+    .control-button.is-filtered { color: var(--teal-700); border-color: var(--teal-700); box-shadow: inset 0 0 0 1px var(--teal-700); }
     .filter-popover {
       position: absolute; right: 0; top: calc(100% + 8px); z-index: 40;
       display: none; width: 280px; max-height: 320px; overflow-y: auto;
@@ -133,6 +135,8 @@
       border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
     }
     .filter-popover.open { display: block; }
+    /* 操作行が折り返してボタンが左端へ来たときだけ、左揃えにして画面外へはみ出さないようにする */
+    .filter-popover.align-left { left: 0; right: auto; }
     .filter-option { display: flex; align-items: center; gap: 9px; padding: 4px 3px; cursor: pointer; font-size: 0.88rem; }
     .filter-option input { accent-color: var(--teal-700); }
 
@@ -148,14 +152,16 @@
       font-size: 0.72rem;
       line-height: 1.35;
     }
+    /* 凡例は1行に収まる幅なら1行、狭い幅では折り返して全文を読めるようにする。
+       保証料の注記や色の意味が「…」で切れると、表の読み違いにつながるため。 */
     .info-line {
       min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
     .info-line + .info-line { margin-top: 2px; }
     .info-line b { font-weight: 700; }
+    .info-line a { color: var(--teal-700); }
     .info-line .legend-warn { color: var(--warn); }
     .info-line .legend-caution { color: var(--caution); }
 
@@ -245,7 +251,8 @@
     tbody tr:hover td.warn { background: #fdeeee; }
     td.caution { color: var(--caution); font-weight: 650; background: #fff8ef; }
     tbody tr:hover td.caution { background: #fdf2e3; }
-    .missing { color: #93a3ae; }
+    /* 「記載なし」を含むセルにも手数料などの中身があるため、読める濃さ（--muted）に留める */
+    .missing { color: var(--muted); }
 
     tbody tr.bank-start > td { border-top: 2px solid #8aa0af; }
 
@@ -293,8 +300,8 @@
   <div class="content">
     <div class="table-scroll" id="tableScroll">
       <div class="scrolling-notes">
-        <div class="info-line"><b>この表</b>＝各機関の公式サイトの商品ページと商品概要説明書から、金利以外の条件を書き写したものです。<b>金利は「住宅ローン金利情報」タブ</b>をご覧ください。</div>
-        <div class="info-line"><b class="legend-warn">赤い欄</b>＝保証料が金利に含まれず必ず別途かかる商品。<b class="legend-caution">橙の欄</b>＝会員かどうかや審査で別途負担が生じうる商品、または公式に記載がなく不明な商品。いずれも金利表の数字だけでは見えない負担があります。</div>
+        <div class="info-line"><b>この表</b>＝各機関の公式サイトの商品ページと商品概要説明書から、金利以外の条件を書き写したものです。<b>金利は<a href="./index.html#rate" target="_top" data-parent-tab="rate">「住宅ローン金利情報」タブ</a></b>をご覧ください。</div>
+        <div class="info-line"><b class="legend-warn">赤い欄</b>＝保証料が金利に含まれず必ず別途かかる商品。<b class="legend-caution">橙の欄</b>＝会員かどうかや審査で別途負担が生じうる商品、または公式に記載がなく不明な商品（公式資料でご確認ください）。どちらも金利表の数字だけでは負担の有無が分かりません。</div>
         <div class="info-line" id="verifiedNote"></div>
       </div>
       <div id="matrix" aria-live="polite">
@@ -597,6 +604,7 @@
     function syncFilterCount(total) {
       const count = state.selectedBanks.size;
       el.filterCount.textContent = count === total ? "（すべて）" : `（${count}/${total}）`;
+      el.filterButton.classList.toggle("is-filtered", count !== total);
     }
 
     async function initialize() {
@@ -605,7 +613,8 @@
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         state.data = await response.json();
       } catch (error) {
-        el.matrix.innerHTML = `<div class="empty-state"><strong>データを読み込めませんでした</strong>${escapeHtml(error.message)}</div>`;
+        console.error(error);
+        el.matrix.innerHTML = `<div class="empty-state"><strong>データを読み込めませんでした</strong>HTTPサーバー経由で開いているか、${escapeHtml(DATA_URL)} があるかご確認ください。</div>`;
         return;
       }
       if (!state.data || !Array.isArray(state.data.products) || !state.data.products.length) {
@@ -643,15 +652,48 @@
       render();
     });
 
+    // 右揃えの一覧は、ボタンが左端へ折り返すと画面の左外へはみ出す（窓を半分にした幅など）。
+    // 決め打ちの幅で分けず、開くたびに実際の位置を測って左揃えへ切り替える。
+    function placeFilterPopover() {
+      el.filterPopover.classList.remove("align-left");
+      if (el.filterPopover.getBoundingClientRect().left < 8) {
+        el.filterPopover.classList.add("align-left");
+      }
+    }
+
     el.filterButton.addEventListener("click", () => {
       const open = el.filterPopover.classList.toggle("open");
       el.filterButton.setAttribute("aria-expanded", String(open));
+      if (open) placeFilterPopover();
     });
 
     document.addEventListener("click", (event) => {
       if (event.target.closest("#bankFilterWrap")) return;
       el.filterPopover.classList.remove("open");
       el.filterButton.setAttribute("aria-expanded", "false");
+    });
+
+    // キーボード操作でも閉じられるようにする（閉じたらボタンへフォーカスを戻す）
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (!el.filterPopover.classList.contains("open")) return;
+      el.filterPopover.classList.remove("open");
+      el.filterButton.setAttribute("aria-expanded", "false");
+      el.filterButton.focus();
+    });
+
+    // 親ページ（タブ表示）の別タブへ移るリンク。親と同じサイトなので親のハッシュを書き換え、
+    // 親の hashchange でタブを切り替える（ページは再読み込みしない）。
+    // 単体で開いているときや親に触れないときは、href のとおり親ページを開く。
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest("a[data-parent-tab]");
+      if (!link || window.self === window.top) return;
+      try {
+        window.top.location.hash = link.dataset.parentTab;
+        event.preventDefault();
+      } catch (_e) {
+        // 親に触れない環境では通常のリンク移動に任せる
+      }
     });
 
     initialize();

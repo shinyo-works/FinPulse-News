@@ -129,6 +129,8 @@
       font-size: 0.84rem;
     }
     .control-button:hover { border-color: #a9bbc7; }
+    /* 一部の機関だけ表示しているときは、外したままになっていることに気づけるよう枠を立てる */
+    .control-button.is-filtered { color: var(--teal-700); border-color: var(--teal-700); box-shadow: inset 0 0 0 1px var(--teal-700); }
     .filter-popover {
       position: absolute; right: 0; top: calc(100% + 8px); z-index: 40;
       display: none; width: 280px; max-height: 320px; overflow-y: auto;
@@ -136,6 +138,8 @@
       border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
     }
     .filter-popover.open { display: block; }
+    /* 操作行が折り返してボタンが左端へ来たときだけ、左揃えにして画面外へはみ出さないようにする */
+    .filter-popover.align-left { left: 0; right: auto; }
     .filter-option { display: flex; align-items: center; gap: 9px; padding: 4px 3px; cursor: pointer; font-size: 0.88rem; }
     .filter-option input { accent-color: var(--teal-700); }
 
@@ -152,14 +156,17 @@
       font-size: 0.72rem;
       line-height: 1.35;
     }
+    /* 凡例は1行に収まる幅なら1行、狭い幅では折り返して全文を読めるようにする。
+       保証料の注記や色の意味が「…」で切れると、表の読み違いにつながるため。 */
     .info-line {
       min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
     .info-line + .info-line { margin-top: 2px; }
     .info-line b { font-weight: 700; }
+    .info-line a { color: var(--teal-700); }
+    .info-line .legend-best { color: #9a6700; font-weight: 800; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
     .info-line .up { color: var(--up); }
     .info-line .down { color: var(--down); }
 
@@ -344,7 +351,7 @@
   <div class="content">
     <div class="table-scroll" id="tableScroll">
       <div class="scrolling-notes">
-        <div class="info-line"><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）　<span class="up"><b>↑</b> 前回調査より上昇</span>　<span class="down"><b>↓</b> 前回調査より低下</span>　<b>変更なし</b>＝表示中の全商品で金利が動いていない期間</div>
+        <div class="info-line"><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）　<span class="up"><b>↑</b> 前回調査より上昇</span>　<span class="down"><b>↓</b> 前回調査より低下</span>　<b>変更なし</b>＝表示中の全商品で金利が動いていない期間　<span class="legend-best">金色の下線</span>・<b>最安</b>＝その調査日に表示中の商品で最も低い金利</div>
         <div class="info-line"><b>掲載範囲</b>＝<span id="coverageScope">公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）</span>　<span id="coverage"></span></div>
         <div id="guaranteeNote" class="info-line" hidden></div>
         <div id="sourceNote" class="info-line"></div>
@@ -372,7 +379,9 @@
         // 住宅ローンは保証料の扱いが機関ごとに割れる（同じ北陸銀行でも定額型は別途・定率型は込み）。
         // 金利だけを並べると実質の負担を読み違えるため、商品ごとの条件を機関名の下に添える。
         featuresUrl: "./data/loan-features.json",
-        featuresNote: "機関名の下の2行＝保証料の扱いと事務手数料。詳しい条件は「住宅ローンの条件比較」タブをご覧ください。",
+        // 条件データを読めたときだけ出す（読めない週は注記が消えるため、説明だけ残さない）。
+        featuresNote: "機関名の下の2行＝保証料の扱いと事務手数料。詳しい条件は",
+        featuresLink: { tab: "features", label: "「住宅ローンの条件比較」タブ" },
       },
       car: {
         dataUrl: "./data/car-loan-history.json",
@@ -395,9 +404,9 @@
     document.title = DATASET.title;
     document.getElementById("subtitleFull").textContent = DATASET.subtitleFull;
     document.getElementById("coverageScope").textContent = DATASET.coverageScope;
-    if (DATASET.guaranteeNote || DATASET.featuresNote) {
-      const guaranteeEl = document.getElementById("guaranteeNote");
-      guaranteeEl.textContent = `■ ${DATASET.guaranteeNote || DATASET.featuresNote}`;
+    const guaranteeEl = document.getElementById("guaranteeNote");
+    if (DATASET.guaranteeNote) {
+      guaranteeEl.textContent = `■ ${DATASET.guaranteeNote}`;
       guaranteeEl.hidden = false;
     }
     const state = {
@@ -832,7 +841,9 @@
 
     function updateFilterCount() {
       const total = new Set((state.data.rows || []).map((r) => r.bank_id)).size;
-      el.filterCount.textContent = total ? `(${state.selectedBanks.size}/${total})` : "";
+      const count = state.selectedBanks.size;
+      el.filterCount.textContent = !total ? "" : count === total ? "（すべて）" : `（${count}/${total}）`;
+      el.filterButton.classList.toggle("is-filtered", Boolean(total) && count !== total);
     }
 
     el.searchInput.addEventListener("input", () => { state.search = el.searchInput.value; render(); });
@@ -847,9 +858,19 @@
       render();
     });
 
+    // 右揃えの一覧は、ボタンが左端へ折り返すと画面の左外へはみ出す（窓を半分にした幅など）。
+    // 決め打ちの幅で分けず、開くたびに実際の位置を測って左揃えへ切り替える。
+    function placeFilterPopover() {
+      el.filterPopover.classList.remove("align-left");
+      if (el.filterPopover.getBoundingClientRect().left < 8) {
+        el.filterPopover.classList.add("align-left");
+      }
+    }
+
     el.filterButton.addEventListener("click", () => {
       const open = el.filterPopover.classList.toggle("open");
       el.filterButton.setAttribute("aria-expanded", String(open));
+      if (open) placeFilterPopover();
     });
 
     el.bankFilters.addEventListener("change", (event) => {
@@ -888,9 +909,28 @@
         for (const product of data.products || []) {
           if (product && product.product_id) state.features.set(product.product_id, product);
         }
+        return true;
       } catch (_e) {
         state.features.clear();
+        return false;
       }
+    }
+
+    // 住宅ローンの保証料・事務手数料の凡例。読めた週は条件比較タブへのリンク付きで説明し、
+    // 読めなかった週は注記が無い理由を示す（金利表そのものは出す）。
+    function showFeaturesNote(loaded) {
+      if (!loaded) {
+        guaranteeEl.textContent = "■ 保証料・事務手数料を読み込めませんでした（金利は表示しています）。時間を置いて再読み込みしてください。";
+        guaranteeEl.hidden = false;
+        return;
+      }
+      const link = document.createElement("a");
+      link.href = `./index.html#${DATASET.featuresLink.tab}`;
+      link.target = "_top";
+      link.dataset.parentTab = DATASET.featuresLink.tab;
+      link.textContent = DATASET.featuresLink.label;
+      guaranteeEl.replaceChildren(`■ ${DATASET.featuresNote}`, link, "をご覧ください。");
+      guaranteeEl.hidden = false;
     }
 
     async function initialize() {
@@ -906,12 +946,26 @@
           el.matrix.innerHTML = '<div class="empty-state"><strong>金利データがありません</strong>データが蓄積されると、ここに履歴が表示されます。</div>';
           return;
         }
-        await loadFeatures();
+        if (DATASET.featuresUrl) showFeaturesNote(await loadFeatures());
         render();
       } catch (_e) {
         el.matrix.innerHTML = `<div class="empty-state"><strong>データを読み込めませんでした</strong>HTTPサーバー経由で開いているか、${escapeHtml(DATA_URL)} があるかご確認ください。</div>`;
       }
     }
+
+    // 親ページ（タブ表示）の別タブへ移るリンク。親と同じサイトなので親のハッシュを書き換え、
+    // 親の hashchange でタブを切り替える（ページは再読み込みしない）。
+    // 単体で開いているときや親に触れないときは、href のとおり親ページを開く。
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest("a[data-parent-tab]");
+      if (!link || window.self === window.top) return;
+      try {
+        window.top.location.hash = link.dataset.parentTab;
+        event.preventDefault();
+      } catch (_e) {
+        // 親に触れない環境では通常のリンク移動に任せる
+      }
+    });
 
     initialize();
   </script>

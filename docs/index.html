@@ -268,6 +268,8 @@
     }
 
     .control-button:hover, .toggle-label:hover { border-color: #a9bbc7; }
+    /* 一部の機関だけ表示しているときは、日付を変えても絞り込みが残ることに気づけるよう枠を立てる */
+    .control-button.is-filtered { color: var(--teal-700); border-color: var(--teal-700); box-shadow: inset 0 0 0 1px var(--teal-700); }
     /* 「金融機関を絞り込む（n/m）」が窮屈に見えないよう、絞り込みボタンだけ幅を確保する */
     #filterButton { min-width: 200px; justify-content: center; padding-inline: 16px; }
 
@@ -601,6 +603,7 @@
     }
 
     .tab-brand .pulse-dot { flex: none; }
+    .tab-note .tab-link { color: var(--teal-700); }
 
     .tab-note span {
       overflow: hidden;
@@ -758,7 +761,7 @@
     <button class="product-tab" type="button" data-view="features">住宅ローンの条件比較</button>
     <button class="product-tab active" type="button" data-view="rate">住宅ローン金利情報</button>
     <button class="product-tab" type="button" data-view="car">マイカーローン金利情報</button>
-    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text note-rate"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-car"><span class="note-full">帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-features"><span class="note-full">帯広エリア 金融機関の住宅ローンについて、保証料・手数料・団信・借入条件など金利以外の条件を並べています。</span>金利は住宅ローン金利情報タブへ。</span></p>
+    <p class="tab-note"><b class="tab-brand"><span class="pulse-dot" aria-hidden="true"></span>十勝金融機関News</b><b class="note-heading">金利履歴ビューアー</b><span class="note-text note-rate"><span class="note-full">帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-car"><span class="note-full">帯広エリア 金融機関のマイカーローン金利（優遇後）を、共通の調査日で比較できます。</span>左が最新、右が過去です。</span><span class="note-text note-features"><span class="note-full">帯広エリア 金融機関の住宅ローンについて、保証料・手数料・団信・借入条件など金利以外の条件を並べています。</span>金利は<a class="tab-link" href="#rate">住宅ローン金利情報タブ</a>へ。</span></p>
   </nav>
 
   <div id="newsView">
@@ -1025,7 +1028,7 @@
       const period = report.lookback_days ? `対象期間 過去${report.lookback_days}日` : "対象期間 全件";
       elements.pageSummary.classList.add("date-summary");
       elements.pageSummary.textContent = `${period}　通過 ${passedCount}件${state.showExcluded ? `　除外 ${excludedCount}件` : ""}${failedCount ? `　収集失敗 ${failedCount}機関` : ""}`;
-      elements.reportContent.innerHTML = sections.length ? sections.join("") : emptyState("該当する記事がありません", "検索語または機関の絞り込みを変更してください。 ");
+      elements.reportContent.innerHTML = sections.length ? sections.join("") : emptyState("該当する記事がありません", "検索語または機関の絞り込みを変更してください。");
     }
 
     function renderInstitutionMode() {
@@ -1044,7 +1047,7 @@
       const isDateMode = state.mode === "date";
       elements.institutionFilterWrap.classList.toggle("hidden", !isDateMode);
       elements.excludedToggleWrap.classList.toggle("hidden", !isDateMode);
-      renderNavigation();
+      syncNavigation();
       if (isDateMode) renderDateMode(); else renderInstitutionMode();
     }
 
@@ -1145,6 +1148,31 @@
         <li><button type="button" class="nav-button ${state.mode === "institution" && state.selectedInstitution === institution.name ? "active" : ""}" data-institution="${escapeHtml(institution.name)}">${escapeHtml(institution.name)}</button></li>`).join("");
     }
 
+    // 一覧は初期化時に一度だけ作り、選択が変わったときは印の付け替えだけにする。
+    // 毎回作り直すと、検索の1文字ごとに手で開いた月・年度が閉じ、押したボタンのフォーカスも失う。
+    let lastNavSelection = null;
+
+    function syncNavigation() {
+      const selectedDate = state.mode === "date" ? state.selectedDate : "";
+      const selectedInstitution = state.mode === "institution" ? state.selectedInstitution : "";
+      const selection = `${state.mode}:${selectedDate}:${selectedInstitution}`;
+      const selectionChanged = selection !== lastNavSelection;
+      lastNavSelection = selection;
+      elements.dateList.querySelectorAll("[data-date]").forEach((button) => {
+        const active = button.dataset.date === selectedDate;
+        button.classList.toggle("active", active);
+        // 選択が変わったときだけ、選択中の日付を含むグループを開く（ほかのグループの開閉は触らない）
+        if (active && selectionChanged) {
+          for (let group = button.closest("details"); group; group = group.parentElement.closest("details")) {
+            group.open = true;
+          }
+        }
+      });
+      elements.institutionList.querySelectorAll("[data-institution]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.institution === selectedInstitution);
+      });
+    }
+
     function buildInstitutionFilters(institutions) {
       // 日付切替時も前回の絞り込みを引き継ぐ（新レポートに存在する機関との積集合）。
       // 初回表示や、引き継げる機関が1つも残らない場合は全選択に戻す。
@@ -1158,7 +1186,9 @@
 
     function updateFilterCount() {
       const total = state.report?.institutions?.length || 0;
-      elements.filterCount.textContent = total ? `(${state.selectedInstitutions.size}/${total})` : "";
+      const count = state.selectedInstitutions.size;
+      elements.filterCount.textContent = !total ? "" : count === total ? "（すべて）" : `（${count}/${total}）`;
+      elements.filterButton.classList.toggle("is-filtered", Boolean(total) && count !== total);
     }
 
     async function loadReport(date) {
@@ -1166,6 +1196,7 @@
       state.mode = "date";
       state.selectedDate = date;
       syncHash();
+      syncNavigation();
       elements.reportContent.innerHTML = '<div class="loading-state"><strong>レポートを読み込んでいます</strong>しばらくお待ちください。</div>';
       try {
         const response = await fetch(`${DATA_ROOT}/${date}.json`);
@@ -1179,6 +1210,10 @@
       } catch (_error) {
         if (requestId !== state.reportRequestId) return;
         state.report = null;
+        // 前の日付の機関一覧と件数を残さない。選択（selectedInstitutions）は消さず、
+        // 次に読めた日付へ引き継ぐ（buildInstitutionFilters の積集合）。
+        elements.institutionFilters.innerHTML = "";
+        updateFilterCount();
         elements.pageTitle.textContent = formatDate(date);
         elements.pageSummary.textContent = "";
         elements.reportContent.innerHTML = emptyState("データを読み込めませんでした", "少し時間を置いてから再度お試しください。");
@@ -1502,18 +1537,16 @@
       }
     });
 
-    // ニュース側の復元を終えてからタブを切り替える（金利タブのiframe遅延読み込みを保つ）。
     // 既定は住宅ローン金利タブ。URLが他のタブを指しているときだけそちらへ切り替える。
-    // ニュース側の初期化が想定外の例外で止まっても、失敗を示したうえで既定タブは開く。
-    initialize()
-      .catch((error) => {
-        console.error(error);
-        elements.pageTitle.textContent = "データを読み込めませんでした";
-        elements.reportContent.innerHTML = emptyState("データを読み込めませんでした", "少し時間を置いてから再度お試しください。");
-      })
-      .finally(() => {
-        switchView(parseHash(INITIAL_HASH)?.view || "rate");
-      });
+    // タブはニュースの読み込みを待たずに先に開く。ニュースの通信が遅くても金利・条件比較を
+    // 見られるようにし、待っている間に押したタブを読み込み完了時に引き戻さないため。
+    // ニュース側のURL書き戻し（syncHash）は表示中のタブを優先するので、先に開いても崩れない。
+    switchView(parseHash(INITIAL_HASH)?.view || "rate");
+    initialize().catch((error) => {
+      console.error(error);
+      elements.pageTitle.textContent = "データを読み込めませんでした";
+      elements.reportContent.innerHTML = emptyState("データを読み込めませんでした", "少し時間を置いてから再度お試しください。");
+    });
   </script>
 </body>
 </html>
