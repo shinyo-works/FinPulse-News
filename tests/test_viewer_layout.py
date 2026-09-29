@@ -96,12 +96,14 @@ class ViewerLayoutTest(unittest.TestCase):
             '<button class="product-tab active" type="button" data-view="rate">住宅ローン金利情報</button>',
             tabs,
         )
-        # URLが他のタブを指すときだけそちらへ切り替える。初期化が失敗しても既定タブは開く
+        # URLが他のタブを指すときだけそちらへ切り替える。タブはニュースの読み込みを待たずに
+        # 先に開く（通信待ちで金利タブが白紙にならず、途中で押したタブも引き戻さない）
         self.assertRegex(
             self.html,
-            r'initialize\(\)\s*\.catch\([\s\S]*?\.finally\(\(\) => \{\s*'
-            r'switchView\(parseHash\(INITIAL_HASH\)\?\.view \|\| "rate"\);',
+            r'switchView\(parseHash\(INITIAL_HASH\)\?\.view \|\| "rate"\);\s*'
+            r'initialize\(\)\.catch\(',
         )
+        self.assertNotRegex(self.html, r"\.finally\(\(\) => \{\s*switchView\(")
 
     def test_car_loan_tab_shows_the_same_viewer_with_car_data(self):
         tabs = re.search(
@@ -170,6 +172,11 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn("allDates.includes(selectedDate)", self.html)
         # 畳んだ中の日付も同じクリック経路（data-date）を通る
         self.assertIn('data-date="${escapeHtml(date)}"', self.html)
+        # 一覧は初期化時だけ作り、検索や選択のたびには作り直さない（開いた月が閉じないように）
+        render_fn = re.search(r"function render\(\) \{.*?\n    \}", self.html, re.DOTALL).group(0)
+        self.assertIn("syncNavigation();", render_fn)
+        self.assertNotIn("renderNavigation();", render_fn)
+        self.assertIn("function syncNavigation()", self.html)
 
     def test_panes_can_be_resized_and_the_width_persists(self):
         self.assertIn('id="paneResizer"', self.html)

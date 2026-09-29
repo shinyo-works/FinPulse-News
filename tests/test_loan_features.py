@@ -249,5 +249,49 @@ class LoanFeaturesViewerTest(unittest.TestCase):
         self.assertIn("確認日", self.features_html)
 
 
+    def test_filter_controls_behave_the_same_on_all_three_screens(self):
+        # 3画面とも「（すべて）／（n/m）」の全角表記で、一部だけ表示中はボタンを強調する
+        for html in (self.index_html, self.rate_html, self.features_html):
+            self.assertIn('"（すべて）"', html)
+            self.assertIn("`（${count}/${total}）`", html)
+            self.assertIn('classList.toggle("is-filtered"', html)
+            self.assertIn(".control-button.is-filtered {", html)
+            self.assertNotIn("`(${", html)
+        # 3画面とも Esc で閉じてボタンへフォーカスを戻す
+        for html in (self.index_html, self.rate_html, self.features_html):
+            self.assertRegex(
+                html,
+                r'if \(event\.key !== "Escape"\) return;[\s\S]{0,400}?filterButton\.focus\(\);',
+            )
+        # iframe の2画面は、開くたびに位置を測って左外へのはみ出しを避ける（決め打ちの幅で分けない）
+        for html in (self.rate_html, self.features_html):
+            self.assertIn("function placeFilterPopover()", html)
+            self.assertIn("if (open) placeFilterPopover();", html)
+            self.assertIn(".filter-popover.align-left { left: 0; right: auto; }", html)
+
+    def test_features_note_is_shown_only_when_the_data_loaded(self):
+        loader = re.search(
+            r"async function loadFeatures\(\) \{.*?\n    \}", self.rate_html, re.DOTALL
+        ).group(0)
+        self.assertIn("return true;", loader)
+        self.assertIn("return false;", loader)
+        self.assertIn("if (DATASET.featuresUrl) showFeaturesNote(await loadFeatures());", self.rate_html)
+        self.assertIn("保証料・事務手数料を読み込めませんでした", self.rate_html)
+        # 読み込み前から「機関名の下の2行」の説明を出さない
+        self.assertNotIn("DATASET.guaranteeNote || DATASET.featuresNote", self.rate_html)
+
+    def test_rate_and_comparison_tabs_link_to_each_other(self):
+        self.assertIn('data-parent-tab="rate"', self.features_html)
+        self.assertIn("link.dataset.parentTab = DATASET.featuresLink.tab;", self.rate_html)
+        for html in (self.rate_html, self.features_html):
+            self.assertIn("window.top.location.hash = link.dataset.parentTab;", html)
+        self.assertIn('<a class="tab-link" href="#rate">', self.index_html)
+
+    def test_comparison_viewer_shows_a_plain_japanese_load_error(self):
+        self.assertNotIn("escapeHtml(error.message)", self.features_html)
+        self.assertIn("HTTPサーバー経由で開いているか", self.features_html)
+        self.assertIn(".missing { color: var(--muted); }", self.features_html)
+
+
 if __name__ == "__main__":
     unittest.main()
