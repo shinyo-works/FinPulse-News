@@ -22,7 +22,9 @@
 - `guard` ジョブ（`scripts/check_weekly_run.py`）が Actions API で「今日（JST）収集ジョブと公開ジョブが両方 success の実行」を探し、あれば収集・送信・公開を省略（全体の success で見ると接続テストの実行で本命が止まるため、ジョブ単位で見る）。判定失敗は実行側に倒す。`force`（手動やり直し）と `check_only`（接続テスト）の入力を追加。設計の理由は `CLAUDE.md`、手順は `docs/external-scheduler.md`。
 - 上流（報告自動化ツール）の FinPulse への push にも再試行ループを追加（8:05 の公開と時間帯が重なるため）。
 - 残: 本人が PAT 発行と cron-job.org 登録（手順書のステップ1〜3）。**それまでは控えの 09:00（実際は10〜12時ごろ）だけで動く**。登録後は cron-job.org のテスト実行で guard だけ緑・他は灰色になることを確認し、Request body を `{"ref":"main"}` に戻す。
-- 初回の本番確認は 10/5（月）: 08:05 起動の `workflow_dispatch` が成功し、控え（schedule）が「省略」で終わること。
+- 検証済み: 全176テスト、GitHub 上で cron-job.org と同じ本文（`{"ref":"main","inputs":{"check_only":"true"}}`）を送り 204・run `36732172177` で guard のみ success／収集・公開は skipped（メールなし）。独立レビューの指摘（ジョブ名の固定テスト等）も反映済み。
+- 未検証（本番でしか確かめられない）: guard が Actions API を引いて「省略」「実行」を判定する経路。ローカルでは実データで確認済み。
+- 初回の本番確認は 10/5（月）: 08:05 起動の `workflow_dispatch` が成功し、控え（schedule）が「省略」で終わること。cron-job.org 未登録なら控えだけが動く（実際は10〜12時ごろ）。
 
 ### GitHub 組織 `shinyo-works` へ移管（2026-09-30）
 
