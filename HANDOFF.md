@@ -16,7 +16,7 @@
 
 ### GitHub 組織 `shinyo-works` へ移管（2026-09-30）
 
-- 目的: 公開 URL から個人名（アカウント名）を消す。旧 URL は転送されないので、共有済みの相手には新 URL を伝え直す。
+- 目的: 公開 URL から個人名（アカウント名）を消す。旧 URL は転送されない。共有済みの相手への新 URL の連絡と、新 URL での表示の本人目視は完了。
 - 移管後に確認: Pages（built・新 URL で本体とデータ JSON すべて 200）、Secrets 3件、上流用デプロイキー、`git push --dry-run`。
 - 上流（報告自動化ツール）の `weekly_report.yml` の checkout 先も `shinyo-works/FinPulse-News` に変更済み。
 - Claude ルーチン「FinPulse-News（月曜：5時）」は本人判断で**有効のまま残す**（2026-09-30。いつでも変更できるように）。現状は dispatch が空振り（受け口の `repository_dispatch` は `05750ec` で外した）で、移管後は旧リポジトリ宛て・個人アカウント用 fine-grained PAT のため dispatch 手順でエラーが出るが、週次メール（Actions の定期実行）には影響しない。復活させる時は (1) workflow に `repository_dispatch` を戻す (2) 所有者 `shinyo-works` の fine-grained PAT を作る (3) ルーチン本文の URL（`docs/routine-prompt-template.md` は修正済み）とトークンを差し替える、の3点。
