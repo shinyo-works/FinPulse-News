@@ -1,17 +1,65 @@
 name: 週次金融機関新着情報レポート
 
 on:
+  # 本命は外部スケジューラ（cron-job.org）から月曜 08:05 JST に workflow_dispatch で起動する
+  # （GitHub の schedule は1〜3時間遅れるため。手順は docs/external-scheduler.md）。
+  # 下の schedule は外部が止まった週の控え。guard ジョブが「今日すでに成功済み」なら省略する。
   schedule:
-    - cron: '0 20 * * 0'  # 毎週日曜 20:00 UTC = 月曜 05:00 JST
-  workflow_dispatch:       # 手動実行ボタン
+    - cron: '0 0 * * 1'  # 控え: 毎週月曜 00:00 UTC = 月曜 09:00 JST
+  workflow_dispatch:       # 外部スケジューラと手動実行ボタン
+    inputs:
+      force:
+        description: '今日すでに成功した実行があっても、もう一度実行する（手動のやり直し用）'
+        type: boolean
+        default: false
+      check_only:
+        description: '起動の確認だけして、収集・送信・公開はしない（外部スケジューラの接続テスト用）'
+        type: boolean
+        default: false
 
 concurrency:
   group: weekly-news-report-main
   cancel-in-progress: false
 
 jobs:
-  collect-and-report:
+  # 同時実行は上の concurrency で1本ずつに並ぶので、後から来た実行は前の実行が
+  # 公開まで終わってから判定する（本命と控えが両方動いても取りこぼさない）。
+  guard:
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      should_run: ${{ steps.decide.outputs.should_run }}
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: main
+          sparse-checkout: scripts/check_weekly_run.py
+          sparse-checkout-cone-mode: false
+
+      - name: 今回実行するかを判定
+        id: decide
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          INPUT_FORCE: ${{ inputs.force }}
+          INPUT_CHECK_ONLY: ${{ inputs.check_only }}
+        run: python3 scripts/check_weekly_run.py
+
+  collect-and-report:
+    needs: guard
+    # 判定が「実行しない」と明示した時だけ止める。判定ジョブの失敗・出力なしは実行する側に倒す。
+    # ただし接続テスト（check_only）は判定の成否に関係なく、ここでも止める（本物のメールを送らない）。
+    # 値が真偽値でも文字列 "true" でも止まるよう、文字列にそろえて比べる。
+    if: >-
+      !cancelled() &&
+      github.ref == 'refs/heads/main' &&
+      format('{0}', inputs.check_only) != 'true' &&
+      needs.guard.outputs.should_run != 'false'
     runs-on: ubuntu-latest
     permissions:
       contents: read

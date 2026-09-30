@@ -47,7 +47,7 @@ except ImportError:
     from emailer import send_resend_email
 
 # 実行環境(GitHub Actions)はUTCで動くため、日付の基準は日本時間(JST)に固定する。
-# cron は日曜20:00 UTC = 月曜05:00 JST 実行なので、JST化しないとレポートが日曜日付になる。
+# 本命の起動は月曜08:05 JST（= 日曜23:05 UTC）なので、JST化しないとレポートが日曜日付になる。
 JST = timezone(timedelta(hours=9))
 
 # 機関別ヴューアー用の全期間集約は、この月数までに制限してサイズを頭打ちにする。

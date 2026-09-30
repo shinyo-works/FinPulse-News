@@ -12,7 +12,7 @@
 |---|---|---|
 | Webサイト巡回・取得 | requests + BeautifulSoup／機関別の専用DOM・XML解析 | ✅ 本番稼働中 |
 | メール送信 | Resend API（`scripts/collect_and_send.py`） | ✅ Phase 2で使用 |
-| スクレイピング自動化 | GitHub Actions（月曜 05:00 JST・収集も実行） | ✅ Phase 3で使用 |
+| スクレイピング自動化 | GitHub Actions（本命: cron-job.org から月曜 08:05 JST に起動／控え: schedule 月曜 09:00 JST・収集も実行） | ✅ Phase 3で使用 |
 | メール自動送信 | GitHub Actions（週次・手動実行） | ✅ Phase 3で使用 |
 | Claude抽出経路 | コードのみ温存・利用機関0・Secret未連携 | 凍結中 |
 | LINE通知 | LINE Notify REST API（要設定） | Phase 3候補 |
@@ -32,6 +32,7 @@ FinPulse-News/
 ├── scripts/
 │   ├── collect_and_send.py  # 収集・フィルタ・保存・送信の本体
 │   ├── emailer.py           # Resend送信の共通処理
+│   ├── check_weekly_run.py  # 週次を今回動かすかの判定（本命済みなら控えを止める）
 │   └── update_rate_history.py # 金利履歴の検証・更新
 ├── .github/
 │   └── workflows/
@@ -48,6 +49,7 @@ FinPulse-News/
 │   ├── data/loan-features.json # 住宅ローンの金利以外の条件の正本（人手で更新）
 │   ├── setup-connectors.md
 │   ├── routine-prompt-template.md
+│   ├── external-scheduler.md # cron-job.org 登録手順（本人作業）
 │   └── research-line-notify.md
 ├── tests/                 # 標準unittestによる固定データ・モックテスト
 ├── CLAUDE.md              # このファイル
@@ -89,6 +91,7 @@ FinPulse-News/
 - ニュースと金利はJavaScript名・IDの衝突を避けるためiframeで分離する。手動送信の2入口は用途別に維持し、送信本体だけを共通化する。
 - 全機関共通の通過語は `config.json` の `common_include_keywords` に1か所だけ書き、`load_config` の `normalize_config` で各機関の `include_keywords` へ合成する。機関ごとの手書き複写は写し漏れで同種記事が機関によって通ったり落ちたりした（2回）ため廃止した。config.json を直接読む処理は必ず `normalize_config` を通す。
 - 汎用抽出で記事リンクが0件の週は `extract_failed` とする（メニュー等まで拾うため、実在の一覧ページで0件になるのは異常時だけ）。北洋の年別XMLは今年分・前年分とも必須で、例外は1月の今年分404だけ（年明けの未公開を許容し、2月以降はURL変更として失敗させる）。
+- 週次の起動は二段構え。本命は cron-job.org から月曜 08:05 JST の `workflow_dispatch`、控えは GitHub の `schedule`（月曜 09:00 JST）。GitHub の schedule は1〜3時間遅れ・発火しない回もあるため定刻は外部に任せ、schedule は外部が止まった週の保険にする（kobetukabu・FX-prudential と同じ方式）。`guard` ジョブが「今日（JST）収集ジョブと公開ジョブの両方が success の実行があるか」を Actions API で調べ、あれば収集以降を省略する。公開済み JSON の有無では判定しない（メール送信だけ失敗した週に控えが動かないため）。実行全体の success でも判定しない（接続テストや省略した実行もジョブが skipped のまま全体は success になり、同じ日の本命を止めてしまうため）。判定の失敗は実行する側に倒す（控えを止めて配信が抜けるより、同日取り直しのほうが害が小さい）。`check_only` は cron-job.org の接続テスト用で、判定ジョブが壊れていても収集ジョブの `if` で二重に止める。控えは必ず本命より後ろの時刻に置く。手順は `docs/external-scheduler.md`。
 - 同日の自動再実行で Resend が冪等キー重複（409 `invalid_idempotent_request`）を返した場合は、送信済みとして成功扱いにする。内容を送り直すのは手動送信の役割。
 - 金利履歴と条件比較の商品突合テストは、週次の配信前ゲートから外して収集後の警告ステップで実行する（`FINPULSE_DEFER_DATA_SYNC_TESTS`）。上流の商品増減でニュース配信まで止めないため。ローカルとpre-commitでは通常どおり実行する。
 - Claude抽出経路は削除せず凍結する。凍結中は `use_claude: true` を設定検証で拒否する（再有効化の一括作業の中でこの拒否を外す）。再有効化する場合は、非信頼HTMLとの指示境界、構造化出力、型・日付・URL・期間の再検証、出力切断、timeout/retry、例外分類、依存分離を一括で実装する。部分修正はしない。

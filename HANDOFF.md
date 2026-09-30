@@ -1,6 +1,8 @@
 # HANDOFF.md
 
-> 最終更新: 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧 `yoshiyukimano-hub.github.io` は 404。Secrets・デプロイキー・Pages は引き継がれた）
+> 最終更新: 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org の登録は本人作業で `docs/external-scheduler.md` の手順待ち）
+>
+> 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧 `yoshiyukimano-hub.github.io` は 404。Secrets・デプロイキー・Pages は引き継がれた）
 >
 > 2026-09-29（公開ヴューアーの UI/UX レビュー（Codex・Claude両方）と再レビューの指摘14件を実装。絞り込みの3画面統一・画面外はみ出し・起動順・日付一覧・凡例の折り返し・条件比較との相互リンク。詳細は `docs/re-review-plan-2026-09-29-uiux.md`）
 >
@@ -13,6 +15,14 @@
 > このファイルは現在地と残課題だけを置くライブ状態の正。恒久的な設計・規律は `CLAUDE.md`、完了履歴は git log を参照する。
 
 ## 現在地
+
+### 週次の起動を二段構えに変更（2026-09-30・cron-job.org の登録は本人作業待ち）
+
+- 本命: cron-job.org から月曜 08:05 JST に `workflow_dispatch`。控え: `schedule` を `0 0 * * 1`（月曜 09:00 JST）へ変更。GitHub の schedule は実測で1〜3時間遅れる（5:00 予定が 6:56〜7:48 起動）。
+- `guard` ジョブ（`scripts/check_weekly_run.py`）が Actions API で「今日（JST）収集ジョブと公開ジョブが両方 success の実行」を探し、あれば収集・送信・公開を省略（全体の success で見ると接続テストの実行で本命が止まるため、ジョブ単位で見る）。判定失敗は実行側に倒す。`force`（手動やり直し）と `check_only`（接続テスト）の入力を追加。設計の理由は `CLAUDE.md`、手順は `docs/external-scheduler.md`。
+- 上流（報告自動化ツール）の FinPulse への push にも再試行ループを追加（8:05 の公開と時間帯が重なるため）。
+- 残: 本人が PAT 発行と cron-job.org 登録（手順書のステップ1〜3）。**それまでは控えの 09:00（実際は10〜12時ごろ）だけで動く**。登録後は cron-job.org のテスト実行で guard だけ緑・他は灰色になることを確認し、Request body を `{"ref":"main"}` に戻す。
+- 初回の本番確認は 10/5（月）: 08:05 起動の `workflow_dispatch` が成功し、控え（schedule）が「省略」で終わること。
 
 ### GitHub 組織 `shinyo-works` へ移管（2026-09-30）
 
@@ -210,7 +220,7 @@
 
 ## 環境メモ
 
-- 本番は GitHub Actions の `.github/workflows/weekly-news-report.yml`。週次は月曜05:00 JST、手動実行は `workflow_dispatch`。
+- 本番は GitHub Actions の `.github/workflows/weekly-news-report.yml`。週次は本命が cron-job.org から月曜08:05 JST、控えが schedule の月曜09:00 JST。手動実行は `workflow_dispatch`（成功済みの日に取り直すなら `force`）。
 - 秘密情報は `.env`（Git管理外）とGitHub Secretsに置く。workflowへ渡すのは `RESEND_API_KEY` と `REPORT_TO` だけ。
 - リポジトリはpublic。個人情報をコミットしない。コミットメールは設定済みのGitHub noreplyを維持する。
 - pre-commitをスキップしない。`core.hooksPath=.githooks` を使用する。
@@ -226,6 +236,6 @@
 5. コード変更時は次を通す。9/27にpre-commitテストの親子プロセス間の文字コードを統一した。以前のcp932問題を理由に恒常的にテスト失敗を許容しない。
 
 ```bash
-python -m py_compile scripts/collect_and_send.py scripts/update_rate_history.py scripts/emailer.py send_report.py send_resend.py
+python -m py_compile scripts/collect_and_send.py scripts/update_rate_history.py scripts/emailer.py scripts/check_weekly_run.py send_report.py send_resend.py
 python -m unittest discover -s tests -v
 ```
