@@ -37,8 +37,80 @@ class WorkflowSecurityTest(unittest.TestCase):
             r"- name: 収集・レポート生成・送信[\s\S]*?timeout-minutes: 15[\s\S]*?run: python scripts/collect_and_send.py",
         )
         # ジョブ全体を打ち切ると、if: always() の成果物保存まで失うため設定しない。
-        collect_job_header = self.workflow.split("steps:", 1)[0]
+        collect_job = self.workflow.split("\n  collect-and-report:\n", 1)[1]
+        collect_job_header = collect_job.split("steps:", 1)[0]
+        self.assertIn("runs-on:", collect_job_header)
         self.assertNotIn("timeout-minutes", collect_job_header)
+
+    def job_block(self, name):
+        """jobs 直下の1ジョブ分（次のジョブ見出しの手前まで）を返す。"""
+        match = re.search(
+            rf"^  {re.escape(name)}:\n([\s\S]*?)(?=^  [a-z][a-z-]*:\n|\Z)",
+            self.workflow,
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(match, name)
+        return match.group(1)
+
+    def test_main_trigger_is_external_dispatch_and_schedule_is_fallback(self):
+        # 本命は cron-job.org の workflow_dispatch（08:05 JST）、schedule は 09:00 JST の控え。
+        self.assertRegex(self.workflow, r"schedule:\s*\n\s*- cron: '0 0 \* \* 1'")
+        self.assertEqual(len(re.findall(r"- cron:", self.workflow)), 1)
+        for name in ("force", "check_only"):
+            with self.subTest(input=name):
+                self.assertRegex(
+                    self.workflow,
+                    rf"{name}:\s*\n\s*description: [^\n]+\n\s*type: boolean\s*\n\s*default: false",
+                )
+
+    def test_guard_can_only_read_and_gets_no_secrets(self):
+        guard = self.job_block("guard")
+        self.assertRegex(guard, r"permissions:\s*\n\s*actions: read\s*\n\s*contents: read")
+        self.assertNotIn("write", guard)
+        self.assertNotIn("secrets.", guard)
+        self.assertIn("run: python3 scripts/check_weekly_run.py", guard)
+        # 判定の失敗で控えまで止めないよう、判定ステップは失敗しても先へ進む。
+        self.assertRegex(guard, r"id: decide\s*\n\s*continue-on-error: true")
+
+    def test_collection_waits_for_guard_and_fails_open(self):
+        collect = self.job_block("collect-and-report")
+        self.assertIn("needs: guard", collect)
+        self.assertIn("!cancelled()", collect)
+        self.assertIn("github.ref == 'refs/heads/main'", collect)
+        # 「実行しない」と明示された時だけ止める（出力なし＝判定失敗は実行する）。
+        self.assertIn("needs.guard.outputs.should_run != 'false'", collect)
+        # 接続テストは判定の成否に関係なく収集しない（本物のメールを送らない）。
+        # API から文字列 "true" で届いても真偽値で届いても止まるよう、文字列にそろえて比べる。
+        self.assertIn("format('{0}', inputs.check_only) != 'true'", collect)
+
+    def test_publish_runs_only_after_real_collection(self):
+        publish = self.job_block("publish-results")
+        self.assertIn("needs: collect-and-report", publish)
+        self.assertIn("needs.collect-and-report.result == 'success'", publish)
+        self.assertIn("needs.collect-and-report.result == 'failure'", publish)
+        # 収集が skipped（判定で省略・接続テスト）の時は公開しない＝if に skipped を許す条件を入れない。
+        publish_if = publish.split("runs-on:", 1)[0]
+        self.assertNotIn("result == 'skipped'", publish_if)
+
+    def test_guard_required_jobs_match_workflow_job_keys(self):
+        # 判定は Actions API のジョブ名で「収集と公開をやり遂げたか」を見る。ジョブ名はキー名と
+        # 一致する前提なので、ジョブにジョブ単位の name: を付けたり改名したりしたらここで落とす
+        # （落とさないと控えが毎週取り直しを続ける）。
+        from scripts.check_weekly_run import REQUIRED_JOBS
+
+        for job_name in REQUIRED_JOBS:
+            with self.subTest(job=job_name):
+                block = self.job_block(job_name)
+                self.assertIsNone(re.search(r"^    name:", block, re.MULTILINE))
+
+    def test_runs_are_serialized_so_fallback_sees_finished_main_run(self):
+        self.assertRegex(
+            self.workflow,
+            re.compile(
+                r"^concurrency:\s*\n\s*group: weekly-news-report-main\s*\n\s*cancel-in-progress: false",
+                re.MULTILINE,
+            ),
+        )
 
     def test_data_sync_check_does_not_block_news_delivery(self):
         # 上流の商品増減で条件比較との突合が落ちても、ニュース収集・送信は止めない。
