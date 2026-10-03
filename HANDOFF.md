@@ -1,6 +1,6 @@
 # HANDOFF.md
 
-> 最終更新: 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org の登録は本人作業で `docs/external-scheduler.md` の手順待ち）
+> 最終更新: 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org は 2026-10-03 に登録済み）
 >
 > 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧 `旧個人アカウント側の github.io` は 404。Secrets・デプロイキー・Pages は引き継がれた）
 >
@@ -16,15 +16,15 @@
 
 ## 現在地
 
-### 週次の起動を二段構えに変更（2026-09-30・cron-job.org の登録は本人作業待ち）
+### 週次の起動を二段構えに変更（2026-09-30・cron-job.org は 10/3 に登録済み）
 
 - 本命: cron-job.org から月曜 08:05 JST に `workflow_dispatch`。控え: `schedule` を `0 0 * * 1`（月曜 09:00 JST）へ変更。GitHub の schedule は実測で1〜3時間遅れる（5:00 予定が 6:56〜7:48 起動）。
 - `guard` ジョブ（`scripts/check_weekly_run.py`）が Actions API で「今日（JST）収集ジョブと公開ジョブが両方 success の実行」を探し、あれば収集・送信・公開を省略（全体の success で見ると接続テストの実行で本命が止まるため、ジョブ単位で見る）。判定失敗は実行側に倒す。`force`（手動やり直し）と `check_only`（接続テスト）の入力を追加。設計の理由は `CLAUDE.md`、手順は `docs/external-scheduler.md`。
 - 上流（報告自動化ツール）の FinPulse への push にも再試行ループを追加（8:05 の公開と時間帯が重なるため）。
-- 残: 本人が PAT 発行と cron-job.org 登録（手順書のステップ1〜3）。**それまでは控えの 09:00（実際は10〜12時ごろ）だけで動く**。登録後は cron-job.org のテスト実行で guard だけ緑・他は灰色になることを確認し、Request body を `{"ref":"main"}` に戻す。
+- cron-job.org 登録済み（2026-10-03）: ジョブ「FinPulse 週次」（月曜 08:05 Asia/Tokyo）。テスト実行 204・guard のみ success を確認し、Request body は本番の `{"ref":"main"}` で保存済み。PAT `finpulse-cron-dispatch` の期限は 2027-10-04（更新時に `X-GitHub-Api-Version` 2022-11-28 の終了予告 2028-03 も見直す）。
 - 検証済み: 全176テスト、GitHub 上で cron-job.org と同じ本文（`{"ref":"main","inputs":{"check_only":"true"}}`）を送り 204・run `36732172177` で guard のみ success／収集・公開は skipped（メールなし）。独立レビューの指摘（ジョブ名の固定テスト等）も反映済み。
 - 未検証（本番でしか確かめられない）: guard が Actions API を引いて「省略」「実行」を判定する経路。ローカルでは実データで確認済み。
-- 初回の本番確認は 10/5（月）: 08:05 起動の `workflow_dispatch` が成功し、控え（schedule）が「省略」で終わること。cron-job.org 未登録なら控えだけが動く（実際は10〜12時ごろ）。
+- 初回の本番確認は 10/5（月）: 08:05 起動の `workflow_dispatch` が成功し、控え（schedule）が「省略」で終わること。
 
 ### GitHub 組織 `shinyo-works` へ移管（2026-09-30）
 
