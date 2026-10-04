@@ -12,6 +12,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21"
           ]
@@ -24,6 +25,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14"
@@ -37,6 +39,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -52,6 +55,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -68,6 +72,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -82,6 +87,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -101,6 +107,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -119,6 +126,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -159,6 +167,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -438,6 +447,28 @@
       "name": "北海道銀行",
       "items": [
         {
+          "date": "2026-09-30",
+          "title": "2026.09.30個人のお客さま「エコノミクス甲子園 北海道大会」エントリー締切延長のお知らせ",
+          "url": "https://www.hokkaidobank.co.jp/info/6148.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
+          "date": "2026-09-28",
+          "title": "2026.09.28個人のお客さま東京都水道局 水道料金等の収納に関するお知らせ",
+          "url": "https://www.hokkaidobank.co.jp/info/uploads/1061661f226f226db951741b151e4e45.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
           "date": "2026-09-14",
           "title": "2026.09.14個人のお客さま変動金利型ローン商品の基準金利改定について",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161_1.pdf",
@@ -445,6 +476,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21"
           ]
@@ -472,6 +504,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -491,6 +524,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -568,6 +602,17 @@
       "name": "北洋銀行",
       "items": [
         {
+          "date": "2026-10-01",
+          "title": "「ほくよう 秋の口座開設＆カードキャンペーン」を実施します",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20261001_076899.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
           "date": "2026-09-15",
           "title": "「ほっくースポーツ応援定期預金 -レバンガコース- 」キャンペーンの実施について",
           "url": "https://www.hokuyobank.co.jp/announcement/pdf/20260915_076875.pdf",
@@ -575,6 +620,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21"
           ]
@@ -587,6 +633,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21"
           ]
@@ -599,6 +646,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -613,6 +661,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -629,6 +678,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -646,6 +696,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -660,6 +711,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -680,6 +732,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -698,6 +751,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -719,6 +773,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -874,49 +929,14 @@
       "name": "十勝信用組合",
       "items": [
         {
-          "date": "2026-09-25",
-          "title": "個人ローン商品の基準金利改定について",
-          "url": "https://www.tokachishinkumi.com/common/pdf/personal_loans_202609.pdf",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-09-28"
-          ]
-        },
-        {
-          "date": "2026-09-24",
-          "title": "住宅ローン基準金利についてのお知らせ",
-          "url": "https://www.tokachishinkumi.com/common/pdf/mortgage_loan_202609.pdf",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-09-28"
-          ]
-        },
-        {
-          "date": "2026-09-04",
-          "title": "預金金利の引き上げについて（定期性）",
-          "url": "https://www.tokachishinkumi.com/common/pdf/202609_yokinkinri.pdf",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-09-28",
-            "2026-09-21",
-            "2026-09-14",
-            "2026-09-07"
-          ]
-        },
-        {
-          "date": "2026-09-01",
+          "date": "2026-10-01",
           "title": "今月のローン金利",
           "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
           "star": true,
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -941,6 +961,56 @@
           ]
         },
         {
+          "date": "2026-09-28",
+          "title": "創業70周年記念定期預金「ありがとうキャンペーン2026」の取扱開始について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/arigatou2026.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
+          "date": "2026-09-25",
+          "title": "個人ローン商品の基準金利改定について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/personal_loans_202609.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05",
+            "2026-09-28"
+          ]
+        },
+        {
+          "date": "2026-09-24",
+          "title": "住宅ローン基準金利についてのお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/mortgage_loan_202609.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05",
+            "2026-09-28"
+          ]
+        },
+        {
+          "date": "2026-09-04",
+          "title": "預金金利の引き上げについて（定期性）",
+          "url": "https://www.tokachishinkumi.com/common/pdf/202609_yokinkinri.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05",
+            "2026-09-28",
+            "2026-09-21",
+            "2026-09-14",
+            "2026-09-07"
+          ]
+        },
+        {
           "date": "2026-08-26",
           "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
           "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance05.html",
@@ -948,6 +1018,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -986,6 +1057,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -1000,6 +1072,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -1040,6 +1113,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -1279,6 +1353,17 @@
       "name": "JAおとふけ",
       "items": [
         {
+          "date": "2026-10-01",
+          "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
+          "url": "https://www.ja-otofuke.jp/2023/13149/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
           "date": "2026-09-04",
           "title": "ホクレン灯油定期配送キャンペーンのお知らせ",
           "url": "https://www.ja-otofuke.jp/2023/13123/",
@@ -1298,6 +1383,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-14",
             "2026-09-07"
@@ -1311,6 +1397,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-14",
             "2026-09-07"
@@ -1347,6 +1434,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-14",
             "2026-09-07",
@@ -1363,6 +1451,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-14",
             "2026-09-07",
@@ -1380,6 +1469,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-14",
             "2026-09-07"
@@ -1549,6 +1639,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28"
           ]
         },
@@ -1561,6 +1652,39 @@
           "date_inferred": false,
           "reports": [
             "2026-09-21"
+          ]
+        },
+        {
+          "date": "2026-08-31",
+          "title": "2026.08.31重要なお知らせ定額小為替証書の取扱終了について（お知らせ）",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/08/【ひな形】顧客通知文書（定額小為替証書の受付停止）.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
+          "date": "2026-08-31",
+          "title": "2026.08.31重要なお知らせ振替払出証書の取扱終了について（お知らせ)",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/08/【ひな形】顧客通知文書（振替払出証書の受付停止）.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
+          "date": "2026-08-31",
+          "title": "2026.08.31重要なお知らせ株式配当金領収証の店頭での取扱停止について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/08/【ひな形】顧客通知文書（株式配当金領収証の受付停止）.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
           ]
         },
         {
@@ -1872,6 +1996,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -1887,6 +2012,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -1914,6 +2040,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -1928,6 +2055,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-05",
             "2026-09-28",
             "2026-09-21",
             "2026-09-14",
@@ -2066,6 +2194,50 @@
     {
       "name": "JA帯広かわにし",
       "items": [
+        {
+          "date": "2026-10-01",
+          "title": "教育ローン金利情報 NEW",
+          "url": "https://www.jaobihirokawanisi.or.jp/wp/wp-content/uploads/2026/10/c942bc5ea3f320f309c63ab2e18b92fc.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
+          "date": "2026-10-01",
+          "title": "マイカーローン金利情報 NEW",
+          "url": "https://www.jaobihirokawanisi.or.jp/wp/wp-content/uploads/2026/10/4f7dbc95f3e89ec5f422d6ce0576bd75.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
+          "date": "2026-10-01",
+          "title": "住宅ローン金利情報 NEW",
+          "url": "https://www.jaobihirokawanisi.or.jp/wp/wp-content/uploads/2026/10/ff90b0bf9741e7ab301bbee3a9f6f052.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
+        {
+          "date": "2026-09-14",
+          "title": "貯金金利の引き上げのご案内",
+          "url": "https://www.jaobihirokawanisi.or.jp/wp/wp-content/uploads/2026/09/b1d9a1ad403afe41226640daa9db5b17.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-05"
+          ]
+        },
         {
           "date": "2026-07-31",
           "title": "各種手数料改定のお知らせ（再案内）",
