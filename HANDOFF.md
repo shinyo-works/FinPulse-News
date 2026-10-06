@@ -1,6 +1,7 @@
 # HANDOFF.md
 
-> 最終更新: 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org は 2026-10-03 に登録済み）
+> 最終更新: 2026-10-07（金利履歴: 北洋銀行の住宅ローン 2 商品 6 項目の 10/5 分を公式値で補完 `3c75677`。報告自動化ツール側で北洋の金利ページ削除（ソフト404）により空欄だったもの。リンク先も新ページ `/person/loan/house/` に更新。本人承認済み。原因と再発防止は報告自動化ツールの HANDOFF.md）
+> 前回更新: 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org は 2026-10-03 に登録済み）
 >
 > 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧 `旧個人アカウント側の github.io` は 404。Secrets・デプロイキー・Pages は引き継がれた）
 >
