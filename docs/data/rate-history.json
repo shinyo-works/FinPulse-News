@@ -1031,9 +1031,13 @@
       "bank_name": "北洋銀行",
       "product_id": "northpacific_teigaku",
       "product_name": "ほくようスペシャル住宅ローンα",
-      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.35,
+          "observed_on": "2026-10-05"
+        },
         {
           "rate": 1.1,
           "observed_on": "2026-09-28"
@@ -1109,9 +1113,13 @@
       "bank_name": "北洋銀行",
       "product_id": "northpacific_teigaku",
       "product_name": "ほくようスペシャル住宅ローンα",
-      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/",
       "rate_type": "fixed_5y",
       "history": [
+        {
+          "rate": 2.35,
+          "observed_on": "2026-10-05"
+        },
         {
           "rate": 2.1,
           "observed_on": "2026-09-28"
@@ -1187,9 +1195,13 @@
       "bank_name": "北洋銀行",
       "product_id": "northpacific_teigaku",
       "product_name": "ほくようスペシャル住宅ローンα",
-      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.75,
+          "observed_on": "2026-10-05"
+        },
         {
           "rate": 2.5,
           "observed_on": "2026-09-28"
@@ -1265,10 +1277,14 @@
       "bank_name": "北洋銀行",
       "product_id": "northpacific_teiritsu",
       "product_name": "ほくようスペシャル住宅ローンα定率型",
-      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/",
       "rate_type": "fixed_3y",
       "history": [
         {
+          "rate": 1.0,
+          "observed_on": "2026-10-05"
+        },
+        {
           "rate": 0.75,
           "observed_on": "2026-09-28"
         },
@@ -1343,10 +1359,14 @@
       "bank_name": "北洋銀行",
       "product_id": "northpacific_teiritsu",
       "product_name": "ほくようスペシャル住宅ローンα定率型",
-      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/",
       "rate_type": "fixed_5y",
       "history": [
         {
+          "rate": 1.91,
+          "observed_on": "2026-10-05"
+        },
+        {
           "rate": 1.66,
           "observed_on": "2026-09-28"
         },
@@ -1421,9 +1441,13 @@
       "bank_name": "北洋銀行",
       "product_id": "northpacific_teiritsu",
       "product_name": "ほくようスペシャル住宅ローンα定率型",
-      "url": "https://www.hokuyobank.co.jp/person/loan/house/h_rates.html",
+      "url": "https://www.hokuyobank.co.jp/person/loan/house/",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.32,
+          "observed_on": "2026-10-05"
+        },
         {
           "rate": 2.07,
           "observed_on": "2026-09-28"
