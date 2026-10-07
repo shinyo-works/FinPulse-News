@@ -1,17 +1,25 @@
 #!/bin/sh
-# pre-commit ゲート: ステージした Python ファイルの構文を検査する。
-# どの CLI(Codex / Claude Code)がコミットしても、壊れて起動しないスクリプトの
+# pre-commit ゲート: ステージしたファイルに鍵の形をした文字列が無いかと、
+# Python ファイルの構文を検査する。
+# どの CLI(Codex / Claude Code)がコミットしても、鍵の混入と壊れて起動しないスクリプトの
 # 混入を防ぐ機械的な関門。core.hooksPath=.githooks で有効化（git管理され共有される）。
 #
 # 有効化（クローン直後に1回だけ）:
 #   git config core.hooksPath .githooks
+
+HOOK_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+# このリポジトリは公開されているため、鍵の検査はすべての文字ファイルにかける
+if ! python "$HOOK_DIR/check_staged_secrets.py"; then
+  echo "[pre-commit] 鍵の混入の疑いがあります。取り除いてから再コミットしてください。" >&2
+  exit 1
+fi
 
 if git diff --cached --quiet --diff-filter=ACMR -- '*.py'; then
   exit 0
 fi
 
 echo "[pre-commit] Python 構文チェック中..."
-HOOK_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 if ! python "$HOOK_DIR/check_staged_python.py"; then
   echo "[pre-commit] 構文エラーがあります。修正してから再コミットしてください。" >&2
   exit 1

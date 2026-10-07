@@ -50,6 +50,20 @@ jobs:
           INPUT_CHECK_ONLY: ${{ inputs.check_only }}
         run: python3 scripts/check_weekly_run.py
 
+  # 金利調査ツールの週次（月曜 07:00）が置いた公開用の金利データを取り込む。
+  # ニュースの判定（guard）とは独立に動く。取り込み済みの週なら何もしないので、何度動いても安全。
+  # 接続テスト（check_only）では動かさない。中身は import-rate-history.yml。
+  import-rate-history:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      format('{0}', inputs.check_only) != 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/import-rate-history.yml
+    secrets:
+      RATE_FEED_READ_KEY: ${{ secrets.RATE_FEED_READ_KEY }}
+      RATE_FEED_REPOSITORY: ${{ secrets.RATE_FEED_REPOSITORY }}
+
   collect-and-report:
     needs: guard
     # 判定が「実行しない」と明示した時だけ止める。判定ジョブの失敗・出力なしは実行する側に倒す。
@@ -155,7 +169,7 @@ jobs:
 
           git diff --staged --quiet || git commit -m "[自動] 金融機関新着情報レポート $(TZ='Asia/Tokyo' date '+%Y-%m-%d')"
 
-          # 別リポジトリ（金利調査ツール）の自動pushと同日に走るため、
+          # 金利履歴の取り込み（import-rate-history）の自動pushと同じ時間帯に走るため、
           # 競合したらリモートを取り込み直して再pushする（最大3回）。
           # commit 済みの状態で rebase するため成果物は巻き戻らない。
           # マーカーなしで output/data/ が未ステージのまま残る場合に備え autostash を使う。

@@ -10,6 +10,7 @@ GitHub Actions で週次実行される
 """
 import os
 import json
+import time
 import re
 import calendar
 import shutil
@@ -63,6 +64,10 @@ EXCLUDE_TARGETS = (EXCLUDE_TARGET_TITLE, EXCLUDE_TARGET_URL)
 MAX_HTML_BYTES = 5 * 1024 * 1024
 MAX_XML_BYTES = 5 * 1024 * 1024
 REQUEST_TIMEOUT = (5, 30)  # 接続待ち・読取無通信の上限（秒）
+# 1 回の応答を読み切るまでの上限（秒）。REQUEST_TIMEOUT は「無通信の時間」しか見ないため、
+# 30 秒未満の間隔で少しずつ返し続けるサイトが 1 つあると、収集全体が 15 分の打ち切りに
+# 当たってその週のメールと公開が無くなる（2026-10-07 監査 W9）。
+MAX_RESPONSE_SECONDS = 60
 MAX_PROGRAMMATIC_ITEMS = 60  # 汎用抽出が1ページから採る記事数の上限
 VIEWER_READY_MARKER_NAME = "viewer-json-ready.txt"
 FAILED_STATUSES = {"fetch_failed", "parse_failed", "extract_failed"}
@@ -193,8 +198,12 @@ def load_config():
     return normalize_config(config)
 
 
-def read_limited_response(response, *, max_bytes, allowed_content_types, url):
-    """外部応答を上限付きで読み、想定外の種類・サイズを拒否する。"""
+def read_limited_response(
+    response, *, max_bytes, allowed_content_types, url, max_seconds=MAX_RESPONSE_SECONDS, clock=None
+):
+    """外部応答を上限付きで読み、想定外の種類・サイズ・読み取り時間を拒否する。"""
+    clock = clock or time.monotonic
+    deadline = clock() + max_seconds
     response.raise_for_status()
     content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
     if content_type and content_type not in allowed_content_types:
@@ -219,6 +228,8 @@ def read_limited_response(response, *, max_bytes, allowed_content_types, url):
         total += len(chunk)
         if total > max_bytes:
             raise FetchError(f"応答サイズが上限を超えています: {url}")
+        if clock() > deadline:
+            raise FetchError(f"応答の読み取りが {max_seconds} 秒を超えたため打ち切りました: {url}")
         chunks.append(chunk)
     return b"".join(chunks)
 

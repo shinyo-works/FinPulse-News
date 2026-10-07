@@ -78,7 +78,7 @@
 
 ### #5 publish ジョブの push リトライ
 - 対象: `.github/workflows/weekly-news-report.yml` 81〜95行。commit 後に「push 失敗 → git pull --rebase → 再push」最大3回のループ。
-- 根拠: 2026-08-03 は本ワークフローと別リポジトリ 金利調査ツール（Deploy Key 経由）の push が同日に発生（20:53 UTC / 23:12 UTC、約2時間20分の間隔）。**衝突は未発生**だが、実行時間の変動や手動 dispatch で窓が重なれば push 失敗が起きる構図（concurrency は自リポジトリ内のみ有効）。
+- 根拠: 2026-08-03 は本ワークフローと別リポジトリの金利調査ツール（当時は Deploy Key 経由）の push が同日に発生（20:53 UTC / 23:12 UTC、約2時間20分の間隔）。**衝突は未発生**だが、実行時間の変動や手動 dispatch で窓が重なれば push 失敗が起きる構図（concurrency は自リポジトリ内のみ有効）。
 - 注意: commit → push → 失敗時 rebase → 再push の順序（`rm -f output/viewer-json-ready.txt` とステージ済み変更が rebase で巻き戻らないこと）。両者の変更は output/ と docs/data/ で非交差のため rebase 自体は安全。3回失敗時は fail-open 原則どおりジョブを失敗表示（成果物は artifact に保存済み）。
 - ゲート: ローカル検証不可。次回 workflow_dispatch 手動実行で確認。`tests/test_workflow_security.py` へのリトライ存在アサートは任意。
 - モデル: opus（CI のみで検証・順序設計にリスク）
@@ -115,7 +115,7 @@
 - **#10 ヴューアー複製・性能・DATA_ROOT**: 複製は iframe 分離の意図的帰結。safeUrl の差は仕様差（"#" に統一すると金利側の無リンク分岐が壊れる）。性能は現規模（11調査日×48行）で問題なし。DATA_ROOT は「Pages = main /(root)」の確定契約内。
 - **#13 レイアウトテスト**: 承認済みレイアウトのピン留め（意図的）。次に正当なスタイル変更を邪魔した時点で、その変更と同じコミットで構造レベルへ緩和。
 - **#14 load_dotenv**: .env.example は引用符なし形式で自家製パーサの契約内。BOM 問題の実害が出たら utf-8-sig 化。
-- **#21 手動機関名ハードコード**: data_sources に情報が無く、動的化はスキーマ拡張（金利調査ツール との契約変更）が先。機関の顔ぶれが変わった時にセットで。
+- **#21 手動機関名ハードコード**: data_sources に情報が無く、動的化はスキーマ拡張（金利調査ツール側のreport-tool との契約変更）が先。機関の顔ぶれが変わった時にセットで。
 - **#23 送信元ドメイン**: 独自ドメイン取得というインフラ判断が前提（re-review-plan C#19 で別タスク化済み）。
 
 ## D評価（やらない・5件）

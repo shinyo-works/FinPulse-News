@@ -604,5 +604,68 @@ class CarLoanHistoryTest(unittest.TestCase):
         self.assertFalse(history.get("is_demo"))
 
 
+
+class SecurityAuditFixTest(unittest.TestCase):
+    """2026-10-07 監査 W5: 未来の調査日を拒否し、自動取り込みは新しい週だけにする。"""
+
+    def test_future_date_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "未来の日付"):
+            update_rate_history.reject_future_date("2026-10-13", today="2026-10-12")
+        update_rate_history.reject_future_date("2026-10-12", today="2026-10-12")
+
+    def test_update_history_rejects_future_survey_date(self):
+        tomorrow = (
+            update_rate_history.datetime.now(update_rate_history.JST)
+            + update_rate_history.timedelta(days=1)
+        ).date().isoformat()
+        history = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))
+        report = {"rate_contract": update_rate_history.expected_rate_contract_metadata(), "loan_table": []}
+        with self.assertRaisesRegex(ValueError, "未来の日付"):
+            update_rate_history.update_history(history, report, tomorrow)
+
+    def _run_main(self, argv, tmp):
+        housing = Path(tmp) / "rate-history.json"
+        car = Path(tmp) / "car-loan-history.json"
+        housing.write_text(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+        car.write_text(update_rate_history.CAR_HISTORY_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+        datasets = {
+            key: dataclasses.replace(ds, history_path=housing if key == "housing" else car)
+            for key, ds in update_rate_history.DATASETS.items()
+        }
+        out = io.StringIO()
+        with mock.patch.object(update_rate_history, "DATASETS", datasets), \
+                mock.patch("sys.argv", ["update_rate_history.py", *argv]), redirect_stdout(out):
+            update_rate_history.main()
+        return housing, car, out.getvalue()
+
+    def test_only_newer_skips_already_imported_week_without_writing(self):
+        latest = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["observation_dates"][0]
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "feed.json"
+            report.write_text(json.dumps({
+                "rate_contract": update_rate_history.expected_rate_contract_metadata_with_car(),
+                "survey_date": latest.replace("-", "/"),
+                "loan_table": [{"bank_id": "x", "product_id": "y", "loan_variable": 9.9}],
+                "car_loan_table": [{"bank_id": "x", "product_id": "z", "car_loan_variable": 9.9}],
+            }), encoding="utf-8")
+            housing, car, log = self._run_main([str(report), "--only-newer"], tmp)
+            self.assertEqual(
+                housing.read_text(encoding="utf-8"),
+                update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"),
+            )
+            self.assertIn("取り込み済み", log)
+
+    def test_main_rejects_future_date_even_with_only_newer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "feed.json"
+            report.write_text(json.dumps({
+                "rate_contract": update_rate_history.expected_rate_contract_metadata_with_car(),
+                "survey_date": "2099/01/05",
+                "loan_table": [{"bank_id": "x", "product_id": "y", "loan_variable": 1.0}],
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "未来の日付"):
+                self._run_main([str(report), "--only-newer"], tmp)
+
+
 if __name__ == "__main__":
     unittest.main()

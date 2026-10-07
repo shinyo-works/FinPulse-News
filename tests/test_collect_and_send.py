@@ -237,6 +237,29 @@ class ValidationTest(unittest.TestCase):
                 url="https://example.com",
             )
 
+    def test_limited_response_stops_slow_drip_after_deadline(self):
+        # 監査 W9: 少しずつ返し続けるサイトで、収集全体が打ち切られないようにする
+        ticks = iter([0, 10, 70, 80])
+        with self.assertRaisesRegex(collector.FetchError, "60 秒"):
+            collector.read_limited_response(
+                FakeResponse([b"a", b"b", b"c"]),
+                max_bytes=10,
+                allowed_content_types={"text/html"},
+                url="https://example.com",
+                clock=lambda: next(ticks),
+            )
+
+    def test_limited_response_within_deadline_is_read(self):
+        ticks = iter([0, 1, 2, 3])
+        content = collector.read_limited_response(
+            FakeResponse([b"ab", b"c"]),
+            max_bytes=10,
+            allowed_content_types={"text/html"},
+            url="https://example.com",
+            clock=lambda: next(ticks),
+        )
+        self.assertEqual(content, b"abc")
+
     def test_limited_response_rejects_unexpected_content_type(self):
         with self.assertRaisesRegex(collector.FetchError, "Content-Type"):
             collector.read_limited_response(

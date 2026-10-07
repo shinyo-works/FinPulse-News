@@ -3,7 +3,7 @@
 > 最終更新: 2026-10-07（金利履歴: 北洋銀行の住宅ローン 2 商品 6 項目の 10/5 分を公式値で補完 `3c75677`。報告自動化ツール側で北洋の金利ページ削除（ソフト404）により空欄だったもの。リンク先も新ページ `/person/loan/house/` に更新。本人承認済み。原因と再発防止は報告自動化ツールの HANDOFF.md）
 > 前回更新: 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org は 2026-10-03 に登録済み）
 >
-> 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧 `旧個人アカウント側の github.io` は 404。Secrets・デプロイキー・Pages は引き継がれた）
+> 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧個人アカウント側の github.io は 404。Secrets・デプロイキー・Pages は引き継がれた）
 >
 > 2026-09-29（公開ヴューアーの UI/UX レビュー（Codex・Claude両方）と再レビューの指摘14件を実装。絞り込みの3画面統一・画面外はみ出し・起動順・日付一覧・凡例の折り返し・条件比較との相互リンク。詳細は `docs/re-review-plan-2026-09-29-uiux.md`）
 >
@@ -156,13 +156,13 @@
 
 ### マイカーローン金利タブ（2026-08-27・両リポジトリともpush済み）
 
-- 方針: 収集は上流 `報告自動化ツール`（金利調査ツール）に追加し、FinPulseは取り込みと表示だけを持つ。金利種別は変動・固定の2種。ユーザー確認済み。
+- 方針: 収集は上流の金利調査ツールに追加し、FinPulseは取り込みと表示だけを持つ。金利種別は変動・固定の2種。ユーザー確認済み。
 - FinPulse側（コミット `fa4209e`）:
   - `scripts/update_rate_history.py` を `Dataset` で住宅ローン／マイカーローンの2系統に一般化。`car_loan_table` を `docs/data/car-loan-history.json` へ積み上げる。既定は `--dataset all`（レポートに含まれる種別をすべて更新）。
   - `rate_contract` は version 1・2 の両方を受け入れる。version 1（住宅ローンのみ）が来た週はマイカーローンを更新しない。
   - `docs/index.html` に3つ目のタブ「マイカーローン金利情報」を追加（ハッシュは `#car`）。`docs/rate-history.html` は `?dataset=car` で読むJSON・タイトル・説明・掲載範囲を切り替える。既知のデータセット名だけを受け付ける。
   - `docs/data/car-loan-history.json` は空（rows 0件）で新規追加。初回の週次実行までは画面に「金利データがありません」が出る。
-- 上流側（`../報告自動化ツール` ・コミット `bff3008`）:
+- 上流側（`金利調査ツールの作業フォルダ` ・コミット `bff3008`）:
   - `rate_contract.py` を version 2 にし `car_loan_rate_fields` を追加。`scraper.py`・`gemini_extraction.py`・`compare.py`・`check_output.py`・`rate_validation.py` にマイカーローン経路を追加。金利抽出の商品名照合は住宅ローンと共通化した。
   - `config/banks.json` に7機関の `car_loan_products` を追加（実サイトで確認済み・下表）。
   - `weekly_report.yml` の反映ステップで `docs/data/car-loan-history.json` も `git add` する。
@@ -196,7 +196,7 @@
 - 除外ルールに照合先の指定 `target`（`title` 既定 / `url`）を追加した。記事名では分けられない区分だけURLで落とすための最小拡張で、`unless` も同じ照合先を見る。`target` を使うのはJAおとふけの1件のみで、他7機関は挙動不変。
 - JAおとふけへ除外2件を追加した。`【イベント】`（金利・貯金・ローン・共済・貸付を含む場合は救済）と `/hokurennews/`（target=url）。どちらもホクレン給油所の記事で、`【イベント】ウェルカムキャンペーン`はガソリン給油の販促だった。実サイトで通過2件・給油所系4件の除外を確認。金融店舗の営業時間変更の記事は残る。
 - JA木野の `include_keywords` に「プライムレート」を追加した。専用抽出化で`短期プライムレートの引き上げについて`が「ローン」を含まず落ちるようになったため。同種記事が通過・除外に分かれる状態は解消済み。
-- 北海道労働金庫の商品名を「住宅ローン（定額型）」「すまいる上手（定率型）」に変更した。`product_name` は上流の `金利調査ツール` から毎週上書きされるため、`update_rate_history.py` の `PRODUCT_NAME_OVERRIDES` で履歴へ書く直前に置き換える方式にした。JSONの直接編集だけでは翌週戻る。
+- 北海道労働金庫の商品名を「住宅ローン（定額型）」「すまいる上手（定率型）」に変更した。`product_name` は上流の金利調査ツールから毎週上書きされるため、`update_rate_history.py` の `PRODUCT_NAME_OVERRIDES` で履歴へ書く直前に置き換える方式にした。JSONの直接編集だけでは翌週戻る。
 - 全体コードレビュー21件のA評価12件とB評価1件は `ba2a064` までで実装済み（内容は git log を参照）。
 - 検証:
   - 指定のPython構文検査に合格。標準 `unittest` は91件すべて合格、`git diff --check` も合格。

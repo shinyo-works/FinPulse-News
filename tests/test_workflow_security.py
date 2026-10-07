@@ -12,11 +12,15 @@ class WorkflowSecurityTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
     def test_all_actions_are_pinned_to_full_commit(self):
-        action_refs = re.findall(r"^\s*uses:\s*([^\s#]+)", self.workflow, re.MULTILINE)
-        self.assertGreater(len(action_refs), 0)
-        for action_ref in action_refs:
-            with self.subTest(action=action_ref):
-                self.assertRegex(action_ref, r"^[^@]+@[0-9a-f]{40}$")
+        for name in ("weekly-news-report.yml", "import-rate-history.yml"):
+            workflow = (self.repository_root / ".github/workflows" / name).read_text(encoding="utf-8")
+            action_refs = re.findall(r"^\s*uses:\s*([^\s#]+)", workflow, re.MULTILINE)
+            self.assertGreater(len(action_refs), 0)
+            for action_ref in action_refs:
+                with self.subTest(workflow=name, action=action_ref):
+                    if action_ref.startswith("./.github/workflows/"):
+                        continue  # 同じリポジトリ内の再利用ワークフロー（版はこのコミットに固定）
+                    self.assertRegex(action_ref, r"^[^@]+@[0-9a-f]{40}$")
 
     def test_collection_has_read_only_permission_and_publish_has_write(self):
         self.assertRegex(
@@ -135,6 +139,48 @@ class WorkflowSecurityTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("--hash=sha256:", lock_text)
+
+
+
+class RateImportWorkflowTest(unittest.TestCase):
+    """2026-10-07 監査 W2: 金利履歴は、こちらから読み取り専用の鍵で取りに行って自分で公開する。"""
+
+    @classmethod
+    def setUpClass(cls):
+        root = Path(__file__).resolve().parents[1]
+        cls.importer = (root / ".github/workflows/import-rate-history.yml").read_text(encoding="utf-8")
+        cls.weekly = (root / ".github/workflows/weekly-news-report.yml").read_text(encoding="utf-8")
+
+    def test_feed_is_read_with_read_only_key_and_not_persisted(self):
+        self.assertIn("ssh-key: ${{ secrets.RATE_FEED_READ_KEY }}", self.importer)
+        self.assertIn("repository: ${{ secrets.RATE_FEED_REPOSITORY }}", self.importer)
+        self.assertIn("ref: rate-feed", self.importer)
+        feed_step = self.importer.split("- name: 公開用の金利データを読み取り専用の鍵で取得", 1)[1].split("- name:", 1)[0]
+        self.assertIn("persist-credentials: false", feed_step)
+
+    def test_private_repository_name_is_not_written_in_public_workflow(self):
+        # 公開ログと公開リポジトリに、非公開の取得元の名前を出さない（Secret から渡す）
+        for text in (self.importer, self.weekly):
+            for line in re.findall(r"^\s*repository:.*$", text, re.MULTILINE):
+                with self.subTest(line=line):
+                    self.assertIn("${{ secrets.RATE_FEED_REPOSITORY }}", line)
+
+    def test_only_newer_by_default_and_manual_reimport_is_explicit(self):
+        self.assertIn('update_rate_history.py "$feed" --only-newer', self.importer)
+        self.assertIn("REIMPORT_SAME_DAY: ${{ inputs.reimport_same_day }}", self.importer)
+        self.assertNotIn("${{ inputs.reimport_same_day }}\n", self.importer.split("run: |", 1)[1])
+
+    def test_permissions_are_minimal(self):
+        self.assertRegex(self.importer, r"(?m)^permissions: \{\}$")
+        self.assertRegex(self.importer, r"import:[\s\S]*?permissions:\s*\n\s*contents: write")
+        self.assertIn("github.ref == 'refs/heads/main'", self.importer)
+
+    def test_weekly_calls_import_except_connection_test(self):
+        block = self.weekly.split("\n  import-rate-history:\n", 1)[1].split("\n  collect-and-report:\n", 1)[0]
+        self.assertIn("uses: ./.github/workflows/import-rate-history.yml", block)
+        self.assertIn("format('{0}', inputs.check_only) != 'true'", block)
+        self.assertNotIn("secrets: inherit", block)
+        self.assertNotIn("needs:", block)
 
 
 if __name__ == "__main__":

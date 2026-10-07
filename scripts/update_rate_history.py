@@ -24,7 +24,7 @@ import os
 import re
 import tempfile
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -181,6 +181,24 @@ def normalize_date(value: str) -> str:
         return datetime.strptime(normalized, "%Y-%m-%d").date().isoformat()
     except ValueError as exc:
         raise ValueError(f"調査日が実在しません: {value}") from exc
+
+
+JST = timezone(timedelta(hours=9))
+
+
+def today_jst() -> str:
+    return datetime.now(JST).date().isoformat()
+
+
+def reject_future_date(survey_date: str, today: str | None = None) -> None:
+    """未来の調査日を拒否する。
+
+    履歴は「最新日より古い日付」を拒否するため、未来日が一度入ると、以後の正しい週次更新が
+    すべて止まる（2026-10-07 監査 W5。起動用の鍵が漏れた場合の止め方として悪用できた）。
+    """
+    today = today or today_jst()
+    if survey_date > today:
+        raise ValueError(f"調査日 {survey_date} は未来の日付のため更新できません（今日は {today}）。")
 
 
 def validate_id(value, field_name: str) -> str:
@@ -429,6 +447,7 @@ def update_history(
 ) -> dict:
     """report_data のローン金利を履歴へ反映する。返り値は変更サマリー。"""
     survey_date = normalize_date(survey_date)
+    reject_future_date(survey_date)
     migrate_history(history, dataset)
     validate_history(history)
     validate_report_data(report_data, dataset)
@@ -630,6 +649,14 @@ def main() -> None:
         help="既存の最新日より前の調査日を追加する（過去データ投入専用）",
     )
     parser.add_argument(
+        "--only-newer",
+        action="store_true",
+        help=(
+            "既存の最新日より新しい調査日のときだけ更新する（同じ日・古い日は何もせず終える）。"
+            "週次の自動取り込み用。取り込み済みの週を、あとから手で直した値ごと上書きしないため"
+        ),
+    )
+    parser.add_argument(
         "--dataset",
         choices=sorted(DATASETS) + ["all"],
         default="all",
@@ -655,6 +682,21 @@ def main() -> None:
             )
     else:
         targets = [DATASETS[args.dataset]]
+
+    reject_future_date(survey_date)
+    if args.only_newer:
+        newer = []
+        for dataset in targets:
+            latest = latest_history_date(load_history(dataset))
+            if latest and survey_date <= latest:
+                print(
+                    f"{dataset.label}: 調査日 {survey_date} は取り込み済み（最新 {latest}）のため更新しません。"
+                )
+            else:
+                newer.append(dataset)
+        targets = newer
+        if not targets:
+            return
 
     # 全種別をメモリ上で更新・検証してから書き込む。マイカー側の入力が不正な回に
     # 住宅ローン側だけが新しい調査日になる部分更新を防ぐ（書き込み自体の途中失敗は対象外。

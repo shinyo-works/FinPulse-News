@@ -45,7 +45,7 @@
 
 ---
 
-## 本人がやること（3ステップ・合計15分ほど）
+## 本人（管理者）がやること（3ステップ・合計15分ほど）
 
 ### ステップ1: PAT（GitHub の合鍵）を1本作る — 約5分
 
@@ -67,7 +67,7 @@
 4. 出てきた `github_pat_...` を**コピーしてステップ2へ**（この画面を離れると二度と見られない）
 
 > **「承認待ち（Pending）」と出たとき**: 組織が合鍵に管理者の承認を求める設定になっている。
-> 管理者は本人本人なので、<https://github.com/organizations/shinyo-works/settings/personal-access-token-requests>
+> 管理者は本人なので、<https://github.com/organizations/shinyo-works/settings/personal-access-token-requests>
 > を開いて、`finpulse-cron-dispatch` を **Approve** する。
 >
 > **Resource owner に `shinyo-works` が出てこないとき**: 組織が合鍵を受け付けない設定になっている。

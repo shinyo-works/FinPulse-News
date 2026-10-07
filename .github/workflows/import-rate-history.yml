@@ -1,0 +1,120 @@
+name: 金利履歴の取り込み
+
+# 金利調査ツール（非公開の別リポジトリ）が週次で作った「公開用の金利データ」を、
+# このリポジトリが自分で読みに行き、検証してから公開する。
+#
+# 2026-10-07 のセキュリティ監査（W2）までは、向こうのリポジトリがこのリポジトリへ書き込める鍵
+# （Deploy key・書き込み可）を持ち、main へ直接 push していた。その鍵が漏れると、このリポジトリの
+# ワークフローや公開サイトまで書き換えられたため、向きを逆にした。
+#
+#   金利調査ツール（月曜 07:00）
+#     └ 金利だけの JSON を、自分のリポジトリの rate-feed ブランチへ置く（こちらへは書き込めない）
+#   このワークフロー
+#     └ 読み取り専用の鍵（RATE_FEED_READ_KEY）で rate-feed を読む
+#     └ 自分のコードで検証・更新し、自分の GITHUB_TOKEN で main へ push する
+#
+# 起動: 週次ニュース（cron-job.org から月曜 08:05 JST）の中から呼ぶのが本命。
+#       控えは GitHub の schedule（月曜 11:00 JST・遅れて起動する）。手動実行もできる。
+# 何度動いても安全: 取り込み済みの週（最新日以前）は何もしない（--only-newer）。
+#       同じ週を取り込み直すときだけ、手動実行で reimport_same_day を選ぶ。
+#
+# 必要な Secret（値は GitHub の画面にだけある）:
+#   RATE_FEED_READ_KEY   … 金利調査ツールのリポジトリの読み取り専用 Deploy key（秘密鍵）
+#   RATE_FEED_REPOSITORY … 金利調査ツールのリポジトリ名（公開ログに出さないため Secret に置く）
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # 控え: 月曜 11:00 JST（= UTC 月曜 02:00）
+  workflow_dispatch:
+    inputs:
+      reimport_same_day:
+        description: '取り込み済みの同じ調査日を、公開用データで上書きし直す（手で直した値も上書きされます）'
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      reimport_same_day:
+        type: boolean
+        default: false
+    secrets:
+      RATE_FEED_READ_KEY:
+        required: true
+      RATE_FEED_REPOSITORY:
+        required: true
+
+permissions: {}
+
+jobs:
+  import:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: import-rate-history
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: main
+
+      - name: 公開用の金利データを読み取り専用の鍵で取得
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          repository: ${{ secrets.RATE_FEED_REPOSITORY }}
+          ref: rate-feed
+          path: rate-feed-input
+          ssh-key: ${{ secrets.RATE_FEED_READ_KEY }}
+          # 鍵を作業場所に残さない（以降は読むだけ）
+          persist-credentials: false
+
+      - name: Python環境セットアップ
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: 金利履歴の更新テスト
+        run: python -m unittest tests.test_update_rate_history -v
+
+      - name: 金利履歴を更新
+        env:
+          REIMPORT_SAME_DAY: ${{ inputs.reimport_same_day }}
+        run: |
+          feed=rate-feed-input/rate-feed.json
+          if [ ! -s "$feed" ]; then
+            echo "::error::公開用の金利データ（rate-feed.json）がありません。"
+            exit 1
+          fi
+          if [ "${REIMPORT_SAME_DAY:-}" = "true" ]; then
+            echo "同じ調査日の取り込み直しを行います（手動実行の指定）。"
+            python scripts/update_rate_history.py "$feed"
+          else
+            python scripts/update_rate_history.py "$feed" --only-newer
+          fi
+          # 取得したデータは公開物に混ぜない
+          rm -rf rate-feed-input
+
+      - name: 金利履歴を公開
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/rate-history.json docs/data/car-loan-history.json
+          git diff --staged --check
+          if git diff --staged --quiet; then
+            echo "金利履歴に変更はありません。"
+            exit 0
+          fi
+          git commit -m "[自動] 住宅ローン・マイカーローン金利履歴を更新"
+          # 週次ニュースの公開 push と同じ時間帯に重なるため、競合したらリモートを
+          # 取り込み直して再pushする（最大3回）。触るファイルが別なので rebase は衝突しない。
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              exit 0
+            fi
+            echo "push失敗（${attempt}回目）。リモートの変更を取り込んで再試行します。"
+            git pull --rebase --autostash origin main || exit 1
+          done
+          echo "pushの再試行がすべて失敗しました。"
+          exit 1

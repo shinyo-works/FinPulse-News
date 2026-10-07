@@ -21,7 +21,6 @@
       "period_start": "",
       "period_end": "2026-10-05",
       "kind": "financial_report_tool",
-      "repository": "金利調査ツール",
       "description": "報告自動化ツールの週次JSON（GitHub Actions実行のArtifactを含む）"
     }
   ],

@@ -54,5 +54,34 @@ class PreCommitHookTest(unittest.TestCase):
             self.assertEqual(0, passed.returncode, passed.stderr)
 
 
+class SecretHookTest(unittest.TestCase):
+    """公開リポジトリなので、鍵の形をした文字列はコミット前に止める（2026-10-07 監査）。"""
+
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".githooks"))
+        import check_staged_secrets
+
+        self.module = check_staged_secrets
+
+    def test_detects_key_like_strings_without_returning_values(self):
+        samples = [
+            "AIza" + "B" * 35,
+            "sk-ant-" + "api03-" + "x" * 30,
+            "github_pat_" + "1" * 30,
+            "ghp_" + "a" * 36,
+            "re_" + "a" * 8 + "_" + "b" * 24,
+            "-----BEGIN OPENSSH " + "PRIVATE KEY-----",
+        ]
+        for sample in samples:
+            with self.subTest(sample=sample[:8]):
+                found = self.module.find_secrets(f"value = '{sample}'")
+                self.assertTrue(found)
+                self.assertNotIn(sample, " ".join(found))
+
+    def test_plain_setting_names_are_not_flagged(self):
+        self.assertEqual(self.module.find_secrets("RESEND_API_KEY=re_xxxxxxxxx"), [])
+        self.assertEqual(self.module.find_secrets("ssh-key: ${{ secrets.RATE_FEED_READ_KEY }}"), [])
+
+
 if __name__ == "__main__":
     unittest.main()
