@@ -249,6 +249,50 @@ class ValidationTest(unittest.TestCase):
                 clock=lambda: next(ticks),
             )
 
+    def test_fetch_limited_stops_real_slow_drip_server(self):
+        # 監査 W9 の再レビュー: 塊がそろうまで戻らない読み取りでも、締切で見切れること
+        import http.server
+        import threading
+        import time as time_module
+
+        stop = threading.Event()
+
+        class DripHandler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", "100000")
+                self.end_headers()
+                while not stop.is_set():
+                    try:
+                        self.wfile.write(b"a")
+                        self.wfile.flush()
+                    except OSError:
+                        return
+                    time_module.sleep(0.1)
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), DripHandler)
+        server.daemon_threads = True
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        try:
+            started = time_module.monotonic()
+            with self.assertRaisesRegex(collector.FetchError, "1 秒を超えた"):
+                collector.fetch_limited(
+                    f"http://127.0.0.1:{server.server_address[1]}/",
+                    headers={},
+                    max_bytes=10 * 1024 * 1024,
+                    allowed_content_types={"text/html"},
+                    max_seconds=1,
+                )
+            self.assertLess(time_module.monotonic() - started, 5)
+        finally:
+            stop.set()
+            server.shutdown()
+            server.server_close()
+
     def test_limited_response_within_deadline_is_read(self):
         ticks = iter([0, 1, 2, 3])
         content = collector.read_limited_response(

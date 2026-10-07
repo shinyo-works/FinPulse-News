@@ -16,6 +16,7 @@ import calendar
 import shutil
 import sys
 import tempfile
+import threading
 import warnings
 from dataclasses import dataclass
 try:
@@ -248,17 +249,50 @@ def decode_html(content, encoding=None):
         return str(content, errors="replace")
 
 
+def fetch_limited(url, *, headers, max_bytes, allowed_content_types, max_seconds=MAX_RESPONSE_SECONDS):
+    """接続から読み切りまでを max_seconds 以内に終える取得。
+
+    requests のタイムアウトは「無通信の時間」しか見ないうえ、本文は塊（最大 64KB）が
+    そろうまで戻ってこない。29 秒ごとに 1 バイト送るサイトでは、読み取りの途中で時間を
+    確かめる方法では止められない（2026-10-07 監査 W9 の再レビュー指摘）。そこで取得全体を
+    別スレッドで動かし、締切を過ぎたら待つのをやめる。取り残したスレッドは daemon なので、
+    処理の終了を妨げない（接続は相手が切るかプロセス終了で閉じる）。
+    """
+    outcome = {}
+
+    def worker():
+        try:
+            with requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, stream=True) as resp:
+                outcome["content"] = read_limited_response(
+                    resp,
+                    max_bytes=max_bytes,
+                    allowed_content_types=allowed_content_types,
+                    url=url,
+                    max_seconds=max_seconds,
+                )
+        except BaseException as exc:  # 呼び出し側へそのまま渡す
+            outcome["error"] = exc
+
+    thread = threading.Thread(target=worker, name="fetch-limited", daemon=True)
+    thread.start()
+    thread.join(max_seconds)
+    if thread.is_alive():
+        raise FetchError(f"取得が {max_seconds} 秒を超えたため打ち切りました: {url}")
+    if "error" in outcome:
+        raise outcome["error"]
+    return outcome["content"]
+
+
 def fetch_page(url, encoding=None):
     """HTMLページを取得してデコードする"""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
-        with requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT, stream=True) as resp:
-            content = read_limited_response(
-                resp,
-                max_bytes=MAX_HTML_BYTES,
-                allowed_content_types={"text/html", "application/xhtml+xml"},
-                url=url,
-            )
+        content = fetch_limited(
+            url,
+            headers=headers,
+            max_bytes=MAX_HTML_BYTES,
+            allowed_content_types={"text/html", "application/xhtml+xml"},
+        )
         return decode_html(content, encoding)
     except Exception as e:
         print(f"  取得失敗 ({url}): {e}")
@@ -636,22 +670,16 @@ def scrape_hokuyo_xml(base_url):
     for year in (this_year, this_year - 1):
         xml_url = urljoin(base_url, f"{year}.xml")
         try:
-            with requests.get(
+            content = fetch_limited(
                 xml_url,
                 headers=headers,
-                timeout=REQUEST_TIMEOUT,
-                stream=True,
-            ) as resp:
-                content = read_limited_response(
-                    resp,
-                    max_bytes=MAX_XML_BYTES,
-                    allowed_content_types={
-                        "application/xml",
-                        "application/rss+xml",
-                        "text/xml",
-                    },
-                    url=xml_url,
-                )
+                max_bytes=MAX_XML_BYTES,
+                allowed_content_types={
+                    "application/xml",
+                    "application/rss+xml",
+                    "text/xml",
+                },
+            )
             root = ET.fromstring(content)
         except Exception as e:
             if _is_new_year_feed_not_published(e, year, this_year):

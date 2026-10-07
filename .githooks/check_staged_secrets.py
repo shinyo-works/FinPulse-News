@@ -21,6 +21,23 @@ SECRET_PATTERNS = (
 )
 
 
+def find_secrets_in_bytes(blob: bytes) -> list[str]:
+    """文字コードに関係なく鍵を探す（鍵の形は ASCII なので、生のバイトをそのまま照合する）。
+
+    UTF-8 以外の文書（CP932 の日本語メモなど）も素通りさせない。UTF-16 は 0 バイトを
+    取り除いた形でも照合する。
+    """
+    texts = [blob.decode("latin-1")]
+    if b"\x00" in blob:
+        texts.append(blob.replace(b"\x00", b"").decode("latin-1"))
+    found = []
+    for text in texts:
+        for label in find_secrets(text):
+            if label not in found:
+                found.append(label)
+    return found
+
+
 def find_secrets(text: str) -> list[str]:
     """鍵の形をした文字列の種類を返す（値そのものは返さない）。"""
     return [label for label, pattern in SECRET_PATTERNS if pattern.search(text)]
@@ -43,11 +60,7 @@ def main() -> int:
             check=True,
             stdout=subprocess.PIPE,
         ).stdout
-        try:
-            text = blob.decode("utf-8")
-        except UnicodeDecodeError:
-            continue  # 画像などの文字でないファイル
-        found = find_secrets(text)
+        found = find_secrets_in_bytes(blob)
         if found:
             found_any = True
             print(

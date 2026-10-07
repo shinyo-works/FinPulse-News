@@ -1,7 +1,8 @@
 # HANDOFF.md
 
-> 最終更新: 2026-10-07（金利履歴: 北洋銀行の住宅ローン 2 商品 6 項目の 10/5 分を公式値で補完 `3c75677`。報告自動化ツール側で北洋の金利ページ削除（ソフト404）により空欄だったもの。リンク先も新ページ `/person/loan/house/` に更新。本人承認済み。原因と再発防止は報告自動化ツールの HANDOFF.md）
-> 前回更新: 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org は 2026-10-03 に登録済み）
+> 最終更新: 2026-10-07 夕方（セキュリティ監査の指摘を修正。金利履歴は金利調査ツールに書き込ませず、こちらが読み取り専用の鍵で取りに行って自分で公開する形に変更。下の「現在地」の先頭）
+> 前回更新: 2026-10-07（金利履歴: 北洋銀行の住宅ローン 2 商品 6 項目の 10/5 分を公式値で補完 `3c75677`。報告自動化ツール側で北洋の金利ページ削除（ソフト404）により空欄だったもの。リンク先も新ページ `/person/loan/house/` に更新。本人承認済み。原因と再発防止は報告自動化ツールの HANDOFF.md）
+> 2026-09-30（週次の起動を二段構えに変更: 本命は cron-job.org から月曜 08:05 JST、控えは GitHub の schedule 月曜 09:00 JST。控えは「今日すでに成功済み」なら省略。cron-job.org は 2026-10-03 に登録済み）
 >
 > 2026-09-30（リポジトリを GitHub 組織 `shinyo-works` へ移管。公開 URL は `https://shinyo-works.github.io/FinPulse-News/docs/index.html` に変わり、旧個人アカウント側の github.io は 404。Secrets・デプロイキー・Pages は引き継がれた）
 >
@@ -16,6 +17,21 @@
 > このファイルは現在地と残課題だけを置くライブ状態の正。恒久的な設計・規律は `CLAUDE.md`、完了履歴は git log を参照する。
 
 ## 現在地
+
+### セキュリティ監査の指摘を修正（2026-10-07）
+
+- **金利履歴の取り込みの向きを逆にした（W2）**。以前は金利調査ツール（非公開の別リポジトリ）がこのリポジトリへ書き込める Deploy key を持ち、main へ直接 push し、その際にこのリポジトリのコードも動かしていた。鍵が漏れるとワークフローの書き換え・Secret の持ち出し・公開サイトの改ざんまでできたため、次の形に変えた。
+  - 金利調査ツールは金利だけの JSON を**自分のリポジトリの `rate-feed` ブランチ**に置くだけ（こちらへは書き込めない）。
+  - こちらの `.github/workflows/import-rate-history.yml` が読み取り専用の鍵（Secret `RATE_FEED_READ_KEY`）で読み、テストと検証を通して自分の `GITHUB_TOKEN` で公開する。取得元のリポジトリ名は Secret `RATE_FEED_REPOSITORY`（公開ログに名前を出さない）。
+  - 起動は週次ニュース（月曜 08:05）の中のジョブ `import-rate-history`、控えは schedule（月曜 11:00 JST）、手動実行も可。`--only-newer` で取り込み済みの週は何もしない（手で直した値を上書きしない）。同じ週を取り込み直すときだけ手動実行で `reimport_same_day` を選ぶ。
+- 未来の調査日を拒否（W5）。起動用の合鍵が漏れたときに、未来日を入れて以後の更新を止める手口があった。
+- ニュース取得は接続から読み切りまで 1 回 60 秒で打ち切る（W9。少しずつ返し続けるサイト 1 つで、その週のメールと公開が無くなっていた）。
+- 公開 JSON と文書から、非公開リポジトリ名・個人アカウント名・ローカルパス・個人名を外した（W7）。コミットの作者は中立名にした。過去の履歴の書き換えは本人の操作で行う（AI からは強制 push できない）。
+- pre-commit で鍵の形をした文字列を止める（`.githooks/check_staged_secrets.py`）。Actions の設定で「外部部品は SHA 固定のものだけ」を必須にした。
+- 引退した Claude ルーチン「FinPulse-News（月曜：5時）」は 2026-10-07 に無効化した（本文に個人アカウントの PAT が平文で入っていたため。PAT の失効は本人作業）。
+- 鍵が漏れたときの止め方は、金利調査ツール側の `docs/security-runbook.md`。このリポジトリが持つ鍵は `RESEND_API_KEY`（resend.com で Revoke）・`RATE_FEED_READ_KEY`（取得元の Deploy keys で Delete）と、cron-job.org の PAT `finpulse-cron-dispatch`（GitHub の Fine-grained tokens で Revoke）。
+- これより下の過去の記録にある「上流の `weekly_report.yml` が金利履歴を `git add` / push する」は 10/7 以前の旧方式。
+- **10/12（月）の確認点**: 週次 run の `import-rate-history / import` が成功し、`docs/data/rate-history.json` の先頭が 2026-10-12 になる。失敗していたら、金利調査ツールの run の `publish-rate-feed` が成功しているかを先に見る。
 
 ### 週次の起動を二段構えに変更（2026-09-30・cron-job.org は 10/3 に登録済み）
 
@@ -32,7 +48,7 @@
 - 目的: 公開 URL から個人名（アカウント名）を消す。旧 URL は転送されない。共有済みの相手への新 URL の連絡と、新 URL での表示の本人目視は完了。
 - 移管後に確認: Pages（built・新 URL で本体とデータ JSON すべて 200）、Secrets 3件、上流用デプロイキー、`git push --dry-run`。
 - 上流（報告自動化ツール）の `weekly_report.yml` の checkout 先も `shinyo-works/FinPulse-News` に変更済み。
-- Claude ルーチン「FinPulse-News（月曜：5時）」は本人判断で**有効のまま残す**（2026-09-30。いつでも変更できるように）。現状は dispatch が空振り（受け口の `repository_dispatch` は `05750ec` で外した）で、移管後は旧リポジトリ宛て・個人アカウント用 fine-grained PAT のため dispatch 手順でエラーが出るが、週次メール（Actions の定期実行）には影響しない。復活させる時は (1) workflow に `repository_dispatch` を戻す (2) 所有者 `shinyo-works` の fine-grained PAT を作る (3) ルーチン本文の URL（`docs/routine-prompt-template.md` は修正済み）とトークンを差し替える、の3点。
+- Claude ルーチン「FinPulse-News（月曜：5時）」は 2026-09-30 に本人判断で有効のまま残したが、2026-10-07 のセキュリティ監査で**無効化した**（本文に PAT が平文で入っていたため）。現状は dispatch が空振り（受け口の `repository_dispatch` は `05750ec` で外した）で、移管後は旧リポジトリ宛て・個人アカウント用 fine-grained PAT のため dispatch 手順でエラーが出るが、週次メール（Actions の定期実行）には影響しない。復活させる時は (1) workflow に `repository_dispatch` を戻す (2) 所有者 `shinyo-works` の fine-grained PAT を作る (3) ルーチン本文の URL（`docs/routine-prompt-template.md` は修正済み）とトークンを差し替える、の3点。
 
 ### UI/UX レビューの指摘を実装（2026-09-29・push済み。公開画面の本人目視は未）
 
@@ -224,7 +240,7 @@
 ## 環境メモ
 
 - 本番は GitHub Actions の `.github/workflows/weekly-news-report.yml`。週次は本命が cron-job.org から月曜08:05 JST、控えが schedule の月曜09:00 JST。手動実行は `workflow_dispatch`（成功済みの日に取り直すなら `force`）。
-- 秘密情報は `.env`（Git管理外）とGitHub Secretsに置く。workflowへ渡すのは `RESEND_API_KEY` と `REPORT_TO` だけ。
+- 秘密情報は `.env`（Git管理外）とGitHub Secretsに置く。workflowへ渡すのは `RESEND_API_KEY` と `REPORT_TO`（週次の収集）、`RATE_FEED_READ_KEY` と `RATE_FEED_REPOSITORY`（金利履歴の取り込みだけ）。このリポジトリへ書き込める Deploy key は置かない。
 - リポジトリはpublic。個人情報をコミットしない。コミットメールは設定済みのGitHub noreplyを維持する。
 - pre-commitをスキップしない。`core.hooksPath=.githooks` を使用する。
 - push先は `origin/main` のみ。参照専用 `../AI-trend-weather-News` は変更禁止。
