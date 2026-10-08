@@ -1,8 +1,9 @@
 """週次ワークフローを今回動かすかを判定する（GitHub Actions の guard ジョブから呼ぶ）。
 
-本命の起動は外部スケジューラ（cron-job.org）から月曜 08:05 JST の workflow_dispatch、
-控えは GitHub の schedule（月曜 09:00 JST）。GitHub の schedule は1〜3時間遅れるうえ
-発火しない回もあるため、定刻は外部に任せ、schedule は外部が止まった週の保険にする。
+本命の起動は外部スケジューラ（cron-job.org）から毎週月曜と毎月1日の 08:05 JST の
+workflow_dispatch、控えは GitHub の schedule（同じ2つの日の 09:00 JST）。GitHub の schedule は
+1〜3時間遅れるうえ発火しない回もあるため、定刻は外部に任せ、schedule は外部が止まった回の保険にする。
+判定は「今日（JST）」単位なので、1日が月曜に重なった日も1回だけ動く。
 
 判定（上から順に最初に当てはまったもの）:
   1. check_only=true   → 動かさない（cron-job.org からの接続テスト。収集・送信・公開をしない）

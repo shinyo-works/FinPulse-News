@@ -1,11 +1,13 @@
 name: 週次金融機関新着情報レポート
 
 on:
-  # 本命は外部スケジューラ（cron-job.org）から月曜 08:05 JST に workflow_dispatch で起動する
+  # 本命は外部スケジューラ（cron-job.org）から毎週月曜と毎月1日の 08:05 JST に workflow_dispatch で起動する
   # （GitHub の schedule は1〜3時間遅れるため。手順は docs/external-scheduler.md）。
-  # 下の schedule は外部が止まった週の控え。guard ジョブが「今日すでに成功済み」なら省略する。
+  # 下の schedule は外部が止まった回の控え。guard ジョブが「今日すでに成功済み」なら省略するので、
+  # 1日が月曜に重なった日も1回だけになる。
   schedule:
     - cron: '0 0 * * 1'  # 控え: 毎週月曜 00:00 UTC = 月曜 09:00 JST
+    - cron: '0 0 1 * *'  # 控え: 毎月1日 00:00 UTC = 1日 09:00 JST（金利の月初改定に合わせる）
   workflow_dispatch:       # 外部スケジューラと手動実行ボタン
     inputs:
       force:
@@ -50,8 +52,8 @@ jobs:
           INPUT_CHECK_ONLY: ${{ inputs.check_only }}
         run: python3 scripts/check_weekly_run.py
 
-  # 金利調査ツールの週次（月曜 07:00）が置いた公開用の金利データを取り込む。
-  # ニュースの判定（guard）とは独立に動く。取り込み済みの週なら何もしないので、何度動いても安全。
+  # 金利調査ツール（毎週月曜と毎月1日の 07:00）が置いた公開用の金利データを取り込む。
+  # ニュースの判定（guard）とは独立に動く。取り込み済みの調査日なら何もしないので、何度動いても安全。
   # 接続テスト（check_only）では動かさない。中身は import-rate-history.yml。
   import-rate-history:
     if: >-

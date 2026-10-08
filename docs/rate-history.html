@@ -352,7 +352,7 @@
     <div class="table-scroll" id="tableScroll">
       <div class="scrolling-notes">
         <div class="info-line"><b>各セル</b>＝列の日付に確認できた実金利（—＝未確認）　<span class="up"><b>↑</b> 前回調査より上昇</span>　<span class="down"><b>↓</b> 前回調査より低下</span>　<b>変更なし</b>＝表示中の全商品で金利が動いていない期間　<span class="legend-best">金色の下線</span>・<b>最安</b>＝その調査日に表示中の商品で最も低い金利</div>
-        <div class="info-line"><b>掲載範囲</b>＝<span id="coverageScope">公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）</span>　<span id="coverage"></span></div>
+        <div class="info-line"><b>掲載範囲</b>＝<span id="coverageScope">公式サイトから毎週月曜と毎月1日に自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）</span>　<span id="coverage"></span></div>
         <div id="guaranteeNote" class="info-line" hidden></div>
         <div id="sourceNote" class="info-line"></div>
       </div>
@@ -375,7 +375,7 @@
         dataUrl: "./data/rate-history.json",
         title: "十勝金融機関News｜金利情報",
         subtitleFull: "帯広エリア 金融機関の住宅ローン金利を、共通の調査日で比較できます。左が最新、右が過去です。",
-        coverageScope: "公式サイトから毎週自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）",
+        coverageScope: "公式サイトから毎週月曜と毎月1日に自動取得できる機関のみ（手動入力のみずほ銀行・JAめむろ・JA木野は対象外）",
         // 住宅ローンは保証料の扱いが機関ごとに割れる（同じ北陸銀行でも定額型は別途・定率型は込み）。
         // 金利だけを並べると実質の負担を読み違えるため、商品ごとの条件を機関名の下に添える。
         featuresUrl: "./data/loan-features.json",
