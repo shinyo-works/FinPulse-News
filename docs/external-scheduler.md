@@ -18,10 +18,10 @@
      → 何もしないで終わる（メールも送らない）                 → 収集 → メール → 公開
 ```
 
-- **毎月1日も同じ流れで動く**（2026-10-08 追加）。本命は cron-job.org の `FinPulse 月初（1日 8:05）`、
-  控えは GitHub の schedule（1日 09:00 JST）。金利の取り込み（import-rate-history）も 1日 08:05 の中で動き、
-  控えは 1日 11:00 JST。1日が月曜に重なった日は、判定が「今日すでに成功済み」で2回目を省略するので1回だけ。
-  上流の金利調査ツールも毎月1日 07:00 に動く（向こうの `docs/external-scheduler.md`）。
+- **毎月1日も同じ流れで動く**（2026-10-08 追加）。本命は cron-job.org の `FinPulse 月初（1日 9:20）`、
+  控えは GitHub の schedule（1日 10:30 JST）。金利の取り込み（import-rate-history）も 1日 09:20 の中で動き、
+  控えは 1日 12:00 JST。1日だけ遅いのは、銀行が改定後の金利を載せるのが営業開始前後になるため（本人決定）。1日が月曜に重なった日は、判定が「今日すでに成功済み」で2回目を省略するので1回だけ。
+  上流の金利調査ツールは毎月1日 09:00 に動く（約6分で終わる）（向こうの `docs/external-scheduler.md`）。
 - **本命は cron-job.org**。GitHub の `schedule` は順番待ちで 1〜3 時間遅れ、発火しない回もあるため、
   定刻は外部に任せる（kobetukabu・FX-prudential と同じ方式）。
 - **控えは GitHub の `schedule`（月曜 09:00 JST）**。cron-job.org が止まった週・PAT が切れた週・
@@ -144,8 +144,8 @@ Request body（`{"ref":"main"}`）は週次と同じ。
 
 | 項目 | 入れる値 |
 | --- | --- |
-| Title | `FinPulse 月初（1日 8:05）` |
-| Execution schedule | 分 `5`、時 `8`、**日 `1` だけ**、月 すべて、**曜日 すべて** |
+| Title | `FinPulse 月初（1日 9:20）` |
+| Execution schedule | **Every 1. of the month at 9:20**（毎月1日の 9:20） |
 
 合鍵（PAT）を作り直したときは、週次と月初の**両方のジョブ**の `Authorization` を差し替える。
 

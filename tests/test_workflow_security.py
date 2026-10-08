@@ -57,11 +57,11 @@ class WorkflowSecurityTest(unittest.TestCase):
         return match.group(1)
 
     def test_main_trigger_is_external_dispatch_and_schedule_is_fallback(self):
-        # 本命は cron-job.org の workflow_dispatch（毎週月曜と毎月1日の 08:05 JST）、
-        # schedule は同じ2つの日の 09:00 JST の控え。
+        # 本命は cron-job.org の workflow_dispatch（毎週月曜 08:05・毎月1日 09:20 JST）、
+        # schedule は月曜 09:00・1日 10:30 JST の控え。
         self.assertRegex(
             self.workflow,
-            r"schedule:\s*\n\s*- cron: '0 0 \* \* 1'[^\n]*\n\s*- cron: '0 0 1 \* \*'",
+            r"schedule:\s*\n\s*- cron: '0 0 \* \* 1'[^\n]*\n\s*- cron: '30 1 1 \* \*'",
         )
         self.assertEqual(len(re.findall(r"- cron:", self.workflow)), 2)
         for name in ("force", "check_only"):

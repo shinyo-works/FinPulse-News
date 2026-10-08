@@ -1,7 +1,7 @@
 """週次ワークフローを今回動かすかを判定する（GitHub Actions の guard ジョブから呼ぶ）。
 
-本命の起動は外部スケジューラ（cron-job.org）から毎週月曜と毎月1日の 08:05 JST の
-workflow_dispatch、控えは GitHub の schedule（同じ2つの日の 09:00 JST）。GitHub の schedule は
+本命の起動は外部スケジューラ（cron-job.org）から毎週月曜 08:05 JST と毎月1日 09:20 JST の
+workflow_dispatch、控えは GitHub の schedule（月曜 09:00・1日 10:30 JST）。GitHub の schedule は
 1〜3時間遅れるうえ発火しない回もあるため、定刻は外部に任せ、schedule は外部が止まった回の保険にする。
 判定は「今日（JST）」単位なので、1日が月曜に重なった日も1回だけ動く。
 
