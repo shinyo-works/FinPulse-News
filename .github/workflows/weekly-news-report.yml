@@ -1,13 +1,14 @@
 name: 週次金融機関新着情報レポート
 
 on:
-  # 本命は外部スケジューラ（cron-job.org）から毎週月曜 08:05 JST と毎月1日 09:20 JST に workflow_dispatch で起動する
+  # 本命は外部スケジューラ（cron-job.org）から毎週月曜 08:05 JST と毎月1〜7日 09:20 JST に workflow_dispatch で起動する
   # （GitHub の schedule は1〜3時間遅れるため。手順は docs/external-scheduler.md）。
+  # 月初の回は月の最初の銀行営業日だけ動く（1日が土日祝なら翌営業日）。1〜7日のうち対象外の日は guard が止める。
   # 下の schedule は外部が止まった回の控え。guard ジョブが「今日すでに成功済み」なら省略するので、
-  # 1日が月曜に重なった日も1回だけになる。
+  # 月初の営業日が月曜に重なった日も1回だけになる。
   schedule:
     - cron: '0 0 * * 1'  # 控え: 毎週月曜 00:00 UTC = 月曜 09:00 JST
-    - cron: '30 1 1 * *'  # 控え: 毎月1日 01:30 UTC = 1日 10:30 JST（金利の月初改定に合わせる）
+    - cron: '30 1 1-7 * *'  # 控え: 毎月1〜7日 01:30 UTC = 10:30 JST（最初の営業日だけ動く。scripts/check_weekly_run.py の MONTHLY_CRON と同じ文字列）
   workflow_dispatch:       # 外部スケジューラと手動実行ボタン
     inputs:
       force:
@@ -16,6 +17,10 @@ on:
         default: false
       check_only:
         description: '起動の確認だけして、収集・送信・公開はしない（外部スケジューラの接続テスト用）'
+        type: boolean
+        default: false
+      monthly:
+        description: '月初の回として起動する（cron-job.org の月初ジョブ用。月の最初の営業日以外は何もしない）'
         type: boolean
         default: false
 
@@ -50,9 +55,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           INPUT_FORCE: ${{ inputs.force }}
           INPUT_CHECK_ONLY: ${{ inputs.check_only }}
+          INPUT_MONTHLY: ${{ inputs.monthly }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
         run: python3 scripts/check_weekly_run.py
 
-  # 金利調査ツール（毎週月曜 07:00・毎月1日 09:00）が置いた公開用の金利データを取り込む。
+  # 金利調査ツール（毎週月曜 07:00・毎月の最初の営業日 09:00）が置いた公開用の金利データを取り込む。
   # ニュースの判定（guard）とは独立に動く。取り込み済みの調査日なら何もしないので、何度動いても安全。
   # 接続テスト（check_only）では動かさない。中身は import-rate-history.yml。
   import-rate-history:

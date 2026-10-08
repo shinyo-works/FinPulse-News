@@ -1,15 +1,18 @@
 """週次ワークフローを今回動かすかを判定する（GitHub Actions の guard ジョブから呼ぶ）。
 
-本命の起動は外部スケジューラ（cron-job.org）から毎週月曜 08:05 JST と毎月1日 09:20 JST の
-workflow_dispatch、控えは GitHub の schedule（月曜 09:00・1日 10:30 JST）。GitHub の schedule は
+本命の起動は外部スケジューラ（cron-job.org）から毎週月曜 08:05 JST と毎月1〜7日 09:20 JST の
+workflow_dispatch、控えは GitHub の schedule（月曜 09:00・1〜7日 10:30 JST）。GitHub の schedule は
 1〜3時間遅れるうえ発火しない回もあるため、定刻は外部に任せ、schedule は外部が止まった回の保険にする。
-判定は「今日（JST）」単位なので、1日が月曜に重なった日も1回だけ動く。
+月初の回は「月の最初の銀行営業日」だけ動かす（1日が土日祝なら翌営業日。本人依頼 2026-10-08）。
+cron-job.org の月初ジョブは本文で monthly=true を渡し、1〜7日のうち最初の営業日以外はここで止める。
+判定は「今日（JST）」単位なので、月初の営業日が月曜に重なった日も1回だけ動く。
 
 判定（上から順に最初に当てはまったもの）:
   1. check_only=true   → 動かさない（cron-job.org からの接続テスト。収集・送信・公開をしない）
   2. force=true        → 動かす（手動の再実行）
-  3. 今日（JST）すでに「収集と公開までやり遂げた」実行がある → 動かさない（本命が済んだ週の控えを止める）
-  4. それ以外          → 動かす
+  3. 月初の回で、今日が月の最初の営業日でない → 動かさない
+  4. 今日（JST）すでに「収集と公開までやり遂げた」実行がある → 動かさない（本命が済んだ週の控えを止める）
+  5. それ以外          → 動かす
 「やり遂げた」は実行全体の成否ではなく、収集ジョブと公開ジョブの両方が success かで見る。
 接続テストや省略した実行も、ジョブが skipped のまま実行全体は success で終わるため、
 全体の成否で見ると同じ日の本命まで止めてしまう。
@@ -25,7 +28,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 JST = timezone(timedelta(hours=9))
 API_ROOT = "https://api.github.com"
@@ -33,6 +36,12 @@ WORKFLOW_FILE = "weekly-news-report.yml"
 # 「やり遂げた」と数えるのに success が要るジョブ（workflow の jobs のキー名）
 REQUIRED_JOBS = ("collect-and-report", "publish-results")
 REQUEST_TIMEOUT_SECONDS = 20
+# 月初の回の控え（workflow の schedule と同じ文字列。github.event.schedule で届く）
+MONTHLY_CRON = "30 1 1-7 * *"
+# 銀行の休業日になる祝日のうち、月の1〜7日に来うるもの（元日・憲法記念日・みどりの日・こどもの日・文化の日）
+EARLY_MONTH_HOLIDAYS = ((1, 1), (5, 3), (5, 4), (5, 5), (11, 3))
+# 年末年始の銀行休業日
+NEW_YEAR_CLOSED_DAYS = ((12, 31), (1, 1), (1, 2), (1, 3))
 
 
 def jst_day_start_utc(now):
@@ -40,6 +49,40 @@ def jst_day_start_utc(now):
     jst_now = now.astimezone(JST)
     start = jst_now.replace(hour=0, minute=0, second=0, microsecond=0)
     return start.astimezone(timezone.utc)
+
+
+def early_month_holidays(year):
+    """その年の EARLY_MONTH_HOLIDAYS と、それが日曜に重なった時の振替休日を返す。"""
+    holidays = {date(year, month, day) for month, day in EARLY_MONTH_HOLIDAYS}
+    for holiday in sorted(holidays):
+        if holiday.weekday() == 6:
+            substitute = holiday + timedelta(days=1)
+            while substitute in holidays:
+                substitute += timedelta(days=1)
+            holidays.add(substitute)
+    return holidays
+
+
+def is_bank_holiday(day):
+    """銀行の休業日か（土日・祝日・年末年始 12/31〜1/3）。
+
+    祝日は月の最初の営業日を決めるのに効くものだけを持つ。成人の日（1月第2月曜）のように
+    8日以降にしか来ない祝日は、1〜7日のどこかに必ず営業日があるので判定に影響しない。
+    即位の礼のような臨時の祝日は持たない（来たらその月だけ1日早く動く）。
+    """
+    if day.weekday() >= 5:
+        return True
+    if (day.month, day.day) in NEW_YEAR_CLOSED_DAYS:
+        return True
+    return day in early_month_holidays(day.year)
+
+
+def first_business_day(year, month):
+    """その月の最初の銀行営業日を返す（最も遅くて7日）。"""
+    day = date(year, month, 1)
+    while is_bank_holiday(day):
+        day += timedelta(days=1)
+    return day
 
 
 def is_true(value):
@@ -76,16 +119,29 @@ def did_real_work(jobs):
     return all(conclusions.get(name) == "success" for name in REQUIRED_JOBS)
 
 
-def decide(*, check_only, force, runs, current_run_id, now, fetch_jobs):
+def is_monthly_trigger(monthly_input, event_schedule):
+    """月初の回の起動か（cron-job.org の monthly=true か、月初の控えの schedule）。"""
+    return is_true(monthly_input) or str(event_schedule).strip() == MONTHLY_CRON
+
+
+def decide(*, check_only, force, runs, current_run_id, now, fetch_jobs, monthly=False):
     """(動かすか, 理由) を返す。
 
     runs が None なら一覧の取得に失敗したことを表す。fetch_jobs(run_id) はその実行の
-    ジョブ一覧を返し、取得に失敗したら None を返す。
+    ジョブ一覧を返し、取得に失敗したら None を返す。monthly は月初の回の起動かどうか。
     """
     if is_true(check_only):
         return False, "接続確認のみ（check_only）。収集・送信・公開は行いません。"
     if is_true(force):
         return True, "手動の強制実行（force）です。"
+    if monthly:
+        today = now.astimezone(JST).date()
+        first = first_business_day(today.year, today.month)
+        if today != first:
+            return False, (
+                f"月初の回は月の最初の営業日（{first.month}/{first.day}）だけ動きます。"
+                "今日は対象外のため省略します。"
+            )
     if runs is None:
         return True, "実行一覧を取得できなかったため、配信を抜かさないよう実行します。"
     day_start = jst_day_start_utc(now)
@@ -181,6 +237,9 @@ def main():
         current_run_id=os.environ.get("GITHUB_RUN_ID", ""),
         now=now,
         fetch_jobs=lambda run_id: fetch_jobs(repository, token, run_id),
+        monthly=is_monthly_trigger(
+            os.environ.get("INPUT_MONTHLY", ""), os.environ.get("EVENT_SCHEDULE", "")
+        ),
     )
     print(("::notice::" if not should_run else "") + reason)
     write_outputs(should_run, reason)
