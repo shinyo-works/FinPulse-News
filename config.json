@@ -29,9 +29,10 @@
       "name": "北海道銀行",
       "url": "https://www.hokkaidobank.co.jp/info/",
       "scraper": "hokkaidobank_info",
-      "include_keywords": ["取り扱い開始", "提供開始", "金融支援"],
+      "include_keywords": ["取り扱い開始", "提供開始"],
       "exclude_rules": [
         { "keyword": "/company/curling/", "target": "url" },
+        { "keyword": "金融支援" },
         { "keyword": "投資信託" },
         { "keyword": "規定" },
         { "keyword": "債券" },

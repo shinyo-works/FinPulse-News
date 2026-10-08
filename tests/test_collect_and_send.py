@@ -1291,7 +1291,6 @@ class RepositoryKeywordRequestTest(unittest.TestCase):
             # 北海道銀行のニュースリリース（本人指示 2026-10-08 で対象化）
             ("北海道銀行", "「年末ジャンボ宝くじ付き定期預金」の取り扱い開始について"),
             ("北海道銀行", "「資金管理 PayMaster」のサービス提供開始について"),
-            ("北海道銀行", "「企業価値担保権」を活用した金融支援の実施について"),
         ]
         for name, title in cases:
             with self.subTest(name=name, title=title):
@@ -1310,6 +1309,8 @@ class RepositoryKeywordRequestTest(unittest.TestCase):
             ("北洋銀行", "インターネットバンキングの登録に関する不審電話にご注意願います！", "不審電話"),
             ("十勝信用組合", "当組合を騙ったフィッシングへの注意喚起について", "フィッシング"),
             ("北海道銀行", "「寄付金」と称する詐欺の取り扱い開始のお知らせ", "詐欺"),
+            # 企業価値担保権などの個社向け金融支援の発表は除外（本人指示 2026-10-08）。
+            ("北海道銀行", "「企業価値担保権」を活用した金融支援の実施について", "金融支援"),
         ]
         for name, title, keyword in cases:
             with self.subTest(name=name, title=title):
