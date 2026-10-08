@@ -200,8 +200,16 @@ class ValidationTest(unittest.TestCase):
         self.assertTrue(common)
         collector.normalize_config(config)
         for institution in config["institutions"]:
+            if institution.get("include_all"):
+                # 全件通過の機関（JA帯広かわにし）は語で判定しないため、何も合成しない。
+                self.assertEqual([], institution["include_keywords"])
+                self.assertEqual([], institution["common_exclude_keywords"])
+                self.assertEqual([], institution["priority_keywords"])
+                continue
             # 合成後の通過語が空だと apply_filters は全件を通すため、必ず共通語を含む。
             self.assertEqual(common, institution["include_keywords"][: len(common)])
+            self.assertEqual(config["common_exclude_keywords"], institution["common_exclude_keywords"])
+            self.assertEqual(config["common_priority_keywords"], institution["priority_keywords"])
 
     def test_rejects_duplicate_name_and_unknown_scraper(self):
         duplicate = minimal_config()
@@ -630,15 +638,11 @@ class JaObihirokawanisiTest(unittest.TestCase):
             self.institution,
             self.config["star_keywords"],
         )
-        self.assertEqual(
-            [
-                "各種手数料改定のお知らせ（再案内）",
-                "夏の定期貯金 金利上乗せキャンペーン",
-                "マイカーローン金利情報",
-            ],
-            [item["title"] for item in passed_all],
-        )
-        self.assertEqual(2, len(excluded))
+        # 本人指示（2026-10-08）: JA帯広かわにしの金融ニュースは除外しない。
+        # 以前は「規定」「不正」で落としていた記事も通す。
+        self.assertTrue(self.institution["include_all"])
+        self.assertEqual([item["title"] for item in items], [item["title"] for item in passed_all])
+        self.assertEqual([], excluded)
 
         with mock.patch.object(
             collector,
@@ -647,15 +651,18 @@ class JaObihirokawanisiTest(unittest.TestCase):
         ):
             passed = collector.filter_by_lookback(passed_all, 90)
 
+        # 期間（90日）の絞り込みだけは他機関と同じく効く。
         self.assertEqual(
             [
                 "各種手数料改定のお知らせ（再案内）",
+                "「APIサービスに関する規定」にかかる改正について",
+                "預貯金等の不正な払戻しへのJAバンクの対応について",
                 "夏の定期貯金 金利上乗せキャンペーン",
             ],
             [item["title"] for item in passed],
         )
         self.assertFalse(passed[0].get("star", False))
-        self.assertTrue(passed[1]["star"])
+        self.assertTrue(passed[3]["star"])
         self.assertEqual("utf-8", self.institution["encoding"])
         self.assertEqual("ja_obihirokawanisi", self.institution["scraper"])
 
@@ -1089,6 +1096,416 @@ class ViewerJsonWriteTest(unittest.TestCase):
             for name, content in existing.items():
                 self.assertEqual(content, (data_dir / name).read_bytes())
             self.assertFalse((data_dir.parent / "viewer-json-ready.txt").exists())
+
+
+# 北海道銀行 お知らせ一覧（/info/）の実構造を縮めたもの（2026-10-08 取得）。
+HOKKAIDOBANK_INFO_HTML = """
+<nav class="c-tab c-tab-column-2"><ul class="c-tab-list">
+  <li class="c-tab-list__item js-tab" data-tab="1"><span class="c-tab-list__item-inner">お知らせ</span></li>
+  <li class="c-tab-list__item js-tab" data-tab="2"><span class="c-tab-list__item-inner">ニュース<br>リリース</span></li>
+  <li class="c-tab-list__item js-tab" data-tab="3"><span class="c-tab-list__item-inner">EB情報</span></li>
+  <li class="c-tab-list__item js-tab" data-tab="4"><span class="c-tab-list__item-inner">カーリング</span></li>
+</ul></nav>
+<div class="c-tab-area">
+  <div class="c-tab-area__item js-tab-area" data-tab="1"><div class="tab-content"><ul class="p-news-list">
+    <li><a href="/info/uploads/a0bb.pdf" target="_blank">
+      <div class="news-date"><p>2026.09.14</p><p class="category kojin">個人のお客さま</p><p class="category houjin">法人のお客さま</p></div>
+      <p class="news-lead">各種預金規定改定のお知らせ</p></a></li>
+    <li><a href="/info/6148.html">
+      <div class="news-date"><p>2026.09.30</p><p class="category kojin">個人のお客さま</p></div>
+      <p class="news-lead">「エコノミクス甲子園 北海道大会」エントリー締切延長のお知らせ</p></a></li>
+  </ul></div></div>
+  <div class="c-tab-area__item js-tab-area" data-tab="2"><div class="tab-content"><ul class="p-news-list">
+    <li><a href="/business/news/uploads/d441.pdf" target="_blank">
+      <div class="news-date"><p>2026.10.06</p><p class="category kojin">個人のお客さま</p></div>
+      <p class="news-lead">「こどもNISAプレスタート応援キャンペーン」の実施について</p></a></li>
+  </ul></div></div>
+  <div class="c-tab-area__item js-tab-area" data-tab="3"><div class="tab-content"><ul class="p-news-list">
+    <li><a href="/ebinfo/6112.html">
+      <div class="news-date"><p>2026.09.25</p><p class="category houjin">法人のお客さま</p></div>
+      <p class="news-lead">道銀ビジネスWEBサービスにおける納付エラー発生のお知らせ</p></a></li>
+  </ul></div></div>
+  <div class="c-tab-area__item js-tab-area" data-tab="4"><div class="tab-content"><ul class="p-news-list">
+    <li><a href="/company/curling/6082.html">
+      <div class="news-date"><p>2026.09.09</p><p class="category kojin">個人のお客さま</p></div>
+      <p class="news-lead">北海道銀行Lilersは、カナダ遠征へ出発のお知らせ</p></a></li>
+  </ul></div></div>
+</div>
+"""
+
+
+# 帯広信用金庫 お知らせ一覧の実構造を縮めたもの（2026-10-08 取得）。
+# 「⼈」は康熙部首（U+2F08）。サイトの表記のまま残している。
+OBISHIN_NEWS_HTML = """
+<ul>
+  <li class="cat-general"><dl>
+    <dt>2026年09月03日 <a href="/obishin/news?category_id=2" class="cat">お知らせ</a></dt>
+    <dd><a href="/obishin/pdf/news/2026.09.03-tokachi_jinjibu.pdf">帯広信⽤⾦庫「とかちの⼈事部」の取り組み開始について</a></dd>
+  </dl></li>
+  <li class="cat-wb"><dl>
+    <dt>2026年08月19日 <a href="/obishin/news?category_id=4" class="cat">インターネットバンキング</a></dt>
+    <dd><a href="/obishin/pdf/news/2026.08.19-limit.pdf">WEBバンキングサービス 振込限度額等引き下げについて</a></dd>
+  </dl></li>
+  <li class="cat-gallery"><dl>
+    <dt>2026年09月15日 <a href="/obishin/news?category_id=6" class="cat">ふれあいギャラリー</a></dt>
+    <dd><a href="/obishin/pdf/news/2026.09.15-fureaigallery.pdf">おびしんふれあいギャラリー「書朋会書展」開催のお知らせ</a></dd>
+  </dl></li>
+</ul>
+<nav><a href="/obishin/net/">インターネットバンキング</a></nav>
+"""
+
+
+class CommonKeywordConfigTest(unittest.TestCase):
+    def test_common_exclude_and_priority_are_distributed(self):
+        config = minimal_config()
+        config["common_exclude_keywords"] = ["書展"]
+        config["common_priority_keywords"] = ["利用規定"]
+        config["institutions"].append({
+            "name": "全件銀行",
+            "url": "https://example.com/all/",
+            "include_all": True,
+            "include_keywords": [],
+            "exclude_rules": [],
+        })
+        collector.validate_config(config)
+        collector.normalize_config(config)
+
+        normal, include_all = config["institutions"]
+        self.assertEqual(["書展"], normal["common_exclude_keywords"])
+        self.assertEqual(["利用規定"], normal["priority_keywords"])
+        self.assertEqual([], include_all["common_exclude_keywords"])
+        self.assertEqual([], include_all["priority_keywords"])
+
+    def test_rejects_invalid_common_keywords_and_include_all(self):
+        for key in ("common_exclude_keywords", "common_priority_keywords"):
+            config = minimal_config()
+            config[key] = ["書展", ""]
+            with self.assertRaisesRegex(ValueError, key):
+                collector.validate_config(config)
+
+        config = minimal_config()
+        config["institutions"][0]["include_all"] = "yes"
+        with self.assertRaisesRegex(ValueError, "真偽値"):
+            collector.validate_config(config)
+
+        # 全件通過なのに語が書いてあると「この語で絞っている」と誤読されるため拒否する。
+        config = minimal_config()
+        config["institutions"][0]["include_all"] = True
+        with self.assertRaisesRegex(ValueError, "include_all"):
+            collector.validate_config(config)
+
+
+class FilterPrecedenceTest(unittest.TestCase):
+    def setUp(self):
+        self.institution = {
+            "name": "テスト銀行",
+            "url": "https://example.com/news/",
+            "include_keywords": ["金利"],
+            "exclude_rules": [{"keyword": "規定"}, {"keyword": "詐欺"}],
+            "common_exclude_keywords": ["子会社化"],
+            "priority_keywords": ["利用規定", "とかちの人事部", "インターネットバンキング"],
+        }
+
+    def judge(self, title, date="2026-09-01", **extra):
+        passed, excluded = collector.apply_filters(
+            [{"date": date, "title": title, "url": "https://example.com/1", **extra}],
+            self.institution,
+            ["金利"],
+        )
+        return ("通過", "") if passed else ("除外", excluded[0].get("exclude_keyword", ""))
+
+    def test_priority_beats_institution_exclude_rules(self):
+        self.assertEqual(("通過", ""), self.judge("北洋銀行アプリ「利用規定」の一部変更について"))
+        self.assertEqual(("除外", "規定"), self.judge("API規定の改定について"))
+        # 共通の除外語は優先語より強い（詐欺の注意喚起はインターネットバンキング関連でも除外）。
+        self.institution["common_exclude_keywords"].append("詐欺")
+        self.assertEqual(("除外", "詐欺"), self.judge("インターネットバンキングを狙った詐欺にご注意ください"))
+
+    def test_common_exclude_beats_priority_and_include(self):
+        self.assertEqual(("除外", "子会社化"), self.judge("株式会社の完全子会社化に関する利用規定のお知らせ"))
+        self.assertEqual(("除外", "子会社化"), self.judge("子会社化と金利のお知らせ"))
+
+    def test_priority_needs_a_date_to_skip_menu_links(self):
+        # メニューの「インターネットバンキング」には日付が無い。通常の判定に回り、通過語が無いので除外。
+        self.assertEqual(("除外", ""), self.judge("インターネットバンキング TOP", date=""))
+
+    def test_matching_absorbs_lookalike_characters(self):
+        # 帯広信金は「⼈」（康熙部首 U+2F08）で書く。NFKC で「人」とそろえて照合する。
+        self.assertEqual(("通過", ""), self.judge("帯広信⽤⾦庫「とかちの⼈事部」の取り組み開始について"))
+        # 全角英字も半角とそろう（除外語を半角で書いても全角の記事名に効く）。
+        self.institution["exclude_rules"] = [{"keyword": "ATM"}]
+        self.assertEqual(("除外", "ATM"), self.judge("ＡＴＭ金利のお知らせ"))
+
+    def test_priority_also_reads_site_categories(self):
+        self.assertEqual(("除外", ""), self.judge("WEBバンキングサービス 振込限度額等引き下げについて"))
+        self.assertEqual(
+            ("通過", ""),
+            self.judge("WEBバンキングサービス 振込限度額等引き下げについて", categories=["インターネットバンキング"]),
+        )
+
+    def test_include_all_passes_everything_and_keeps_star(self):
+        institution = {"name": "全件", "include_all": True, "include_keywords": [], "exclude_rules": []}
+        items = [
+            {"date": "2026-09-01", "title": "「APIサービスに関する規定」にかかる改正について"},
+            {"date": "2026-09-01", "title": "預貯金等の不正な払戻しへの対応について"},
+            {"date": "2026-09-01", "title": "貯金金利の引き上げのご案内"},
+        ]
+        passed, excluded = collector.apply_filters(items, institution, ["金利"])
+        self.assertEqual(3, len(passed))
+        self.assertEqual([], excluded)
+        self.assertTrue(passed[2]["star"])
+        self.assertNotIn("star", passed[0])
+
+
+class RepositoryKeywordRequestTest(unittest.TestCase):
+    """本人指示（2026-10-08）の対象語・除外語を、実在の記事名で固定する。"""
+
+    def setUp(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        self.config = collector.normalize_config(json.loads(
+            (repository_root / "config.json").read_text(encoding="utf-8")
+        ))
+        self.by_name = {item["name"]: item for item in self.config["institutions"]}
+
+    def judge(self, name, title, date="2026-09-01", **extra):
+        passed, excluded = collector.apply_filters(
+            [{"date": date, "title": title, "url": "https://example.com/1", **extra}],
+            self.by_name[name],
+            self.config["star_keywords"],
+        )
+        return "通過" if passed else f"除外（{excluded[0].get('exclude_keyword', '')}）"
+
+    def test_requested_topics_pass_even_where_rules_excluded_them(self):
+        cases = [
+            ("帯広信用金庫", "帯広信⽤⾦庫「とかちの⼈事部」の取り組み開始について"),
+            ("帯広信用金庫", "相続専用定期預金の取扱開始について"),
+            ("帯広信用金庫", "帯広信用金庫ディスクロージャー2026を公開しました"),
+            ("北海道銀行", "各種預金規定改定のお知らせ"),
+            ("北海道銀行", "「どうぎんアプリご利用規定」等の改定について"),
+            ("北洋銀行", "北洋銀行アプリ「利用規定」の一部変更について"),
+            ("北洋銀行", "北洋ダイレクト（個人向けインターネットバンキング）の終了について"),
+            ("十勝信用組合", "2026年版ディスクロージャー誌を掲載いたしました"),
+            ("十勝信用組合", "定期性預金規定の改訂について"),
+            ("十勝信用組合", "インターネットバンキングの画面デザインの変更について"),
+            ("JA木野", "ペイジー口座振替受付サービス利用規定にかかる改正について"),
+            # 北海道銀行のニュースリリース（本人指示 2026-10-08 で対象化）
+            ("北海道銀行", "「年末ジャンボ宝くじ付き定期預金」の取り扱い開始について"),
+            ("北海道銀行", "「資金管理 PayMaster」のサービス提供開始について"),
+            ("北海道銀行", "「企業価値担保権」を活用した金融支援の実施について"),
+        ]
+        for name, title in cases:
+            with self.subTest(name=name, title=title):
+                self.assertEqual("通過", self.judge(name, title))
+
+    def test_requested_exclusions_and_unrelated_topics_are_excluded(self):
+        cases = [
+            ("帯広信用金庫", "おびしんふれあいギャラリー「書朋会書展」開催のお知らせ", "書展"),
+            ("帯広信用金庫", "おびしんふれあいギャラリー「白華個展」開催のお知らせ", "ふれあいギャラリー"),
+            ("北海道銀行", "東京都水道局 水道料金等の収納に関するお知らせ", "東京都水道局"),
+            ("北海道銀行", "「エコノミクス甲子園 北海道大会」エントリー締切延長のお知らせ", "エコノミクス甲子園"),
+            ("北洋銀行", "キャリアバンク株式会社の完全子会社化に関するお知らせ", "子会社化"),
+            ("JAおとふけ", "ホクレンSS公式アプリのリリース及びキャンペーン実施のお知らせについて", "ホクレン"),
+            # 詐欺・不審電話の注意喚起は優先語（インターネットバンキング）より強く除外する（本人指示 2026-10-08）。
+            ("北洋銀行", "事業者向けインターネットバンキングを狙った詐欺にご注意ください", "詐欺"),
+            ("北洋銀行", "インターネットバンキングの登録に関する不審電話にご注意願います！", "不審電話"),
+            ("十勝信用組合", "当組合を騙ったフィッシングへの注意喚起について", "フィッシング"),
+            ("北海道銀行", "「寄付金」と称する詐欺の取り扱い開始のお知らせ", "詐欺"),
+        ]
+        for name, title, keyword in cases:
+            with self.subTest(name=name, title=title):
+                self.assertEqual(f"除外（{keyword}）", self.judge(name, title))
+
+    def test_ja_obihirokawanisi_excludes_nothing(self):
+        for title in (
+            "「APIサービスに関する規定」にかかる改正について",
+            "預貯金等の不正な払戻しへのJAバンクの対応について",
+            "組合員・利用者本位の業務運営に関する令和7年度取組状況について",
+        ):
+            with self.subTest(title=title):
+                self.assertEqual("通過", self.judge("JA帯広かわにし", title))
+
+    def test_menu_link_named_internet_banking_stays_excluded(self):
+        self.assertEqual("除外（）", self.judge("北海道銀行", "インターネットバンキング TOP", date=""))
+
+
+class HokkaidobankInfoTest(unittest.TestCase):
+    URL = "https://www.hokkaidobank.co.jp/info/"
+
+    def test_reads_the_same_tabs_as_the_top_page_all(self):
+        items = collector.scrape_hokkaidobank_info(HOKKAIDOBANK_INFO_HTML, self.URL)
+
+        self.assertEqual(
+            [
+                ("2026-09-14", "各種預金規定改定のお知らせ", "https://www.hokkaidobank.co.jp/info/uploads/a0bb.pdf"),
+                ("2026-09-30", "「エコノミクス甲子園 北海道大会」エントリー締切延長のお知らせ",
+                 "https://www.hokkaidobank.co.jp/info/6148.html"),
+                ("2026-10-06", "「こどもNISAプレスタート応援キャンペーン」の実施について",
+                 "https://www.hokkaidobank.co.jp/business/news/uploads/d441.pdf"),
+                ("2026-09-09", "北海道銀行Lilersは、カナダ遠征へ出発のお知らせ",
+                 "https://www.hokkaidobank.co.jp/company/curling/6082.html"),
+            ],
+            [(item["date"], item["title"], item["url"]) for item in items],
+        )
+        # EB情報はトップページの ALL に含まれない。
+        self.assertNotIn("納付エラー", " ".join(item["title"] for item in items))
+        config = json.loads(
+            (Path(__file__).resolve().parents[1] / "config.json").read_text(encoding="utf-8")
+        )
+        institution = next(item for item in config["institutions"] if item["name"] == "北海道銀行")
+        self.assertEqual("hokkaidobank_info", institution["scraper"])
+        self.assertEqual(self.URL, institution["url"])
+
+    def test_curling_is_collected_but_excluded_by_url(self):
+        config = collector.normalize_config(json.loads(
+            (Path(__file__).resolve().parents[1] / "config.json").read_text(encoding="utf-8")
+        ))
+        institution = next(item for item in config["institutions"] if item["name"] == "北海道銀行")
+        items = collector.scrape_hokkaidobank_info(HOKKAIDOBANK_INFO_HTML, self.URL)
+        passed, excluded = collector.apply_filters(items, institution, config["star_keywords"])
+
+        self.assertEqual(
+            ["各種預金規定改定のお知らせ", "「こどもNISAプレスタート応援キャンペーン」の実施について"],
+            [item["title"] for item in passed],
+        )
+        self.assertEqual(
+            ["エコノミクス甲子園", "/company/curling/"],
+            [item["exclude_keyword"] for item in excluded],
+        )
+
+    def test_missing_tabs_are_extraction_failures(self):
+        without_news_release = HOKKAIDOBANK_INFO_HTML.replace("ニュース<br>リリース", "おしらせ２")
+        with self.assertRaisesRegex(collector.ExtractionError, "ニュースリリース"):
+            collector.scrape_hokkaidobank_info(without_news_release, self.URL)
+        with self.assertRaisesRegex(collector.ExtractionError, "タブ"):
+            collector.scrape_hokkaidobank_info("<html><body>改装中</body></html>", self.URL)
+
+    def test_legacy_titles_from_generic_extraction_are_cleaned(self):
+        self.assertEqual(
+            "各種預金規定改定のお知らせ",
+            collector.clean_report_title("2026.09.14個人のお客さま法人のお客さま各種預金規定改定のお知らせ"),
+        )
+        self.assertEqual(
+            "東京都水道局 水道料金等の収納に関するお知らせ",
+            collector.clean_report_title("2026.09.28個人のお客さま東京都水道局 水道料金等の収納に関するお知らせ"),
+        )
+        # 対象区分が続かない日付（JAめむろ等の形式）は従来どおり触らない。
+        self.assertEqual(
+            "2026.09.14重要なお知らせ貯金商品一覧「金利表」を更新しました",
+            collector.clean_report_title("2026.09.14重要なお知らせ貯金商品一覧「金利表」を更新しました"),
+        )
+
+
+class ObishinNewsTest(unittest.TestCase):
+    URL = "https://www.shinkin.co.jp/obishin/news/"
+
+    def test_extracts_articles_with_categories_and_skips_label_links(self):
+        items = collector.scrape_obishin_news(OBISHIN_NEWS_HTML, self.URL)
+
+        self.assertEqual(
+            [
+                ("2026-09-03", "帯広信⽤⾦庫「とかちの⼈事部」の取り組み開始について", ["お知らせ"]),
+                ("2026-08-19", "WEBバンキングサービス 振込限度額等引き下げについて", ["インターネットバンキング"]),
+                ("2026-09-15", "おびしんふれあいギャラリー「書朋会書展」開催のお知らせ", ["ふれあいギャラリー"]),
+            ],
+            [(item["date"], item["title"], item["categories"]) for item in items],
+        )
+        # 分類ラベルやメニューの「インターネットバンキング」は記事として拾わない。
+        self.assertNotIn("インターネットバンキング", [item["title"] for item in items])
+        self.assertEqual(
+            "https://www.shinkin.co.jp/obishin/pdf/news/2026.09.03-tokachi_jinjibu.pdf",
+            items[0]["url"],
+        )
+
+    def test_repository_filters_use_the_internet_banking_category(self):
+        config = collector.normalize_config(json.loads(
+            (Path(__file__).resolve().parents[1] / "config.json").read_text(encoding="utf-8")
+        ))
+        institution = next(item for item in config["institutions"] if item["name"] == "帯広信用金庫")
+        self.assertEqual("obishin_news", institution["scraper"])
+        items = collector.sanitize_items(
+            collector.scrape_obishin_news(OBISHIN_NEWS_HTML, self.URL),
+            institution["name"],
+        )
+        passed, excluded = collector.apply_filters(items, institution, config["star_keywords"])
+
+        self.assertEqual(
+            [
+                "帯広信⽤⾦庫「とかちの⼈事部」の取り組み開始について",
+                "WEBバンキングサービス 振込限度額等引き下げについて",
+            ],
+            [item["title"] for item in passed],
+        )
+        self.assertEqual(["書展"], [item["exclude_keyword"] for item in excluded])
+
+    def test_missing_structure_is_extraction_failure(self):
+        with self.assertRaisesRegex(collector.ExtractionError, "一覧"):
+            collector.scrape_obishin_news("<html><body>メンテナンス中</body></html>", self.URL)
+
+    def test_malformed_categories_are_cleared(self):
+        cleaned = collector.sanitize_items(
+            [{"date": "2026-09-01", "title": "記事", "categories": "インターネットバンキング"}],
+            "テスト",
+        )
+        self.assertEqual([], cleaned[0]["categories"])
+
+
+class InstitutionListUrlTest(unittest.TestCase):
+    def test_list_url_reaches_report_and_institution_index(self):
+        result = collector.InstitutionResult(
+            "テスト銀行",
+            [{"date": "2026-08-01", "title": "金利のお知らせ", "url": "https://example.com/news/1"}],
+            [],
+            "プログラム",
+            url="https://example.com/news/",
+        )
+        report = collector.format_report([result], "2026-08-01", 30)
+        self.assertIn("ニュース一覧: https://example.com/news/", report)
+
+        with tempfile.TemporaryDirectory() as directory:
+            data_dir = Path(directory) / "output" / "data"
+            collector.write_json_viewer_data(
+                [result],
+                "2026-08-01",
+                30,
+                data_dir=data_dir,
+                institution_order=["テスト銀行"],
+                institution_urls={"テスト銀行": "https://example.com/news/"},
+            )
+            index = json.loads((data_dir / "by-institution.json").read_text(encoding="utf-8"))
+            daily = json.loads((data_dir / "2026-08-01.json").read_text(encoding="utf-8"))
+
+        self.assertEqual("https://example.com/news/", index["institutions"][0]["url"])
+        # 日付別JSONは当時の記録なので、URLは持たせない（現在の正は by-institution.json）。
+        self.assertNotIn("url", daily["institutions"][0])
+
+    def test_collect_institution_keeps_url_on_failure(self):
+        institution = minimal_config()["institutions"][0]
+        with mock.patch.object(collector, "fetch_page", side_effect=collector.FetchError("test")):
+            result, _ = collector.collect_institution(institution, 30, ["金利"])
+        self.assertEqual("https://example.com/news/", result.url)
+
+    def test_institution_index_rejects_non_http_url(self):
+        document = {"schema_version": 1, "institutions": [
+            {"name": "テスト銀行", "url": "javascript:alert(1)", "items": []},
+        ]}
+        with self.assertRaisesRegex(ValueError, "HTTP"):
+            collector.validate_institution_index(document)
+
+    def test_repository_list_urls_cover_every_institution(self):
+        config = json.loads(
+            (Path(__file__).resolve().parents[1] / "config.json").read_text(encoding="utf-8")
+        )
+        urls = collector.institution_list_urls(config)
+        self.assertEqual([item["name"] for item in config["institutions"]], list(urls))
+        published = json.loads(
+            (Path(__file__).resolve().parents[1] / "output" / "data" / "by-institution.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        # 公開中の集約にも、現在の設定と同じURLが載っている（ヴューアーの機関名リンクの元）。
+        for institution in published["institutions"]:
+            with self.subTest(name=institution["name"]):
+                self.assertEqual(urls.get(institution["name"]), institution.get("url"))
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@
   "institutions": [
     {
       "name": "帯広信用金庫",
+      "url": "https://www.shinkin.co.jp/obishin/news/",
       "items": [
         {
           "date": "2026-09-15",
@@ -445,10 +446,11 @@
     },
     {
       "name": "北海道銀行",
+      "url": "https://www.hokkaidobank.co.jp/info/",
       "items": [
         {
           "date": "2026-09-30",
-          "title": "2026.09.30個人のお客さま「エコノミクス甲子園 北海道大会」エントリー締切延長のお知らせ",
+          "title": "「エコノミクス甲子園 北海道大会」エントリー締切延長のお知らせ",
           "url": "https://www.hokkaidobank.co.jp/info/6148.html",
           "star": false,
           "fallback": false,
@@ -459,7 +461,7 @@
         },
         {
           "date": "2026-09-28",
-          "title": "2026.09.28個人のお客さま東京都水道局 水道料金等の収納に関するお知らせ",
+          "title": "東京都水道局 水道料金等の収納に関するお知らせ",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/1061661f226f226db951741b151e4e45.pdf",
           "star": false,
           "fallback": false,
@@ -470,7 +472,7 @@
         },
         {
           "date": "2026-09-14",
-          "title": "2026.09.14個人のお客さま変動金利型ローン商品の基準金利改定について",
+          "title": "変動金利型ローン商品の基準金利改定について",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161_1.pdf",
           "star": true,
           "fallback": false,
@@ -483,7 +485,7 @@
         },
         {
           "date": "2026-08-21",
-          "title": "2026.08.21個人のお客さま「口座開設プラザ」のシルバーウィーク営業のお知らせ",
+          "title": "「口座開設プラザ」のシルバーウィーク営業のお知らせ",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/bf2e809592939e72fdf7d73e1ebc3afd.pdf",
           "star": false,
           "fallback": false,
@@ -498,7 +500,7 @@
         },
         {
           "date": "2026-07-29",
-          "title": "2026.07.29個人のお客さま法人のお客さまテレホンバンキングサービス終了のお知らせ",
+          "title": "テレホンバンキングサービス終了のお知らせ",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/87de1cdb596f3469c8cd438791d04b7c.pdf",
           "star": false,
           "fallback": false,
@@ -518,7 +520,7 @@
         },
         {
           "date": "2026-07-27",
-          "title": "2026.07.27個人のお客さま法人のお客さま手形・小切手振出期限のご案内と振出日ご記入のお願いについて",
+          "title": "手形・小切手振出期限のご案内と振出日ご記入のお願いについて",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/0ff4824a129680c23606acefd0d7332b.pdf",
           "star": false,
           "fallback": false,
@@ -555,7 +557,7 @@
         },
         {
           "date": "2026-03-18",
-          "title": "2026.03.18個人のお客さま変動金利型ローン商品の基準金利改定について",
+          "title": "変動金利型ローン商品の基準金利改定について",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161.pdf",
           "star": true,
           "fallback": true,
@@ -571,17 +573,7 @@
             "2026-06-08",
             "2026-06-01",
             "2026-05-31",
-            "2026-05-28"
-          ]
-        },
-        {
-          "date": "2026-03-18",
-          "title": "変動金利型ローン商品の基準金利改定について",
-          "url": "https://www.hokkaidobank.co.jp/info/uploads/6f9177b82c5b1672cc88ac90fc06e161.pdf",
-          "star": true,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
+            "2026-05-28",
             "2026-05-17"
           ]
         },
@@ -600,6 +592,7 @@
     },
     {
       "name": "北洋銀行",
+      "url": "https://www.hokuyobank.co.jp/announcement/",
       "items": [
         {
           "date": "2026-10-01",
@@ -927,6 +920,7 @@
     },
     {
       "name": "十勝信用組合",
+      "url": "https://www.tokachishinkumi.com/info/",
       "items": [
         {
           "date": "2026-10-01",
@@ -1351,6 +1345,7 @@
     },
     {
       "name": "JAおとふけ",
+      "url": "https://www.ja-otofuke.jp/newslist/",
       "items": [
         {
           "date": "2026-10-01",
@@ -1630,6 +1625,7 @@
     },
     {
       "name": "JAめむろ",
+      "url": "https://www.ja-memuro.or.jp/category/finance_info/",
       "items": [
         {
           "date": "2026-09-14",
@@ -1987,6 +1983,7 @@
     },
     {
       "name": "JA木野",
+      "url": "https://ja-kino.com/news/",
       "items": [
         {
           "date": "2026-08-25",
@@ -2193,6 +2190,7 @@
     },
     {
       "name": "JA帯広かわにし",
+      "url": "https://www.jaobihirokawanisi.or.jp/service/bank/",
       "items": [
         {
           "date": "2026-10-01",

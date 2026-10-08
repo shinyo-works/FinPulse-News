@@ -1,15 +1,19 @@
 {
-  "_comment": "lookback_days: 収集対象とする過去日数（0=全件取得）。common_include_keywords: 全機関共通の通過語（各機関の include_keywords と合成される）",
+  "_comment": "lookback_days: 収集対象とする過去日数（0=全件取得）。common_include_keywords: 全機関共通の通過語（各機関の include_keywords と合成される）。common_exclude_keywords: 全機関共通の除外語（何より先に除外）。common_priority_keywords: 全機関共通の優先語（日付のある記事なら機関ごとの除外より先に通過）。include_all: その機関の記事を語で絞らず全件通過させる",
   "lookback_days": 90,
   "star_keywords": ["金利", "キャンペーン"],
   "common_include_keywords": ["キャンペーン", "金利", "お知らせ", "手形", "小切手", "プライムレート"],
+  "common_exclude_keywords": ["書展", "東京都水道局", "エコノミクス甲子園", "子会社化", "詐欺", "不審電話", "フィッシング", "騙"],
+  "common_priority_keywords": ["とかちの人事部", "インターネットバンキング", "相続専用定期預金", "預金規定", "ディスクロージャー", "利用規定"],
 
   "institutions": [
     {
       "name": "帯広信用金庫",
       "url": "https://www.shinkin.co.jp/obishin/news/",
+      "scraper": "obishin_news",
       "include_keywords": [],
       "exclude_rules": [
+        { "keyword": "ふれあいギャラリー" },
         { "keyword": "メンテナンス" },
         { "keyword": "採用" },
         { "keyword": "休止" },
@@ -24,8 +28,10 @@
     {
       "name": "北海道銀行",
       "url": "https://www.hokkaidobank.co.jp/info/",
-      "include_keywords": [],
+      "scraper": "hokkaidobank_info",
+      "include_keywords": ["取り扱い開始", "提供開始", "金融支援"],
       "exclude_rules": [
+        { "keyword": "/company/curling/", "target": "url" },
         { "keyword": "投資信託" },
         { "keyword": "規定" },
         { "keyword": "債券" },
@@ -82,6 +88,7 @@
       "exclude_rules": [
         { "keyword": "燃料" },
         { "keyword": "灯油" },
+        { "keyword": "ホクレン" },
         { "keyword": "入札" },
         { "keyword": "ガソリン" },
         { "keyword": "共済" },
@@ -131,19 +138,9 @@
       "url": "https://www.jaobihirokawanisi.or.jp/service/bank/",
       "encoding": "utf-8",
       "scraper": "ja_obihirokawanisi",
-      "include_keywords": ["金融", "貯金", "ローン", "手数料"],
-      "exclude_rules": [
-        { "keyword": "キャンペーン情報" },
-        { "keyword": "商品一覧" },
-        { "keyword": "各種事務手数料" },
-        { "keyword": "各種手数料はこちら" },
-        { "keyword": "規定" },
-        { "keyword": "不正" },
-        { "keyword": "犯罪" },
-        { "keyword": "詐欺" },
-        { "keyword": "共済" },
-        { "keyword": "採用" }
-      ]
+      "include_all": true,
+      "include_keywords": [],
+      "exclude_rules": []
     }
   ]
 }

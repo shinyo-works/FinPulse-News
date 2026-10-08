@@ -4,7 +4,7 @@ GitHub Actions で週次実行される
 
 収集方式:
   - 標準サイト: BeautifulSoup（プログラム解析）
-  - サイト固有の構造: SCRAPERS 登録簿の専用抽出（北洋XML・JA帯広かわにし・JA木野）
+  - サイト固有の構造: SCRAPERS 登録簿の専用抽出（帯広信金・北洋XML・北海道銀行・JA帯広かわにし・JA木野）
   - Claude API 経路はコードのみ温存・凍結中（use_claude: true は設定検証で拒否する。
     再有効化の条件は CLAUDE.md の設計決定事項を参照）
 """
@@ -17,6 +17,7 @@ import shutil
 import sys
 import tempfile
 import threading
+import unicodedata
 import warnings
 from dataclasses import dataclass
 try:
@@ -62,6 +63,12 @@ DEFAULT_STAR_KEYWORDS = ("金利", "キャンペーン")
 EXCLUDE_TARGET_TITLE = "title"
 EXCLUDE_TARGET_URL = "url"
 EXCLUDE_TARGETS = (EXCLUDE_TARGET_TITLE, EXCLUDE_TARGET_URL)
+# 全機関共通の語の置き場（config.json の最上位）。normalize_config が各機関へ配る。
+COMMON_KEYWORD_KEYS = (
+    "common_include_keywords",
+    "common_exclude_keywords",
+    "common_priority_keywords",
+)
 MAX_HTML_BYTES = 5 * 1024 * 1024
 MAX_XML_BYTES = 5 * 1024 * 1024
 REQUEST_TIMEOUT = (5, 30)  # 接続待ち・読取無通信の上限（秒）
@@ -92,6 +99,7 @@ class InstitutionResult:
     method: str
     status: str = "ok"
     error: str = ""
+    url: str = ""  # 機関のニュース一覧ページ（レポートの機関名に添える）
 
 
 def now_jst():
@@ -119,11 +127,12 @@ def validate_config(config):
     ):
         raise ValueError("star_keywords は空でない文字列の配列にしてください。")
 
-    common_include_keywords = config.get("common_include_keywords", [])
-    if not isinstance(common_include_keywords, list) or not all(
-        isinstance(value, str) and value for value in common_include_keywords
-    ):
-        raise ValueError("common_include_keywords は空でない文字列の配列にしてください。")
+    for key in COMMON_KEYWORD_KEYS:
+        values = config.get(key, [])
+        if not isinstance(values, list) or not all(
+            isinstance(value, str) and value for value in values
+        ):
+            raise ValueError(f"{key} は空でない文字列の配列にしてください。")
 
     institutions = config.get("institutions")
     if not isinstance(institutions, list) or not institutions:
@@ -166,6 +175,16 @@ def validate_config(config):
         exclude_rules = institution.get("exclude_rules", [])
         if not isinstance(exclude_rules, list):
             raise ValueError(f"{name} の exclude_rules は配列にしてください。")
+
+        include_all = institution.get("include_all", False)
+        if not isinstance(include_all, bool):
+            raise ValueError(f"{name} の include_all は真偽値にしてください。")
+        if include_all and (include_keywords or exclude_rules):
+            # 全件通過の機関に語を書いても効かない。効かない設定を残すと、
+            # 後から読んだ人が「この語で絞っている」と誤解するため拒否する。
+            raise ValueError(
+                f"{name} は include_all: true のため、include_keywords と exclude_rules は空にしてください。"
+            )
         for rule_index, rule in enumerate(exclude_rules, start=1):
             if not isinstance(rule, dict) or not isinstance(rule.get("keyword"), str) or not rule["keyword"]:
                 raise ValueError(f"{name} の exclude_rules[{rule_index}].keyword が不正です。")
@@ -182,13 +201,26 @@ def validate_config(config):
 
 
 def normalize_config(config):
-    """全機関共通の通過語を各機関の include_keywords の先頭へ合成する。
+    """全機関共通の語を各機関へ合成する。apply_filters は合成後の値だけを読む。
     共通語を8機関へ手で複写していた頃、写し漏れで同種の記事が機関ごとに通ったり
-    落ちたりした（HANDOFF 2026-08-31・JA木野）。apply_filters は合成後の値だけを読む。"""
+    落ちたりした（HANDOFF 2026-08-31・JA木野）。
+      - common_include_keywords → include_keywords の先頭（通過語）
+      - common_exclude_keywords → common_exclude_keywords（機関の設定より先に除外）
+      - common_priority_keywords → priority_keywords（機関ごとの除外より先に通過）"""
     common = config.get("common_include_keywords", [])
+    common_exclude = list(config.get("common_exclude_keywords", []))
+    common_priority = list(config.get("common_priority_keywords", []))
     for institution in config["institutions"]:
         own = institution.get("include_keywords", [])
+        if institution.get("include_all"):
+            # 全件通過の機関は語で判定しない。合成もしない（設定の見た目と挙動を一致させる）。
+            institution["include_keywords"] = list(own)
+            institution["common_exclude_keywords"] = []
+            institution["priority_keywords"] = []
+            continue
         institution["include_keywords"] = list(dict.fromkeys([*common, *own]))
+        institution["common_exclude_keywords"] = list(common_exclude)
+        institution["priority_keywords"] = list(common_priority)
     return config
 
 
@@ -462,6 +494,7 @@ def validate_institution_index(document):
         if not isinstance(name, str) or not name or name in seen_names:
             raise ValueError(f"{prefix}.name が空または重複しています。")
         seen_names.add(name)
+        validate_optional_http_url(institution.get("url"), f"{prefix}.url")
         items = institution.get("items")
         if not isinstance(items, list):
             raise ValueError(f"{prefix}.items は配列にしてください。")
@@ -606,6 +639,105 @@ def scrape_ja_obihirokawanisi(html, base_url):
     return items
 
 
+def scrape_obishin_news(html, base_url):
+    """帯広信用金庫のお知らせ一覧から記事名・日付・URL・分類を個別に抽出する。
+    1件は「日付・分類ラベル（リンク）／記事名（リンク）」の組。汎用抽出では分類ラベル
+    「インターネットバンキング」まで日付付きの記事として拾い、メニューのリンクも毎週
+    20件以上混ざっていた。分類は categories に入れ、優先語の照合だけに使う。"""
+    soup = BeautifulSoup(html, "html.parser")
+    rows = soup.select("li[class^='cat-'] > dl")
+    if not rows:
+        raise ExtractionError("帯広信用金庫のお知らせ一覧が見つかりませんでした。")
+
+    items = []
+    for row in rows:
+        head = row.find("dt")
+        link = row.select_one("dd a[href]")
+        if not head or not link:
+            continue
+
+        title = link.get_text(" ", strip=True)
+        href = link.get("href", "").strip()
+        if not title or not href or href.startswith(("#", "javascript", "mailto", "tel")):
+            continue
+
+        items.append({
+            "date": extract_date_from_text(head.get_text(" ", strip=True)),
+            "title": title,
+            "url": urljoin(base_url, href),
+            "date_inferred": False,
+            "categories": [
+                label.get_text(" ", strip=True)
+                for label in head.select("a.cat")
+                if label.get_text(strip=True)
+            ],
+        })
+
+    if not items:
+        raise ExtractionError("帯広信用金庫のお知らせ記事を抽出できませんでした。")
+    if not any(item["date"] for item in items):
+        raise ExtractionError("帯広信用金庫のお知らせ記事から日付を抽出できませんでした。")
+    return items
+
+
+# 北海道銀行トップページの「お知らせ」欄の「ALL」タブに並ぶ区分。
+# お知らせ一覧（/info/）は同じ区分をタブで分けて載せており、ここから ALL と同じ範囲を読む。
+# トップページの ALL は最新5件しか出ないため、週次の取りこぼしを避けて一覧側を使う。
+# 「EB情報」タブは ALL に含まれないため対象外（2026-10-08 にトップページで確認）。
+HOKKAIDOBANK_ALL_TABS = ("お知らせ", "ニュースリリース", "カーリング")
+HOKKAIDOBANK_REQUIRED_TABS = ("お知らせ", "ニュースリリース")
+
+
+def scrape_hokkaidobank_info(html, base_url):
+    """北海道銀行のお知らせ一覧から、トップページの ALL と同じ区分の記事を抽出する。
+    汎用抽出はメニューのリンクで上限60件を使い切り、2つ目のタブ（ニュースリリース）を
+    1件も読めていなかった。記事名に日付と「個人のお客さま」も連結されていた。"""
+    soup = BeautifulSoup(html, "html.parser")
+    tab_labels = {
+        tab.get("data-tab"): tab.get_text("", strip=True)
+        for tab in soup.select(".js-tab[data-tab]")
+    }
+    missing = [label for label in HOKKAIDOBANK_REQUIRED_TABS if label not in tab_labels.values()]
+    if missing:
+        raise ExtractionError(f"北海道銀行のお知らせ一覧に必要なタブがありません: {'・'.join(missing)}")
+    wanted_tabs = {number for number, label in tab_labels.items() if label in HOKKAIDOBANK_ALL_TABS}
+
+    items = []
+    seen = set()  # 同じ記事が複数のタブに載る場合に備える
+    for area in soup.select(".js-tab-area[data-tab]"):
+        if area.get("data-tab") not in wanted_tabs:
+            continue
+        for row in area.select("ul.p-news-list > li"):
+            link = row.find("a", href=True)
+            title_element = row.select_one(".news-lead")
+            date_element = row.select_one(".news-date p:not(.category)")
+            if not link or not title_element:
+                continue
+
+            title = title_element.get_text(" ", strip=True)
+            href = link.get("href", "").strip()
+            if not title or not href or href.startswith(("#", "javascript", "mailto", "tel")):
+                continue
+
+            url = urljoin(base_url, href)
+            if (title, url) in seen:
+                continue
+            seen.add((title, url))
+            date_text = date_element.get_text(" ", strip=True) if date_element else ""
+            items.append({
+                "date": extract_date_from_text(date_text),
+                "title": title,
+                "url": url,
+                "date_inferred": False,
+            })
+
+    if not items:
+        raise ExtractionError("北海道銀行のお知らせ記事を抽出できませんでした。")
+    if not any(item["date"] for item in items):
+        raise ExtractionError("北海道銀行のお知らせ記事から日付を抽出できませんでした。")
+    return items
+
+
 def scrape_ja_kino(html, base_url):
     """JA木野の新着情報一覧から記事名・日付・URLを個別に抽出する。
     記事1件が1リンクに日付・カテゴリ・記事名を並べる構造で、汎用抽出では
@@ -739,6 +871,16 @@ def _scrape_ja_kino_institution(institution, url):
     return scrape_ja_kino(html, url)
 
 
+def _scrape_obishin_institution(institution, url):
+    html = fetch_page(url, encoding=institution.get("encoding"))
+    return scrape_obishin_news(html, url)
+
+
+def _scrape_hokkaidobank_institution(institution, url):
+    html = fetch_page(url, encoding=institution.get("encoding"))
+    return scrape_hokkaidobank_info(html, url)
+
+
 # スクレイパーの登録簿。設定検証（VALID_SCRAPERS）とディスパッチが自動で揃うよう、
 # 新方式を追加する場合はこの辞書へ1エントリ足すだけにする。
 SCRAPERS = {
@@ -746,6 +888,8 @@ SCRAPERS = {
     "hokuyo_xml": _scrape_hokuyo_institution,
     "ja_obihirokawanisi": _scrape_ja_obihirokawanisi_institution,
     "ja_kino": _scrape_ja_kino_institution,
+    "hokkaidobank_info": _scrape_hokkaidobank_institution,
+    "obishin_news": _scrape_obishin_institution,
 }
 VALID_SCRAPERS = set(SCRAPERS)
 
@@ -779,6 +923,11 @@ def sanitize_items(items, source_name):
         if date and (not isinstance(date, str) or parse_ymd(date) is None):
             print(f"  不正な日付を空欄化: {date!r}（{source_name}）")
             entry["date"] = ""
+
+        categories = entry.get("categories", [])
+        if not isinstance(categories, list) or not all(isinstance(value, str) for value in categories):
+            print(f"  不正な分類を空欄化: {categories!r}（{source_name}）")
+            entry["categories"] = []
 
         cleaned.append(entry)
     if dropped:
@@ -854,32 +1003,83 @@ def get_fallback_item(passed_all, lookback_days):
     return best
 
 
+def normalize_match_text(value):
+    """キーワード照合用に表記ゆれをそろえる（NFKC）。
+    サイトによっては見た目が同じ別の文字で書く。帯広信金の「とかちの⼈事部」は
+    「⼈」が康熙部首（U+2F08）で、通常の「人」では一致しなかった（2026-10-08）。
+    全角英数・全角かっこもここで半角へそろうため、語は普段どおりの表記で書けばよい。"""
+    return unicodedata.normalize("NFKC", value or "")
+
+
+def _first_keyword_in(keywords, text):
+    """text に含まれる最初の語を、設定に書かれた表記のまま返す。"""
+    for keyword in keywords:
+        if normalize_match_text(keyword) in text:
+            return keyword
+    return None
+
+
 def apply_filters(items, institution, star_keywords=None):
-    """include_keywords・exclude_rules でフィルタ適用"""
+    """記事を通過・除外へ振り分ける。判定は上から順に1回だけ当てる。
+
+      1. include_all の機関 …… 全件通過（JA帯広かわにし。金融専用の一覧ページのため）
+      2. 共通の除外語 ………… 除外（金融と無関係な催し等。優先語より強い）
+      3. 共通の優先語 ………… 日付のある記事だけ通過（機関ごとの除外ルールより強い）
+      4. 機関ごとの除外ルール … 除外
+      5. 通過語 ……………………… 含めば通過、含まなければ除外
+
+    3 で日付を条件にするのは、汎用抽出がメニューの「インターネットバンキング」等の
+    リンクも拾うため（メニューには日付が無く、記事には必ず日付がある）。3 だけは記事名に
+    加えてサイトの分類（専用抽出が入れる categories）も見る。帯広信金の「インターネット
+    バンキング」分類の記事は、記事名にその語が無いことが多いため。
+    語の照合は normalize_match_text で表記ゆれをそろえてから行う。"""
+    include_all = institution.get("include_all", False)
     include_kw = institution.get("include_keywords", [])
     exclude_rules = institution.get("exclude_rules", [])
+    common_exclude_kw = institution.get("common_exclude_keywords", [])
+    priority_kw = institution.get("priority_keywords", [])
     if star_keywords is None:
         star_keywords = DEFAULT_STAR_KEYWORDS
     passed = []
     excluded = []
 
+    def mark_star(item, match_title):
+        if _first_keyword_in(star_keywords, match_title):
+            item["star"] = True
+
     for item in items:
         title = item.get("title", "")
+        match_title = normalize_match_text(title)
 
-        excluded_by = None
+        if include_all:
+            mark_star(item, match_title)
+            passed.append(item)
+            continue
+
+        excluded_by = _first_keyword_in(common_exclude_kw, match_title)
+        if excluded_by:
+            item["exclude_keyword"] = excluded_by
+            excluded.append(item)
+            continue
+
+        priority_text = normalize_match_text(" ".join([title, *item.get("categories", [])]))
+        if item.get("date") and _first_keyword_in(priority_kw, priority_text):
+            mark_star(item, match_title)
+            passed.append(item)
+            continue
+
         for rule in exclude_rules:
             kw = rule["keyword"]
             # 照合先はルール単位。unless も同じ文字列に対して見て、1ルール内で
-            # 判断材料が2か所に割れないようにする。
-            haystack = (
-                item.get("url", "")
-                if rule.get("target") == EXCLUDE_TARGET_URL
-                else title
-            )
-            if kw in haystack:
-                unless = rule.get("unless", [])
-                if unless and any(u in haystack for u in unless):
-                    continue
+            # 判断材料が2か所に割れないようにする。URLは表記ゆれをそろえずそのまま見る。
+            if rule.get("target") == EXCLUDE_TARGET_URL:
+                haystack = item.get("url", "")
+                found = kw in haystack
+                saved = any(u in haystack for u in rule.get("unless", []))
+            else:
+                found = normalize_match_text(kw) in match_title
+                saved = bool(_first_keyword_in(rule.get("unless", []), match_title))
+            if found and not saved:
                 excluded_by = kw
                 break
 
@@ -888,9 +1088,8 @@ def apply_filters(items, institution, star_keywords=None):
             excluded.append(item)
             continue
 
-        if not include_kw or any(kw in title for kw in include_kw):
-            if any(k in title for k in star_keywords):
-                item["star"] = True
+        if not include_kw or _first_keyword_in(include_kw, match_title):
+            mark_star(item, match_title)
             passed.append(item)
         else:
             excluded.append(item)
@@ -909,6 +1108,11 @@ def format_report(results, today, lookback_days):
     for result in results:
         lines.append(f"## {result.name}　*（収集: {result.method}）*")
         lines.append("")
+        if result.url:
+            # メールは平文で送るため、Markdownのリンク記法ではなくURLをそのまま置く
+            # （多くのメールソフトが自動でリンクにする）。見出し行は backfill の解析対象なので変えない。
+            lines.append(f"ニュース一覧: {result.url}")
+            lines.append("")
         if result.status in FAILED_STATUSES:
             failed_count += 1
             lines.append(f"> ⚠️ 収集失敗: {result.error or '原因を確認してください。'}")
@@ -960,6 +1164,7 @@ ANNOTATION_BY_FLAG = {
     "date_inferred": "※当月分（日付はページに記載なし・当月初で補完）",
 }
 _TITLE_ANNOTATIONS = list(ANNOTATION_BY_FLAG.values())
+_HOKKAIDOBANK_LEGACY_PREFIX = re.compile(r"^\d{4}\.\d{2}\.\d{2}(?:個人のお客さま|法人のお客さま)+")
 
 
 def clean_report_title(title):
@@ -969,6 +1174,10 @@ def clean_report_title(title):
         cleaned = cleaned.replace(annotation, "")
     # 初期の手動レポートでは「⭐金利」という短い注記も使っていた。
     cleaned = re.sub(r"⭐(?:金利(?:・キャンペーン)?|キャンペーン)", "", cleaned)
+    # 北海道銀行を汎用抽出していた頃（〜2026-10-05）は、記事名の前に掲載日と対象区分が
+    # 連結されていた（例「2026.09.14個人のお客さま法人のお客さま各種預金規定改定のお知らせ」）。
+    # 専用抽出に切り替えた後の記事名とそろえ、機関別の重複除去で同じ記事を1件にまとめる。
+    cleaned = _HOKKAIDOBANK_LEGACY_PREFIX.sub("", cleaned)
     return re.sub(r"\s+", " ", cleaned).strip()
 
 
@@ -1049,9 +1258,12 @@ def build_institution_index(
     window_months=INSTITUTION_WINDOW_MONTHS,
     today=None,
     institution_order=None,
+    institution_urls=None,
 ):
     """全日付のJSONを読み、通過記事を機関別に重複なくまとめる。
-    window_months を指定すると、その月数より古いレポートを集約から除外する。"""
+    window_months を指定すると、その月数より古いレポートを集約から除外する。
+    institution_urls（機関名→ニュース一覧URL）を渡すと各機関に url を添える。
+    URLは過去レポートではなく現在の config.json を正とする（一覧ページが移転したら新しい方へ案内する）。"""
     data_path = Path(data_dir)
     institutions = {}
 
@@ -1107,7 +1319,12 @@ def build_institution_index(
         for item in items:
             item["reports"].sort(reverse=True)
         items.sort(key=lambda item: (bool(item["date"]), item["date"]), reverse=True)
-        result.append({"name": name, "items": items})
+        entry = {"name": name}
+        url = (institution_urls or {}).get(name)
+        if url:
+            entry["url"] = url
+        entry["items"] = items
+        result.append(entry)
 
     return {
         "schema_version": 1,
@@ -1121,6 +1338,7 @@ def write_json_viewer_data(
     lookback_days,
     data_dir="output/data",
     institution_order=None,
+    institution_urls=None,
 ):
     """三点セットを一時領域で全検証し、成功後だけ正本へ反映する。"""
     data_path = Path(data_dir)
@@ -1164,6 +1382,7 @@ def write_json_viewer_data(
         institution_index = build_institution_index(
             staging_path,
             institution_order=institution_order,
+            institution_urls=institution_urls,
         )
         validate_institution_index(institution_index)
         staged_institution_path = staging_path / "by-institution.json"
@@ -1258,6 +1477,7 @@ def collect_institution(institution, lookback_days, star_keywords, claude_client
             method,
             status="fetch_failed",
             error="ページまたはXMLを取得できませんでした。",
+            url=url,
         ), claude_client
     except ExtractionError as exc:
         print(f"  抽出失敗: {exc}")
@@ -1268,6 +1488,7 @@ def collect_institution(institution, lookback_days, star_keywords, claude_client
             method,
             status="extract_failed",
             error="記事一覧を抽出できませんでした。",
+            url=url,
         ), claude_client
     except Exception as exc:
         print(f"  解析失敗 ({name}): {type(exc).__name__}: {exc}")
@@ -1278,12 +1499,21 @@ def collect_institution(institution, lookback_days, star_keywords, claude_client
             method,
             status="parse_failed",
             error="取得内容を解析できませんでした。",
+            url=url,
         ), claude_client
 
     status = "empty" if not items else "ok"
     print(f"  取得: {len(items)}件")
     print(f"  通過: {len(passed)}件 / 除外: {len(excluded)}件")
-    return InstitutionResult(name, passed, excluded, method, status=status), claude_client
+    return InstitutionResult(name, passed, excluded, method, status=status, url=url), claude_client
+
+
+def institution_list_urls(config):
+    """機関名→ニュース一覧URL。収集先の url をそのまま使う（人が開く一覧ページと同じ）。"""
+    return {
+        institution["name"]: institution["url"]
+        for institution in config.get("institutions", [])
+    }
 
 
 def run_collection(config, today):
@@ -1294,6 +1524,7 @@ def run_collection(config, today):
         institution["name"]
         for institution in config.get("institutions", [])
     ]
+    institution_urls = institution_list_urls(config)
 
     print(f"=== 金融機関新着情報収集 ({today} / 過去{lookback_days}日) ===")
     viewer_ready_marker_path().unlink(missing_ok=True)
@@ -1324,6 +1555,7 @@ def run_collection(config, today):
             today,
             lookback_days,
             institution_order=institution_order,
+            institution_urls=institution_urls,
         )
         viewer_json_ok = True
         print("ヴューアー用JSON保存: output/data/")

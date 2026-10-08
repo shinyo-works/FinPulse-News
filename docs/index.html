@@ -370,6 +370,38 @@
       line-height: 1.2;
     }
 
+    /* 機関名から各機関のニュース一覧（公式サイト）へ。見出しの色を保ち、外部リンクと分かる印を添える */
+    .institution-link {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: var(--line);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+      overflow-wrap: anywhere;
+    }
+
+    .institution-link:hover,
+    .institution-link:focus-visible {
+      color: var(--teal-700);
+      text-decoration-color: currentColor;
+    }
+
+    .external-mark {
+      margin-left: 0.2em;
+      color: var(--muted);
+      font-size: 0.8em;
+      font-weight: 700;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
     .count {
       display: inline-flex;
       align-items: center;
@@ -988,6 +1020,21 @@
       return "除外された記事は「除外も表示」で確認できます。";
     }
 
+    // 機関名→ニュース一覧URL。by-institution.json が現在の config.json から添える1か所だけを正とする
+    // （日付別JSONは当時の記録なので持たない）。URLが無い・HTTP(S)でない機関は名前だけを出す。
+    function institutionListUrl(name) {
+      const entry = (state.institutionIndex?.institutions || []).find((item) => item.name === name);
+      const url = safeUrl(entry?.url);
+      return url === "#" ? "" : url;
+    }
+
+    function institutionNameHtml(name) {
+      const label = escapeHtml(name);
+      const url = institutionListUrl(name);
+      if (!url) return label;
+      return `<a class="institution-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${label}のニュース一覧（公式サイト）を新しいタブで開く">${label}<span class="external-mark" aria-hidden="true">↗</span><span class="visually-hidden">（ニュース一覧・新しいタブで開く）</span></a>`;
+    }
+
     function collectionFailureNotice(institution) {
       if (!FAILED_STATUSES.has(institution?.status)) return "";
       const detail = institution.error || "この金融機関の新着情報を取得できませんでした。";
@@ -1014,7 +1061,7 @@
         sections.push(`
           <section class="institution-section">
             <div class="section-head">
-              <h2 class="section-title">${escapeHtml(institution.name)}</h2>
+              <h2 class="section-title">${institutionNameHtml(institution.name)}</h2>
               <span class="count">${passed.length}件</span>
             </div>
             ${failureNotice}
@@ -1035,7 +1082,8 @@
       const institution = (state.institutionIndex.institutions || []).find((item) => item.name === state.selectedInstitution);
       const items = (institution?.items || []).filter(matchesSearch);
       elements.modeLabel.textContent = "INSTITUTION ARCHIVE";
-      elements.pageTitle.textContent = state.selectedInstitution || "金融機関を選択";
+      if (state.selectedInstitution) elements.pageTitle.innerHTML = institutionNameHtml(state.selectedInstitution);
+      else elements.pageTitle.textContent = "金融機関を選択";
       elements.pageSummary.classList.remove("date-summary");
       elements.pageSummary.textContent = `全レポート横断・重複除去済み・${items.length}件`;
       elements.reportContent.innerHTML = items.length

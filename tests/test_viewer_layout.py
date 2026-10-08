@@ -231,6 +231,52 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertNotIn("<script>", behavior["failed"])
         self.assertEqual("", behavior["empty"])
 
+    def test_institution_names_link_to_their_news_list(self):
+        """機関名は by-institution.json の url（現在の設定）へリンクする。HTTP(S)以外は名前だけ。"""
+        self.assertIn('<h2 class="section-title">${institutionNameHtml(institution.name)}</h2>', self.html)
+        self.assertIn("elements.pageTitle.innerHTML = institutionNameHtml(state.selectedInstitution)", self.html)
+
+        functions = []
+        for name in ("escapeHtml", "safeUrl", "institutionListUrl", "institutionNameHtml"):
+            match = re.search(
+                rf"    function {name}\([^\n]*\) \{{[\s\S]*?\n    \}}",
+                self.html,
+            )
+            self.assertIsNotNone(match, name)
+            functions.append(match.group(0))
+        script = (
+            """
+            const state = { institutionIndex: { institutions: [
+              { name: "帯広信用金庫", url: "https://www.shinkin.co.jp/obishin/news/", items: [] },
+              { name: "<b>罠</b>", url: "javascript:alert(1)", items: [] },
+              { name: "URLなし", items: [] },
+            ] } };
+            """
+            + "\n".join(functions)
+            + """
+            console.log(JSON.stringify({
+              linked: institutionNameHtml("帯広信用金庫"),
+              unsafe: institutionNameHtml("<b>罠</b>"),
+              missing: institutionNameHtml("URLなし"),
+              unknown: institutionNameHtml("未登録"),
+            }));
+            """
+        )
+        result = subprocess.run(
+            ["node", "-e", script],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        behavior = json.loads(result.stdout)
+        self.assertIn('href="https://www.shinkin.co.jp/obishin/news/"', behavior["linked"])
+        self.assertIn('target="_blank" rel="noopener noreferrer"', behavior["linked"])
+        self.assertIn(">帯広信用金庫<", behavior["linked"])
+        self.assertEqual("&lt;b&gt;罠&lt;/b&gt;", behavior["unsafe"])
+        self.assertEqual("URLなし", behavior["missing"])
+        self.assertEqual("未登録", behavior["unknown"])
+
     def test_url_names_accept_only_defined_views_and_datasets(self):
         """#constructor や ?dataset=__proto__ のような全オブジェクト共通の名前で壊れない。"""
         datasets = re.search(
