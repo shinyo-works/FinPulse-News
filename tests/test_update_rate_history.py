@@ -900,5 +900,188 @@ class StaleFeedTest(unittest.TestCase):
             self.assertEqual(update_rate_history.EXIT_PARTIAL, raised.exception.code)
 
 
+class ImportGuardTest(unittest.TestCase):
+    """再レビュー #5（2026-10-13）: 受け手の検証を締める。範囲外・急な変化はその項目だけ保留し、
+    名前とリンク先のホストの変更は前回のままにして警告する。"""
+
+    def history(self, rate=2.0, url="https://www.example-bank.jp/loan/"):
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "rate_type_order": list(HOUSING_DATASET.rate_type_order),
+            "rate_type_labels": dict(HOUSING_DATASET.rate_type_labels),
+            "observation_dates": ["2026-10-05"],
+            "generated_at": "2026-10-05",
+            "rows": [{
+                "bank_id": "bank",
+                "bank_name": "確認銀行",
+                "product_id": "loan",
+                "product_name": "住宅ローン",
+                "url": url,
+                "rate_type": "variable",
+                "history": [{"rate": rate, "observed_on": "2026-10-05"}],
+            }],
+        }
+
+    def report(self, **loan):
+        row = {
+            "bank_id": "bank",
+            "bank_name": "確認銀行",
+            "product_id": "loan",
+            "product_name": "住宅ローン",
+            "url": "https://www.example-bank.jp/loan/",
+            "loan_variable": 2.25,
+        }
+        row.update(loan)
+        return {"rate_contract": expected_rate_contract_metadata(), "loan_table": [row]}
+
+    def latest(self, history):
+        return history["rows"][0]["history"][0]
+
+    def test_normal_revision_passes(self):
+        # 北洋の +0.25% のような正当な改定は通る
+        history = self.history()
+        summary = update_history(history, self.report(), "2026-10-12")
+        self.assertEqual({"rate": 2.25, "observed_on": "2026-10-12"}, self.latest(history))
+        self.assertEqual([], summary["held"])
+        self.assertEqual([], summary["warnings"])
+
+    def test_out_of_range_values_are_held(self):
+        for value in (0.05, 15.5, 0.0):
+            with self.subTest(value=value):
+                history = self.history()
+                summary = update_history(history, self.report(loan_variable=value), "2026-10-12")
+                self.assertEqual("2026-10-05", self.latest(history)["observed_on"])
+                self.assertEqual(1, len(summary["held"]))
+                self.assertIn("範囲外", summary["held"][0])
+
+    def test_range_bounds_are_inclusive(self):
+        for value in (0.1, 15.0):
+            with self.subTest(value=value):
+                history = self.history(rate=value)
+                summary = update_history(history, self.report(loan_variable=value), "2026-10-12")
+                self.assertEqual([], summary["held"])
+
+    def test_big_jump_or_ratio_is_held(self):
+        for previous, value in ((2.0, 5.1), (1.0, 10.0), (3.0, 0.3)):
+            with self.subTest(previous=previous, value=value):
+                history = self.history(rate=previous)
+                summary = update_history(history, self.report(loan_variable=value), "2026-10-12")
+                self.assertEqual(previous, self.latest(history)["rate"])
+                self.assertEqual(1, len(summary["held"]))
+
+    def test_jump_of_exactly_three_points_passes(self):
+        history = self.history(rate=2.0)
+        summary = update_history(history, self.report(loan_variable=5.0), "2026-10-12")
+        self.assertEqual([], summary["held"])
+
+    def test_same_day_reimport_compares_with_the_previous_day(self):
+        # 同じ日の取り直しでも、比べる相手は前の調査日の値
+        history = self.history(rate=2.0)
+        update_history(history, self.report(loan_variable=2.25), "2026-10-12")
+        summary = update_history(history, self.report(loan_variable=5.3), "2026-10-12")
+        self.assertEqual(2.25, self.latest(history)["rate"])
+        self.assertEqual(1, len(summary["held"]))
+
+    def test_new_row_out_of_range_is_held(self):
+        history = self.history()
+        report = self.report(product_id="new", product_name="新商品", loan_variable=20.0)
+        summary = update_history(history, report, "2026-10-12")
+        self.assertEqual(1, len(history["rows"]))
+        self.assertEqual(1, len(summary["held"]))
+
+    def test_host_change_keeps_old_url(self):
+        history = self.history()
+        summary = update_history(
+            history, self.report(url="https://evil.example.com/loan/"), "2026-10-12"
+        )
+        self.assertEqual("https://www.example-bank.jp/loan/", history["rows"][0]["url"])
+        self.assertEqual(1, len(summary["warnings"]))
+        self.assertIn("evil.example.com", summary["warnings"][0])
+
+    def test_same_host_url_is_updated(self):
+        history = self.history()
+        summary = update_history(
+            history, self.report(url="https://WWW.example-bank.jp/loan/new/"), "2026-10-12"
+        )
+        self.assertEqual("https://WWW.example-bank.jp/loan/new/", history["rows"][0]["url"])
+        self.assertEqual([], summary["warnings"])
+
+    def test_missing_url_row_takes_the_new_url(self):
+        history = self.history(url=None)
+        update_history(history, self.report(), "2026-10-12")
+        self.assertEqual("https://www.example-bank.jp/loan/", history["rows"][0]["url"])
+
+    def test_name_change_keeps_old_name(self):
+        history = self.history()
+        summary = update_history(
+            history, self.report(bank_name="別の銀行", product_name="別の商品"), "2026-10-12"
+        )
+        row = history["rows"][0]
+        self.assertEqual(("確認銀行", "住宅ローン"), (row["bank_name"], row["product_name"]))
+        self.assertEqual(2, len(summary["warnings"]))
+        # 金利そのものは取り込む
+        self.assertEqual(2.25, self.latest(history)["rate"])
+
+    def test_exact_three_point_jump_with_float_error_passes(self):
+        history = self.history(rate=2.2)
+        summary = update_history(history, self.report(loan_variable=5.2), "2026-10-12")
+        self.assertEqual([], summary["held"])
+
+    def test_names_in_warnings_cannot_inject_workflow_commands(self):
+        history = self.history()
+        summary = update_history(
+            history, self.report(bank_name="別名\n::error::偽物"), "2026-10-12"
+        )
+        self.assertEqual(1, len(summary["warnings"]))
+        self.assertNotIn("\n", summary["warnings"][0])
+        self.assertIn("::error::偽物", summary["warnings"][0])  # 1 行の途中なのでコマンドにならない
+
+    def test_all_held_does_not_advance_the_survey_date(self):
+        history = self.history()
+        report = self.report(loan_variable=42.0)
+        report["feed_generated_at"] = "2026-10-12T07:00:00+09:00"
+        summary = update_history(history, report, "2026-10-12")
+        self.assertEqual(["2026-10-05"], history["observation_dates"])
+        self.assertEqual("2026-10-05", history["generated_at"])
+        self.assertNotIn("last_feed_generated_at", history)
+        self.assertEqual(1, len(summary["held"]))
+        validate_history(history)
+
+    def test_partial_hold_does_not_record_the_version(self):
+        history = self.history()
+        history["rows"].append({
+            **history["rows"][0], "rate_type": "fixed_10y",
+            "history": [{"rate": 3.0, "observed_on": "2026-10-05"}],
+        })
+        report = self.report(loan_fixed_10y=9.5)  # 3.0 → 9.5 は急な変化で保留
+        report["feed_generated_at"] = "2026-10-12T07:00:00+09:00"
+        summary = update_history(history, report, "2026-10-12")
+        self.assertEqual("2026-10-12", history["generated_at"])  # 変動は取り込めた
+        self.assertNotIn("last_feed_generated_at", history)  # 直った新しい版を同じ日に取り込めるように
+        self.assertEqual(1, len(summary["held"]))
+
+    def test_max_rate_constant_for_whole_history_is_unchanged(self):
+        # 履歴全体の検証（validate_history）と共用なので、取り込み用の範囲とは別に保つ
+        self.assertEqual(100.0, update_rate_history.MAX_RATE_PERCENT)
+
+    def test_main_prints_warnings_for_holds(self):
+        today = update_rate_history.datetime.now(update_rate_history.JST).date().isoformat()
+        source = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["rows"][0]
+        helper = SecurityAuditFixTest()
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "feed.json"
+            report.write_text(json.dumps({
+                "rate_contract": update_rate_history.expected_rate_contract_metadata(),
+                "survey_date": today,
+                "loan_table": [{
+                    "bank_id": source["bank_id"], "bank_name": source["bank_name"],
+                    "product_id": source["product_id"], "product_name": source["product_name"],
+                    "loan_variable": 42.0,
+                }],
+            }), encoding="utf-8")
+            _, _, log = helper._run_main([str(report)], tmp)
+        self.assertIn("::warning title=住宅ローン金利で保留した金利があります::", log)
+
+
 if __name__ == "__main__":
     unittest.main()

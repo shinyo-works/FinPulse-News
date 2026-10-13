@@ -138,6 +138,14 @@ CAR_DEFAULT_LABELS = {
 }
 CAR_DEFAULT_ORDER = ["variable", "fixed"]
 MAX_RATE_PERCENT = 100.0
+# 取り込み時だけに使う、もっともらしい金利の範囲（%）。外れた項目はその項目だけ保留する（再レビュー #5）。
+# MAX_RATE_PERCENT は履歴全体の検証（validate_history）と共用なので、こちらとは分けて変えない。
+IMPORT_MIN_RATE_PERCENT = 0.1
+IMPORT_MAX_RATE_PERCENT = 15.0
+# 前回の値からの急な変化。金利調査ツールの get_rate_anomaly_reason と同じ基準
+# （差が 3.0% を超えるか、10 倍以上・1/10 以下）。北洋の +0.25% のような正当な改定は通る。
+IMPORT_MAX_RATE_JUMP = 3.0
+IMPORT_MAX_RATE_RATIO = 10.0
 # 保証料注記の上限文字数。表の1セルに収める前提で、長文が来ても画面を壊さない。
 MAX_GUARANTEE_NOTE_CHARS = 80
 SCHEMA_VERSION = 2
@@ -257,6 +265,36 @@ def validate_rate(value, field_name: str) -> float:
             f"{field_name} は 0〜{MAX_RATE_PERCENT:g} の有限数にしてください: {value!r}"
         )
     return rate
+
+
+def import_hold_reason(value: float, previous) -> str | None:
+    """取り込むと危ない値なら保留の理由を返す。前回の値（previous）が無ければ範囲だけを見る。"""
+    if not IMPORT_MIN_RATE_PERCENT <= value <= IMPORT_MAX_RATE_PERCENT:
+        return f"{IMPORT_MIN_RATE_PERCENT:g}〜{IMPORT_MAX_RATE_PERCENT:g}% の範囲外"
+    if not isinstance(previous, (int, float)) or isinstance(previous, bool) or previous <= 0:
+        return None
+    ratio = value / previous
+    if ratio >= IMPORT_MAX_RATE_RATIO or ratio <= 1 / IMPORT_MAX_RATE_RATIO:
+        return f"前回 {previous:g}% の約 {ratio:.2g} 倍"
+    # 2.2 → 5.2 のような差ちょうど 3.0 が小数の誤差で保留側に倒れないよう丸めて比べる
+    if round(abs(value - previous), 6) > IMPORT_MAX_RATE_JUMP:
+        return f"前回 {previous:g}% との差が {abs(value - previous):.3f}%"
+    return None
+
+
+def log_safe(value, limit: int = 80) -> str:
+    """公開用データ由来の文字列を Actions のログ 1 行に載せられる形にする。
+
+    改行などの制御文字を残すと、次の行が ::error:: などのワークフローコマンドとして
+    解釈されてしまう（他リポジトリ由来の値なので信用しない）。
+    """
+    text = re.sub(r"[\x00-\x1f\x7f]", " ", str(value))
+    return text if len(text) <= limit else text[:limit] + "…"
+
+
+def same_host(old_url, new_url) -> bool:
+    """2 つの URL のホスト名が同じか（大文字小文字は区別しない）。"""
+    return (urlparse(old_url).hostname or "").lower() == (urlparse(new_url).hostname or "").lower()
 
 
 def parse_feed_version(value):
@@ -527,7 +565,8 @@ def update_history(
             f"調査日 {survey_date} は既存の最新日 {latest_date} より古いため更新できません。"
         )
 
-    if survey_date not in history["observation_dates"]:
+    added_survey_date = survey_date not in history["observation_dates"]
+    if added_survey_date:
         history["observation_dates"].append(survey_date)
         history["observation_dates"].sort(reverse=True)
 
@@ -540,6 +579,9 @@ def update_history(
         "added_rows": 0,
         "changed": 0,
         "unchanged": 0,
+        # その項目だけ取り込まなかった値と、取り込んだが変えなかった名前・URL（Actions の警告に出す）
+        "held": [],
+        "warnings": [],
     }
 
     for loan in report_data.get(dataset.table_key, []):
@@ -559,6 +601,18 @@ def update_history(
             key = row_key(bank_id, product_id, rate_type)
             row = index.get(key)
             loan_url = loan.get("url") if is_http_url(loan.get("url")) else None
+            previous_entry = next(
+                (
+                    entry for entry in (row or {}).get("history", [])
+                    if entry.get("observed_on", "") < survey_date
+                ),
+                None,
+            )
+            hold_reason = import_hold_reason(value, (previous_entry or {}).get("rate"))
+            if hold_reason:
+                # その項目だけ保留する（前回の値は残る。ほかの項目と種別の取り込みは止めない）
+                summary["held"].append(f"{bank_id}/{product_id} {rate_type}={value:g}（{hold_reason}）")
+                continue
             if row is None:
                 # 新規の(機関×商品×種別)。履歴を1件で作る。名前が無い新商品は表に
                 # 名前の空いた行を作ってしまうため、その回の取り込みを止めて気づかせる。
@@ -594,11 +648,39 @@ def update_history(
             if not row_latest_date or survey_date >= row_latest_date:
                 # 過去データの投入で現在の商品名・URLを巻き戻さない。
                 # 上流の名前が欠けた週は前回の名前を保つ（1件の欠けで全体を止めない）。
-                row["bank_name"] = clean_display_name(loan.get("bank_name")) or row.get("bank_name")
-                row["product_name"] = clean_display_name(
-                    resolve_product_name(bank_id, product_id, loan.get("product_name"))
-                ) or row.get("product_name")
-                if loan_url:
+                # 名前が変わろうとしたときも前回の名前を保ち、警告だけ出す（再レビュー #5・本人決定
+                # 2026-10-13）。本当に名前が変わったときは、警告を見て履歴 JSON を手で直す。
+                for name_key, incoming in (
+                    ("bank_name", clean_display_name(loan.get("bank_name"))),
+                    (
+                        "product_name",
+                        clean_display_name(
+                            resolve_product_name(bank_id, product_id, loan.get("product_name"))
+                        ),
+                    ),
+                ):
+                    if incoming is None or incoming == row.get(name_key):
+                        continue
+                    if row.get(name_key):
+                        message = (
+                            f"{bank_id}/{product_id} の {name_key} が「{log_safe(row[name_key])}」→"
+                            f"「{log_safe(incoming)}」に変わろうとしたため、前回の名前のままにしました"
+                        )
+                        if message not in summary["warnings"]:
+                            summary["warnings"].append(message)
+                    else:
+                        row[name_key] = incoming
+                # リンク先のホストが変わろうとしたときは旧 URL を残して警告する（本人決定）。
+                # 許可リストは持たない（金利調査ツールの banks.json との二重管理になるため）
+                if loan_url and row.get("url") and not same_host(row["url"], loan_url):
+                    message = (
+                        f"{bank_id}/{product_id} のリンク先のホストが "
+                        f"{urlparse(row['url']).hostname} → {urlparse(loan_url).hostname} に"
+                        "変わろうとしたため、旧 URL のままにしました"
+                    )
+                    if message not in summary["warnings"]:
+                        summary["warnings"].append(message)
+                elif loan_url:
                     row["url"] = loan_url
                 # 保証料の条件が消えた週は注記も消す（古い断り書きを残さない）
                 guarantee_note = normalize_guarantee_note(loan.get("guarantee_note"))
@@ -630,12 +712,25 @@ def update_history(
                 else:
                     summary["changed"] += 1
 
-    history["generated_at"] = history["observation_dates"][0]
-    if survey_date == history["generated_at"]:
+    if added_survey_date and summary["held"] and not any(
+        entry.get("observed_on") == survey_date
+        for row in history["rows"]
+        for entry in row.get("history", [])
+    ):
+        # 保留があり、1 項目も取り込めなかった日は、調査日を進めない（値が丸ごとおかしい回）。
+        # 進めると、公開ページに値の空いた日付の列ができる。単に値が取れなかっただけの日は
+        # 従来どおり調査日を残す（画面で「未確認」と出す設計）
+        history["observation_dates"].remove(survey_date)
+    if history["observation_dates"]:
+        history["generated_at"] = history["observation_dates"][0]
+    else:
+        history.pop("generated_at", None)
+    if survey_date == history.get("generated_at"):
         # 最新の調査日を書いた公開用データの版を残す。同じ日に新しい版が来たら取り込み直す
         # 判定（import_decision）に使う。版の無いデータで書いたときは、古い版を残さない。
+        # 保留した項目があった回は版を残さない（直った新しい版が来たら、同じ日でも取り込み直せるように）
         version = report_data.get("feed_generated_at")
-        if version:
+        if version and not summary["held"]:
             history["last_feed_generated_at"] = version
         else:
             history.pop("last_feed_generated_at", None)
@@ -891,6 +986,15 @@ def update_targets(args, report_data: dict, survey_date: str, targets: list) -> 
             f"  新規行 {summary['added_rows']} / 金利変更 {summary['changed']} / "
             f"据え置き {summary['unchanged']}"
         )
+        if summary["held"]:
+            print(
+                f"::warning title={dataset.label}で保留した金利があります::"
+                f"範囲外や急な変化のため {len(summary['held'])} 項目を取り込みませんでした"
+                "（その日の値は空欄。1 項目も取り込めなかった日は調査日も進めない）。"
+                "公式サイトの値を確かめてください: " + " / ".join(summary["held"])
+            )
+        for message in summary["warnings"]:
+            print(f"::warning title={dataset.label}の名前・リンクの変更を保留しました::{message}")
 
 
 if __name__ == "__main__":
