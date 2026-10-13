@@ -666,6 +666,44 @@ class SecurityAuditFixTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "未来の日付"):
                 self._run_main([str(report), "--only-newer"], tmp)
 
+    def test_empty_car_table_imports_housing_only_and_exits_partial(self):
+        # 約束にマイカーがあるのに表が空の回: 住宅だけ取り込み、マイカーは前回のまま、終了コード 2（赤）
+        today = update_rate_history.datetime.now(update_rate_history.JST).date().isoformat()
+        housing_before = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))
+        bank = housing_before["rows"][0]
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "feed.json"
+            report.write_text(json.dumps({
+                "rate_contract": update_rate_history.expected_rate_contract_metadata_with_car(),
+                "survey_date": today,
+                "loan_table": [{
+                    "bank_id": bank["bank_id"],
+                    "bank_name": bank["bank_name"],
+                    "product_id": bank["product_id"],
+                    "product_name": bank["product_name"],
+                    "loan_variable": 1.0,
+                }],
+                "car_loan_table": [],
+            }), encoding="utf-8")
+            with self.assertRaises(SystemExit) as raised:
+                self._run_main([str(report)], tmp)
+            self.assertEqual(update_rate_history.EXIT_PARTIAL, raised.exception.code)
+            housing = json.loads((Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
+            self.assertEqual(today, housing["observation_dates"][0])
+            self.assertEqual(
+                (Path(tmp) / "car-loan-history.json").read_text(encoding="utf-8"),
+                update_rate_history.CAR_HISTORY_PATH.read_text(encoding="utf-8"),
+            )
+
+    def test_report_has_dataset_follows_the_contract_not_the_table(self):
+        report = {
+            "rate_contract": update_rate_history.expected_rate_contract_metadata_with_car(),
+            "loan_table": [{"bank_id": "x"}],
+            "car_loan_table": [],
+        }
+        self.assertTrue(update_rate_history.report_has_dataset(report, update_rate_history.CAR_DATASET))
+        self.assertTrue(update_rate_history.report_table_is_empty(report, update_rate_history.CAR_DATASET))
+
 
 if __name__ == "__main__":
     unittest.main()

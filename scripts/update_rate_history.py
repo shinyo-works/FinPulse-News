@@ -22,6 +22,7 @@ import json
 import math
 import os
 import re
+import sys
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -159,14 +160,27 @@ CAR_DATASET = Dataset(
 DATASETS = {dataset.key: dataset for dataset in (HOUSING_DATASET, CAR_DATASET)}
 
 
+# 約束（rate_contract）にある表のどれかが空で、残りの表だけ取り込んだときの終了コード。
+# workflow はこのコードのときも取り込めた分を公開し、最後に赤で知らせる（本人決定 2026-10-13）。
+EXIT_PARTIAL = 2
+
+
 def report_has_dataset(report_data: dict, dataset: Dataset) -> bool:
-    """入力レポートがこのローン種別の表を持つかを返す。"""
+    """入力レポートの約束（rate_contract）が、このローン種別を含むかを返す。
+
+    表が空かどうかは見ない。約束にあるのに表が空の回を「対象外」として黙って
+    素通りさせず、report_table_is_empty で拾って赤で知らせるため。
+    """
     if not isinstance(report_data, dict):
         return False
     contract = report_data.get("rate_contract")
-    if not isinstance(contract, dict) or dataset.contract_field not in contract:
-        return False
-    return bool(report_data.get(dataset.table_key))
+    return isinstance(contract, dict) and dataset.contract_field in contract
+
+
+def report_table_is_empty(report_data: dict, dataset: Dataset) -> bool:
+    """このローン種別の表が無いか空の配列なら True。"""
+    table = report_data.get(dataset.table_key) if isinstance(report_data, dict) else None
+    return not table
 
 
 def normalize_date(value: str) -> str:
@@ -670,12 +684,17 @@ def main() -> None:
     raw_date = args.date or report_data.get("survey_date", "")
     survey_date = normalize_date(raw_date)
 
+    empty = []
     if args.dataset == "all":
-        targets = [
+        declared = [
             dataset
             for dataset in DATASETS.values()
             if report_has_dataset(report_data, dataset)
         ]
+        # 約束にあるのに表が空の種別は、その種別だけ取り込まずに最後で赤にする
+        # （上流の収集が一部だけ失敗した回でも、取れた種別の更新は止めない）。
+        empty = [dataset for dataset in declared if report_table_is_empty(report_data, dataset)]
+        targets = [dataset for dataset in declared if dataset not in empty]
         if not targets:
             raise SystemExit(
                 "入力レポートに取り込めるローン表がありません（loan_table / car_loan_table）。"
@@ -684,6 +703,20 @@ def main() -> None:
         targets = [DATASETS[args.dataset]]
 
     reject_future_date(survey_date)
+    update_targets(args, report_data, survey_date, targets)
+    if empty:
+        for dataset in empty:
+            print(
+                f"::error title={dataset.label}を取り込めません::"
+                f"公開用の金利データの {dataset.table_key} が空です。"
+                f"{dataset.label}の履歴は前回のまま残し、ほかの種別だけ更新しました。"
+                "金利調査ツール側の収集結果を確かめてください。"
+            )
+        sys.exit(EXIT_PARTIAL)
+
+
+def update_targets(args, report_data: dict, survey_date: str, targets: list) -> None:
+    """targets の種別を更新して書き込む（--only-newer なら取り込み済みの種別は飛ばす）。"""
     if args.only_newer:
         newer = []
         for dataset in targets:

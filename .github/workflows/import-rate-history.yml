@@ -80,6 +80,7 @@ jobs:
         run: python -m unittest tests.test_update_rate_history -v
 
       - name: 金利履歴を更新
+        id: update
         env:
           REIMPORT_SAME_DAY: ${{ inputs.reimport_same_day }}
         run: |
@@ -88,14 +89,22 @@ jobs:
             echo "::error::公開用の金利データ（rate-feed.json）がありません。"
             exit 1
           fi
+          status=0
           if [ "${REIMPORT_SAME_DAY:-}" = "true" ]; then
             echo "同じ調査日の取り込み直しを行います（手動実行の指定）。"
-            python scripts/update_rate_history.py "$feed"
+            python scripts/update_rate_history.py "$feed" || status=$?
           else
-            python scripts/update_rate_history.py "$feed" --only-newer
+            python scripts/update_rate_history.py "$feed" --only-newer || status=$?
           fi
           # 取得したデータは公開物に混ぜない
           rm -rf rate-feed-input
+          # 2 = 約束にある表の一部が空で、残りの種別だけ更新した。取り込めた分は公開し、
+          # 最後のステップで赤にする（本人決定 2026-10-13: 住宅だけ取り込み、赤で知らせる）。
+          if [ "$status" = "2" ]; then
+            echo "partial=true" >> "$GITHUB_OUTPUT"
+          elif [ "$status" != "0" ]; then
+            exit "$status"
+          fi
 
       - name: 金利履歴を公開
         run: |
@@ -118,4 +127,10 @@ jobs:
             git pull --rebase --autostash origin main || exit 1
           done
           echo "pushの再試行がすべて失敗しました。"
+          exit 1
+
+      - name: 取り込めなかった表を知らせる
+        if: steps.update.outputs.partial == 'true'
+        run: |
+          echo "::error::公開用の金利データに空の表があったため、その種別は取り込んでいません（上の「金利履歴を更新」の注記を参照）。"
           exit 1
