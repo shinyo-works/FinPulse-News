@@ -14,8 +14,10 @@ cron-job.org の月初ジョブは本文で monthly=true を渡し、1〜7日の
   4. 今日（JST）すでに「収集と公開までやり遂げた」実行がある → 動かさない（本命が済んだ週の控えを止める）
   5. それ以外          → 動かす
 「やり遂げた」は実行全体の成否ではなく、収集ジョブと公開ジョブの両方が success かで見る。
-接続テストや省略した実行も、ジョブが skipped のまま実行全体は success で終わるため、
-全体の成否で見ると同じ日の本命まで止めてしまう。
+実行全体の成否では先に絞らない（failure・cancelled・実行中も中のジョブを確かめる）。
+接続テストや省略した実行は、ジョブが skipped のまま実行全体は success で終わる。
+逆に、金利の取り込みのような別ジョブだけが失敗すると、ニュースは公開済みでも全体は failure になる。
+全体の成否で見ると、前者では同じ日の本命まで止め、後者ではニュースを再公開してしまう。
 一覧やジョブの取得に失敗したら「動かす」に倒す。控えが止まって配信が抜けるより、
 同日に取り直すほうが害が小さい（メールは同日の冪等キーで2通目が止まる）。
 
@@ -90,13 +92,15 @@ def is_true(value):
     return str(value).strip().lower() == "true"
 
 
-def successful_runs_today(runs, current_run_id, day_start_utc):
-    """今日（JST）作られ、全体が成功で終わった「今回以外」の実行を返す（新しい順のまま）。"""
+def runs_today(runs, current_run_id, day_start_utc):
+    """今日（JST）作られた「今回以外」の実行を返す（新しい順のまま）。
+
+    実行全体の成否では絞らない。金利の取り込みのような別ジョブだけが失敗した実行も、
+    収集と公開をやり遂げていれば「済んだ」と数えるため（判定は did_real_work のジョブ単位）。
+    """
     found = []
     for run in runs:
         if str(run.get("id")) == str(current_run_id):
-            continue
-        if run.get("conclusion") != "success":
             continue
         created_at = run.get("created_at")
         if not isinstance(created_at, str):
@@ -145,7 +149,7 @@ def decide(*, check_only, force, runs, current_run_id, now, fetch_jobs, monthly=
     if runs is None:
         return True, "実行一覧を取得できなかったため、配信を抜かさないよう実行します。"
     day_start = jst_day_start_utc(now)
-    for run in successful_runs_today(runs, current_run_id, day_start):
+    for run in runs_today(runs, current_run_id, day_start):
         jobs = fetch_jobs(run.get("id"))
         if jobs is None:
             # 確かめられない実行は数えない（止めるより動かすほうが害が小さい）

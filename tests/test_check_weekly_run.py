@@ -100,22 +100,35 @@ class DecideTest(unittest.TestCase):
         should_run, _ = self.decide([run(1, "success", "2026-10-04T23:05:10Z")], jobs={1: None})
         self.assertTrue(should_run)
 
-    def test_failed_runs_are_not_even_looked_up(self):
+    def test_failed_run_counts_when_collect_and_publish_succeeded(self):
+        # 金利の取り込みなど別ジョブだけ失敗して全体が failure でも、ニュースは公開済みなので省略する
         should_run, _ = self.decide([run(1, "failure", "2026-10-04T23:05:10Z")])
+        self.assertFalse(should_run)
+        self.assertEqual(self.fetched, [1])
+
+    def test_successful_run_with_publish_failure_still_runs(self):
+        jobs = [
+            {"name": "collect-and-report", "conclusion": "success"},
+            {"name": "publish-results", "conclusion": "failure"},
+        ]
+        should_run, _ = self.decide([run(1, "success", "2026-10-04T23:05:10Z")], jobs={1: jobs})
         self.assertTrue(should_run)
-        self.assertEqual(self.fetched, [])
 
     def test_fallback_runs_when_no_run_today(self):
         # cron-job.org が止まった週: 今日の実行が1件もない
         should_run, _ = self.decide([])
         self.assertTrue(should_run)
 
-    def test_cancelled_or_in_progress_runs_do_not_count_as_success(self):
-        runs = [
-            run(1, "cancelled", "2026-10-04T23:05:10Z"),
-            run(2, None, "2026-10-04T23:30:00Z"),
+    def test_cancelled_run_counts_when_collect_and_publish_succeeded(self):
+        should_run, _ = self.decide([run(1, "cancelled", "2026-10-04T23:05:10Z")])
+        self.assertFalse(should_run)
+
+    def test_in_progress_run_before_publish_does_not_count(self):
+        jobs = [
+            {"name": "collect-and-report", "conclusion": "success"},
+            {"name": "publish-results", "conclusion": None},
         ]
-        should_run, _ = self.decide(runs)
+        should_run, _ = self.decide([run(2, None, "2026-10-04T23:30:00Z")], jobs={2: jobs})
         self.assertTrue(should_run)
 
     def test_success_from_previous_week_is_ignored(self):
