@@ -623,17 +623,21 @@ class SecurityAuditFixTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "未来の日付"):
             update_rate_history.update_history(history, report, tomorrow)
 
-    def _run_main(self, argv, tmp):
+    def _run_main(self, argv, tmp, stale=None, keep=False):
+        """keep=True なら、tmp に前回の呼び出しで書いた履歴をそのまま使う（初回はリポジトリの写し）。"""
         housing = Path(tmp) / "rate-history.json"
         car = Path(tmp) / "car-loan-history.json"
-        housing.write_text(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"), encoding="utf-8")
-        car.write_text(update_rate_history.CAR_HISTORY_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+        if not (keep and housing.exists()):
+            housing.write_text(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+        if not (keep and car.exists()):
+            car.write_text(update_rate_history.CAR_HISTORY_PATH.read_text(encoding="utf-8"), encoding="utf-8")
         datasets = {
             key: dataclasses.replace(ds, history_path=housing if key == "housing" else car)
             for key, ds in update_rate_history.DATASETS.items()
         }
         out = io.StringIO()
         with mock.patch.object(update_rate_history, "DATASETS", datasets), \
+                mock.patch.object(update_rate_history, "stale_feed_message", return_value=stale), \
                 mock.patch("sys.argv", ["update_rate_history.py", *argv]), redirect_stdout(out):
             update_rate_history.main()
         return housing, car, out.getvalue()
@@ -703,6 +707,197 @@ class SecurityAuditFixTest(unittest.TestCase):
         }
         self.assertTrue(update_rate_history.report_has_dataset(report, update_rate_history.CAR_DATASET))
         self.assertTrue(update_rate_history.report_table_is_empty(report, update_rate_history.CAR_DATASET))
+
+
+def _history(latest="2026-11-02", **extra):
+    history = {
+        "schema_version": SCHEMA_VERSION,
+        "rate_type_order": list(HOUSING_DATASET.rate_type_order),
+        "rate_type_labels": dict(HOUSING_DATASET.rate_type_labels),
+        "observation_dates": [latest] if latest else [],
+        "rows": [],
+    }
+    if latest:
+        history["generated_at"] = latest
+    history.update(extra)
+    return history
+
+
+class FeedVersionImportTest(unittest.TestCase):
+    """再レビュー G-2（2026-10-13）: 同じ調査日でも新しい版なら取り込み直す。手直しの日は manual_lock で守る。"""
+
+    def decide(self, history, survey_date, version):
+        return update_rate_history.import_decision(history, survey_date, version)[0]
+
+    def test_newer_survey_date_imports(self):
+        self.assertTrue(self.decide(_history(), "2026-11-09", None))
+
+    def test_empty_history_imports(self):
+        self.assertTrue(self.decide(_history(latest=None), "2026-11-02", None))
+
+    def test_older_survey_date_does_nothing(self):
+        self.assertFalse(self.decide(_history(), "2026-10-26", "2026-10-26T07:00:00+09:00"))
+
+    def test_same_day_newer_version_imports(self):
+        history = _history(last_feed_generated_at="2026-11-02T07:10:00+09:00")
+        self.assertTrue(self.decide(history, "2026-11-02", "2026-11-02T09:10:00+09:00"))
+
+    def test_same_day_same_or_older_version_does_nothing(self):
+        history = _history(last_feed_generated_at="2026-11-02T09:10:00+09:00")
+        self.assertFalse(self.decide(history, "2026-11-02", "2026-11-02T09:10:00+09:00"))
+        self.assertFalse(self.decide(history, "2026-11-02", "2026-11-02T07:10:00+09:00"))
+
+    def test_manual_lock_protects_the_day(self):
+        history = _history(
+            last_feed_generated_at="2026-11-02T07:10:00+09:00",
+            manual_lock={"2026-11-02": "北洋の固定10年を公式サイトの値に手直し"},
+        )
+        should_import, reason = update_rate_history.import_decision(
+            history, "2026-11-02", "2026-11-02T09:10:00+09:00"
+        )
+        self.assertFalse(should_import)
+        self.assertIn("manual_lock", reason)
+
+    def test_history_without_version_is_not_overwritten_on_same_day(self):
+        # 版の記録を始める前に手で直した値を守る
+        self.assertFalse(self.decide(_history(), "2026-11-02", "2026-11-02T09:10:00+09:00"))
+
+    def test_versionless_feed_does_not_overwrite_same_day(self):
+        history = _history(last_feed_generated_at="2026-11-02T07:10:00+09:00")
+        self.assertFalse(self.decide(history, "2026-11-02", None))
+
+    def test_versions_are_compared_as_instants(self):
+        history = _history(last_feed_generated_at="2026-11-02T09:00:00+09:00")
+        self.assertTrue(self.decide(history, "2026-11-02", "2026-11-02T00:30:00+00:00"))  # 09:30 JST
+
+    def test_validate_history_checks_new_keys(self):
+        validate_history(_history(
+            last_feed_generated_at="2026-11-02T07:10:00+09:00",
+            manual_lock={"2026-11-02": "理由"},
+        ))
+        for bad in (
+            {"last_feed_generated_at": "2026-11-02T07:10:00"},  # 時差なし
+            {"last_feed_generated_at": "きのう"},
+            {"manual_lock": ["2026-11-02"]},
+            {"manual_lock": {"2026/11/02": "理由"}},
+            {"manual_lock": {"2026-11-02": ""}},
+            {"manual_lock": {"2026-11-02": "あ" * 201}},
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                validate_history(_history(**bad))
+
+    def test_report_with_broken_version_is_rejected(self):
+        report = {
+            "rate_contract": update_rate_history.expected_rate_contract_metadata(),
+            "feed_generated_at": "2026-11-02 07:10",
+            "loan_table": [{"bank_id": "x", "product_id": "y"}],
+        }
+        with self.assertRaisesRegex(ValueError, "feed_generated_at"):
+            update_rate_history.validate_report_data(report)
+        report["feed_generated_at"] = "2099-01-01T00:00:00+09:00"
+        with self.assertRaisesRegex(ValueError, "未来"):
+            update_rate_history.validate_report_data(report)
+
+    def test_import_records_the_version_and_same_day_rerun_updates_value(self):
+        today = update_rate_history.datetime.now(update_rate_history.JST).date().isoformat()
+        source = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["rows"][0]
+
+        def feed(rate, version):
+            return {
+                "rate_contract": update_rate_history.expected_rate_contract_metadata_with_car(),
+                "survey_date": today,
+                "feed_generated_at": version,
+                "loan_table": [{
+                    "bank_id": source["bank_id"], "bank_name": source["bank_name"],
+                    "product_id": source["product_id"], "product_name": source["product_name"],
+                    "loan_variable": rate,
+                }],
+                "car_loan_table": [],
+            }
+
+        helper = SecurityAuditFixTest()
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "feed.json"
+            first = f"{today}T07:10:00+09:00"
+            report.write_text(json.dumps(feed(1.0, first)), encoding="utf-8")
+            with self.assertRaises(SystemExit):  # マイカーが空なので最後は赤（#6）
+                helper._run_main([str(report)], tmp)
+            housing = json.loads((Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
+            self.assertEqual(first, housing["last_feed_generated_at"])
+
+            # 同じ日の新しい版（月初の 09:00 取り直し）は --only-newer でも取り込み直す
+            second = f"{today}T09:10:00+09:00"
+            report.write_text(json.dumps(feed(1.5, second)), encoding="utf-8")
+            with self.assertRaises(SystemExit):
+                helper._run_main([str(report), "--only-newer"], tmp, keep=True)
+            housing = json.loads((Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
+            self.assertEqual(second, housing["last_feed_generated_at"])
+            row = next(
+                r for r in housing["rows"]
+                if r["bank_id"] == source["bank_id"] and r["product_id"] == source["product_id"]
+                and r["rate_type"] == "variable"
+            )
+            self.assertEqual({"rate": 1.5, "observed_on": today}, row["history"][0])
+
+            # 手直しの印を付けた日は、さらに新しい版が来ても上書きしない
+            housing["manual_lock"] = {today: "手直し"}
+            (Path(tmp) / "rate-history.json").write_text(json.dumps(housing, ensure_ascii=False), encoding="utf-8")
+            before = (Path(tmp) / "rate-history.json").read_text(encoding="utf-8")
+            report.write_text(json.dumps(feed(2.0, f"{today}T10:10:00+09:00")), encoding="utf-8")
+            with self.assertRaises(SystemExit):
+                helper._run_main([str(report), "--only-newer"], tmp, keep=True)
+            self.assertEqual(before, (Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
+
+
+JST_TEST = update_rate_history.JST
+
+
+class StaleFeedTest(unittest.TestCase):
+    """再レビュー G-3（2026-10-13）: 公開用データが古いまま止まったら、控えの時刻以降は赤にする。"""
+
+    def at(self, *args):
+        return update_rate_history.datetime(*args, tzinfo=JST_TEST)
+
+    def test_expected_date_is_latest_monday_or_first_business_day(self):
+        expect = update_rate_history.expected_latest_survey_date
+        self.assertEqual("2026-10-12", expect(self.at(2026, 10, 13, 9)).isoformat())  # 火曜 → 前日の月曜
+        self.assertEqual("2026-10-12", expect(self.at(2026, 10, 12, 8)).isoformat())  # 月曜当日
+        self.assertEqual("2026-12-01", expect(self.at(2026, 12, 3, 12)).isoformat())  # 月初の火曜が後
+        self.assertEqual("2026-11-30", expect(self.at(2026, 11, 30, 12)).isoformat())
+        # 2027-01-04（月）は年始休みの明けで最初の営業日でもある
+        self.assertEqual("2027-01-04", expect(self.at(2027, 1, 4, 9)).isoformat())
+        # 2027-01-01〜03 は休みなので、まだ前の週の月曜（12/28）
+        self.assertEqual("2026-12-28", expect(self.at(2027, 1, 2, 12)).isoformat())
+
+    def test_fresh_feed_is_quiet(self):
+        self.assertIsNone(update_rate_history.stale_feed_message("2026-10-12", self.at(2026, 10, 12, 12)))
+
+    def test_stale_before_eleven_is_a_warning(self):
+        level, text = update_rate_history.stale_feed_message("2026-10-05", self.at(2026, 10, 12, 8, 5))
+        self.assertEqual("warning", level)
+        self.assertIn("2026-10-12", text)
+
+    def test_stale_after_eleven_is_an_error(self):
+        level, _ = update_rate_history.stale_feed_message("2026-10-05", self.at(2026, 10, 12, 11, 0))
+        self.assertEqual("error", level)
+        level, _ = update_rate_history.stale_feed_message("2026-10-05", self.at(2026, 10, 13, 8, 0))
+        self.assertEqual("error", level)
+
+    def test_stale_error_turns_main_red_but_warning_does_not(self):
+        latest = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["observation_dates"][0]
+        helper = SecurityAuditFixTest()
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "feed.json"
+            report.write_text(json.dumps({
+                "rate_contract": update_rate_history.expected_rate_contract_metadata(),
+                "survey_date": latest,
+                "loan_table": [{"bank_id": "x", "product_id": "y", "loan_variable": 1.0}],
+            }), encoding="utf-8")
+            _, _, log = helper._run_main([str(report), "--only-newer"], tmp, stale=("warning", "古い"))
+            self.assertIn("::warning title=公開用の金利データが古いままです::古い", log)
+            with self.assertRaises(SystemExit) as raised:
+                helper._run_main([str(report), "--only-newer"], tmp, stale=("error", "古い"))
+            self.assertEqual(update_rate_history.EXIT_PARTIAL, raised.exception.code)
 
 
 if __name__ == "__main__":

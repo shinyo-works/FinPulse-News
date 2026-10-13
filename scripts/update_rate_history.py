@@ -29,6 +29,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
+try:  # テストは scripts パッケージとして、本番は scripts/ を直接実行する
+    from scripts.check_weekly_run import first_business_day
+except ImportError:  # pragma: no cover - 直接実行のとき
+    from check_weekly_run import first_business_day
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "docs" / "data"
 HISTORY_PATH = DATA_DIR / "rate-history.json"
 CAR_HISTORY_PATH = DATA_DIR / "car-loan-history.json"
@@ -160,9 +165,17 @@ CAR_DATASET = Dataset(
 DATASETS = {dataset.key: dataset for dataset in (HOUSING_DATASET, CAR_DATASET)}
 
 
-# 約束（rate_contract）にある表のどれかが空で、残りの表だけ取り込んだときの終了コード。
-# workflow はこのコードのときも取り込めた分を公開し、最後に赤で知らせる（本人決定 2026-10-13）。
+# 「取り込めた分は公開してよいが、最後に赤で知らせる」ときの終了コード。workflow はこのコードの
+# ときも取り込めた分を公開し、最後のステップで失敗にする（本人決定 2026-10-13）。使う場面は 2 つ。
+#   - 約束（rate_contract）にある表のどれかが空で、残りの表だけ取り込んだ（再レビュー #6）
+#   - 公開用データの調査日が、期待される最新の調査日より古いまま止まっている（再レビュー G-3）
 EXIT_PARTIAL = 2
+# 公開用データが古いままでも、期待される調査日のこの時刻（JST）までは警告だけにする。
+# 金利調査ツールの控えが遅れて動く日でも、取り込みの控え（月曜 11:00・1〜7日 12:00）で拾えるため。
+STALE_FEED_ERROR_HOUR_JST = 11
+MAX_MANUAL_LOCK_REASON_CHARS = 200
+# 公開用データの版（作った時刻）が今より先でも許す幅（時計のずれ）
+FEED_VERSION_CLOCK_SKEW_MINUTES = 10
 
 
 def report_has_dataset(report_data: dict, dataset: Dataset) -> bool:
@@ -246,6 +259,17 @@ def validate_rate(value, field_name: str) -> float:
     return rate
 
 
+def parse_feed_version(value):
+    """公開用データの版（feed_generated_at）を datetime にする。時差の無い値・読めない値は None。"""
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
 def validate_report_data(report_data: dict, dataset: Dataset = HOUSING_DATASET) -> None:
     """入力レポートのローン行を、履歴変更前に検証する。"""
     if not isinstance(report_data, dict):
@@ -262,6 +286,13 @@ def validate_report_data(report_data: dict, dataset: Dataset = HOUSING_DATASET) 
             f"rate_contract に {dataset.contract_field} がないため"
             f"{dataset.label}は取り込めません。"
         )
+    if "feed_generated_at" in report_data:
+        version = parse_feed_version(report_data["feed_generated_at"])
+        if version is None:
+            raise ValueError("feed_generated_at は時差付きの ISO 形式の日時にしてください。")
+        # 未来の版を受け付けると、その日の取り込み直し（新しい版の判定）がずっと止まる
+        if version > datetime.now(JST) + timedelta(minutes=FEED_VERSION_CLOCK_SKEW_MINUTES):
+            raise ValueError(f"feed_generated_at が未来の日時です: {report_data['feed_generated_at']}")
     table_key = dataset.table_key
     loans = report_data.get(table_key)
     if not isinstance(loans, list) or not loans:
@@ -407,6 +438,25 @@ def validate_history(history: dict) -> None:
             seen_dates.add(observed_on)
             previous_date = observed_on
             validate_rate(entry.get("rate"), f"rows[{index}].history[{entry_index}].rate")
+
+    if "last_feed_generated_at" in history and parse_feed_version(history["last_feed_generated_at"]) is None:
+        raise ValueError("last_feed_generated_at は時差付きの ISO 形式の日時にしてください。")
+    manual_lock = history.get("manual_lock")
+    if manual_lock is not None:
+        if not isinstance(manual_lock, dict):
+            raise ValueError('manual_lock は {"YYYY-MM-DD": "理由"} の形にしてください。')
+        for locked_date, reason in manual_lock.items():
+            if not isinstance(locked_date, str) or normalize_date(locked_date) != locked_date:
+                raise ValueError(f"manual_lock の日付は YYYY-MM-DD にしてください: {locked_date!r}")
+            if (
+                not isinstance(reason, str)
+                or not reason.strip()
+                or len(reason) > MAX_MANUAL_LOCK_REASON_CHARS
+            ):
+                raise ValueError(
+                    f"manual_lock[{locked_date}] の理由は{MAX_MANUAL_LOCK_REASON_CHARS}文字以内の"
+                    "空でない文字列にしてください。"
+                )
 
     generated_at = history.get("generated_at")
     if generated_at and normalize_date(generated_at) != generated_at:
@@ -581,6 +631,14 @@ def update_history(
                     summary["changed"] += 1
 
     history["generated_at"] = history["observation_dates"][0]
+    if survey_date == history["generated_at"]:
+        # 最新の調査日を書いた公開用データの版を残す。同じ日に新しい版が来たら取り込み直す
+        # 判定（import_decision）に使う。版の無いデータで書いたときは、古い版を残さない。
+        version = report_data.get("feed_generated_at")
+        if version:
+            history["last_feed_generated_at"] = version
+        else:
+            history.pop("last_feed_generated_at", None)
     history["is_demo"] = False
     extend_automated_source_period(history, survey_date)
     validate_history(history)
@@ -704,6 +762,14 @@ def main() -> None:
 
     reject_future_date(survey_date)
     update_targets(args, report_data, survey_date, targets)
+    alert = bool(empty)
+    if args.only_newer:
+        # 週次の自動取り込みのときだけ、公開用データの鮮度を見る（手動の取り込み直しは対象外）
+        stale = stale_feed_message(survey_date, datetime.now(JST))
+        if stale:
+            level, text = stale
+            print(f"::{level} title=公開用の金利データが古いままです::{text}")
+            alert = alert or level == "error"
     if empty:
         for dataset in empty:
             print(
@@ -712,20 +778,87 @@ def main() -> None:
                 f"{dataset.label}の履歴は前回のまま残し、ほかの種別だけ更新しました。"
                 "金利調査ツール側の収集結果を確かめてください。"
             )
+    if alert:
         sys.exit(EXIT_PARTIAL)
 
 
+def import_decision(history: dict, survey_date: str, feed_version) -> tuple[bool, str]:
+    """週次の自動取り込み（--only-newer）で、この種別を取り込むか。(取り込むか, 理由) を返す。
+
+    調査日が新しければ取り込む。同じ調査日なら、公開用データの版（feed_generated_at）が
+    履歴に記録した版（last_feed_generated_at）より新しく、その日に手直しの印（manual_lock）が
+    無いときだけ取り込み直す（再レビュー G-2・本人決定 2026-10-13）。月初の 09:00 取り直しの
+    ような同じ日の作り直しを反映しつつ、手で直した日は守る。
+    履歴に版の記録が無いときも同じ日は上書きしない（版の記録を始める前に手で直した値を守るため）。
+    """
+    latest = latest_history_date(history)
+    if not latest or survey_date > latest:
+        return True, f"調査日 {survey_date} は未取り込みのため更新します。"
+    if survey_date < latest:
+        return False, f"調査日 {survey_date} は取り込み済み（最新 {latest}）のため更新しません。"
+    lock_reason = (history.get("manual_lock") or {}).get(survey_date)
+    if lock_reason:
+        return False, (
+            f"調査日 {survey_date} は取り込み済みで、手直しの印（manual_lock: {lock_reason}）が"
+            "あるため更新しません。"
+        )
+    new_at = parse_feed_version(feed_version)
+    old_at = parse_feed_version(history.get("last_feed_generated_at"))
+    if new_at is None:
+        return False, f"調査日 {survey_date} は取り込み済み（公開用データに版が無い）のため更新しません。"
+    if old_at is None:
+        return False, (
+            f"調査日 {survey_date} は取り込み済み（履歴に版の記録が無いので、手直しを守る）"
+            "のため更新しません。"
+        )
+    if new_at > old_at:
+        return True, (
+            f"調査日 {survey_date} の新しい版（{feed_version}・前回 {history['last_feed_generated_at']}）"
+            "のため取り込み直します。"
+        )
+    return False, f"調査日 {survey_date} は取り込み済み（同じか古い版）のため更新しません。"
+
+
+def expected_latest_survey_date(now: datetime):
+    """今日（JST）以前で、金利調査ツールが最後に調査したはずの日（直近の月曜か、今月の最初の営業日）。"""
+    today = now.astimezone(JST).date()
+    monday = today - timedelta(days=today.weekday())
+    first = first_business_day(today.year, today.month)
+    return max(monday, first) if first <= today else monday
+
+
+def stale_feed_message(survey_date: str, now: datetime):
+    """公開用データが古いままなら (注記の種類 "warning"/"error", 文) を返す。新しければ None。"""
+    expected = expected_latest_survey_date(now)
+    if survey_date >= expected.isoformat():
+        return None
+    deadline = datetime(
+        expected.year, expected.month, expected.day, STALE_FEED_ERROR_HOUR_JST, tzinfo=JST
+    )
+    level = "error" if now.astimezone(JST) >= deadline else "warning"
+    text = (
+        f"公開用の金利データの調査日が {survey_date} のままです"
+        f"（期待される最新の調査日 {expected.isoformat()}）。"
+        "金利調査ツールの週次・月初の回が失敗していないか、rate-feed ブランチが更新されたかを確かめてください。"
+    )
+    if level == "warning":
+        text += (
+            f"（{expected.isoformat()} {STALE_FEED_ERROR_HOUR_JST}:00 までは警告だけ。"
+            "後の控えで新しいデータを取り込めれば消えます）"
+        )
+    return level, text
+
+
 def update_targets(args, report_data: dict, survey_date: str, targets: list) -> None:
-    """targets の種別を更新して書き込む（--only-newer なら取り込み済みの種別は飛ばす）。"""
+    """targets の種別を更新して書き込む（--only-newer なら import_decision で選ぶ）。"""
     if args.only_newer:
         newer = []
         for dataset in targets:
-            latest = latest_history_date(load_history(dataset))
-            if latest and survey_date <= latest:
-                print(
-                    f"{dataset.label}: 調査日 {survey_date} は取り込み済み（最新 {latest}）のため更新しません。"
-                )
-            else:
+            should_import, reason = import_decision(
+                load_history(dataset), survey_date, report_data.get("feed_generated_at")
+            )
+            print(f"{dataset.label}: {reason}")
+            if should_import:
                 newer.append(dataset)
         targets = newer
         if not targets:
