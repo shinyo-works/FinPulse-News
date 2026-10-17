@@ -957,12 +957,18 @@ HTML:
 {html_truncated}"""
 
     try:
+        # Haiku 5.5 は思考が既定で走る。切らずに effort "low" で浅く使う（2026-10-17 本人の方針）。
+        # 思考も max_tokens に入るので、Haiku 4.5 時代の 2000 から上げてある
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=2000,
+            model="claude-haiku-5-5",
+            max_tokens=8000,
+            output_config={"effort": "low"},
             messages=[{"role": "user", "content": prompt}],
         )
-        text = response.content[0].text.strip()
+        # 応答の先頭は思考ブロックのことがあるので、本文（text）を種類で拾う
+        if response.stop_reason in ("max_tokens", "refusal"):
+            raise ExtractionError(f"Claudeの応答が完結しませんでした（stop_reason={response.stop_reason}）。")
+        text = "".join(b.text for b in response.content if b.type == "text").strip()
         match = re.search(r'\[.*\]', text, re.DOTALL)
         if match:
             return json.loads(match.group())
