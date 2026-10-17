@@ -1509,5 +1509,38 @@ class InstitutionListUrlTest(unittest.TestCase):
                 self.assertEqual(urls.get(institution["name"]), institution.get("url"))
 
 
+
+class FrozenClaudeExtractionTest(unittest.TestCase):
+    """凍結中の Claude 抽出経路が、Haiku 5.5 の応答の形で壊れないこと"""
+
+    @staticmethod
+    def _client(stop_reason="end_turn", blocks=None):
+        Block = lambda type_, text="": mock.Mock(type=type_, text=text)  # noqa: E731
+        response = mock.Mock(stop_reason=stop_reason, content=blocks if blocks is not None else [
+            Block("thinking"),
+            Block("text", '[{"date": "2026-10-01", "title": "金利改定", "url": "https://example.com/a"}]'),
+        ])
+        client = mock.Mock()
+        client.messages.create.return_value = response
+        return client
+
+    def test_reads_text_after_thinking_block(self):
+        client = self._client()
+        items = collector.extract_news_with_claude(client, "機関", "https://example.com", "<html></html>", 30)
+        self.assertEqual(items[0]["title"], "金利改定")
+        kwargs = client.messages.create.call_args.kwargs
+        self.assertEqual(kwargs["model"], "claude-haiku-5-5")
+        self.assertEqual(kwargs["output_config"], {"effort": "low"})
+        self.assertNotIn("temperature", kwargs)
+
+    def test_truncated_or_refused_response_is_failure(self):
+        for reason in ("max_tokens", "refusal"):
+            with self.subTest(reason=reason):
+                with self.assertRaises(collector.ExtractionError):
+                    collector.extract_news_with_claude(
+                        self._client(stop_reason=reason), "機関", "https://example.com", "<html></html>", 30
+                    )
+
+
 if __name__ == "__main__":
     unittest.main()
