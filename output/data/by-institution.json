@@ -6,6 +6,17 @@
       "url": "https://www.shinkin.co.jp/obishin/news/",
       "items": [
         {
+          "date": "2026-10-16",
+          "title": "インターネットバンキングにおけるセキュリティソフト「Rapport」の最新バージョンの提供について",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.10.16-RapportVerup-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-19"
+          ]
+        },
+        {
           "date": "2026-09-15",
           "title": "おびしんふれあいギャラリー「書朋会書展」開催のお知らせ",
           "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.09.15-fureaigallery-2026.10.09.pdf",
@@ -26,6 +37,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -41,6 +53,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -52,6 +65,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -69,6 +83,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -87,6 +102,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -103,6 +119,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -124,6 +141,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -135,6 +153,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -155,6 +174,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -485,6 +505,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -496,6 +517,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -529,6 +551,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -540,6 +563,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -551,6 +575,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -562,6 +587,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -576,6 +602,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -587,6 +614,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -613,6 +641,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -624,6 +653,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -645,6 +675,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -661,6 +692,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -672,6 +704,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -744,6 +777,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -755,6 +789,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05"
           ]
@@ -767,6 +802,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -778,6 +814,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -792,6 +829,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -806,6 +844,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -822,6 +861,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -840,6 +880,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -859,6 +900,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -870,6 +912,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -886,6 +929,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -908,6 +952,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1107,6 +1152,39 @@
       "url": "https://www.tokachishinkumi.com/info/",
       "items": [
         {
+          "date": "2026-10-13",
+          "title": "両替・金種指定払出手数料の改定について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_charge.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-19"
+          ]
+        },
+        {
+          "date": "2026-10-13",
+          "title": "「大量硬貨入金に関する手数料」新設のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_kouka.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-19"
+          ]
+        },
+        {
+          "date": "2026-10-13",
+          "title": "「破産管財人等特殊口座開設手数料」新設のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_hasan.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-10-19"
+          ]
+        },
+        {
           "date": "2026-10-01",
           "title": "今月のローン金利",
           "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
@@ -1114,6 +1192,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1147,6 +1226,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05"
           ]
@@ -1159,6 +1239,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28"
@@ -1172,6 +1253,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28"
@@ -1185,6 +1267,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1201,6 +1284,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1241,6 +1325,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1257,6 +1342,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1277,6 +1363,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -1559,6 +1646,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05"
           ]
@@ -1583,6 +1671,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1598,6 +1687,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1636,6 +1726,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1654,6 +1745,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1673,6 +1765,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -1845,6 +1938,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28"
@@ -1869,6 +1963,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05"
           ]
@@ -1881,6 +1976,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05"
           ]
@@ -1893,6 +1989,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05"
           ]
@@ -2207,6 +2304,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -2218,6 +2316,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -2229,6 +2328,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -2246,6 +2346,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -2275,6 +2376,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -2291,6 +2393,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05",
             "2026-09-28",
@@ -2440,6 +2543,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -2451,6 +2555,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -2462,6 +2567,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
@@ -2506,6 +2612,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12",
             "2026-10-05"
           ]
@@ -2518,6 +2625,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-19",
             "2026-10-12"
           ]
         },
