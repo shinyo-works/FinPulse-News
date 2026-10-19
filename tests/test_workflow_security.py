@@ -179,6 +179,24 @@ class RateImportWorkflowTest(unittest.TestCase):
         self.assertRegex(self.importer, r"import:[\s\S]*?permissions:\s*\n\s*contents: write")
         self.assertIn("github.ref == 'refs/heads/main'", self.importer)
 
+    def test_rehearsal_import_cannot_publish(self):
+        # 再レビュー G4（本人決定 2026-10-19）: 予行は別ジョブで、読み取り権限・予行のブランチ・公開のステップ無し
+        main_job = self.importer.split("\n  import:\n", 1)[1].split("\n  rehearsal-import:\n", 1)[0]
+        self.assertIn("format('{0}', inputs.rehearsal) != 'true'", main_job)
+        self.assertIn("ref: rate-feed\n", main_job)
+        rehearsal = self.importer.split("\n  rehearsal-import:\n", 1)[1]
+        self.assertIn("if: format('{0}', inputs.rehearsal) == 'true'", rehearsal)
+        self.assertRegex(rehearsal, r"permissions:\s*\n\s*contents: read\n")
+        self.assertNotIn("contents: write", rehearsal)
+        self.assertIn("ref: rate-feed-rehearsal", rehearsal)
+        self.assertNotIn("git push", rehearsal)
+        self.assertNotIn("git commit", rehearsal)
+        self.assertNotIn("金利履歴を公開", rehearsal)
+        self.assertEqual(2, rehearsal.count("persist-credentials: false"))
+        self.assertIn('update_rate_history.py "$feed" --only-newer', rehearsal)
+        # workflow_call（週次ニュースからの呼び出し）には予行の入力を足さない
+        self.assertNotIn("rehearsal", self.importer.split("  workflow_call:", 1)[1].split("\npermissions:", 1)[0])
+
     def test_weekly_calls_import_except_connection_test(self):
         block = self.weekly.split("\n  import-rate-history:\n", 1)[1].split("\n  collect-and-report:\n", 1)[0]
         self.assertIn("uses: ./.github/workflows/import-rate-history.yml", block)

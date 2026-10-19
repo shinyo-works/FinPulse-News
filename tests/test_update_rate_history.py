@@ -25,6 +25,28 @@ from scripts import update_rate_history
 from scripts.backfill_rate_history import normalize_legacy_report, rebuild_history
 
 
+def next_survey_day():
+    """リポジトリの履歴の最新日の 1 週後。本物のデータが進んでも「まだ取り込んでいない日」になる。"""
+    latest = max(
+        date
+        for path in (update_rate_history.HISTORY_PATH, update_rate_history.CAR_HISTORY_PATH)
+        for date in json.loads(path.read_text(encoding="utf-8"))["observation_dates"]
+    )
+    return (
+        update_rate_history.datetime.fromisoformat(latest) + update_rate_history.timedelta(days=7)
+    ).date()
+
+
+def freeze_clock(test, day, hour, minute):
+    """update_rate_history の「今」を固定する（未来の版・未来の日の拒否が本物の時計に左右されないように）。
+    返り値の stop() で外せる。外し忘れてもテストの終わりに外れる。"""
+    fixed = update_rate_history.datetime(day.year, day.month, day.day, hour, minute, tzinfo=update_rate_history.JST)
+    patcher = mock.patch.object(update_rate_history, "datetime", wraps=update_rate_history.datetime)
+    patcher.start().now.return_value = fixed
+    test.addCleanup(patcher.stop)
+    return patcher
+
+
 class UpdateRateHistoryTest(unittest.TestCase):
     def setUp(self):
         self.history = {
@@ -672,7 +694,9 @@ class SecurityAuditFixTest(unittest.TestCase):
 
     def test_empty_car_table_imports_housing_only_and_exits_partial(self):
         # 約束にマイカーがあるのに表が空の回: 住宅だけ取り込み、マイカーは前回のまま、終了コード 2（赤）
-        today = update_rate_history.datetime.now(update_rate_history.JST).date().isoformat()
+        day = next_survey_day()
+        today = day.isoformat()
+        freeze_clock(self, day, 7, 15)
         housing_before = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))
         bank = housing_before["rows"][0]
         with tempfile.TemporaryDirectory() as tmp:
@@ -799,7 +823,8 @@ class FeedVersionImportTest(unittest.TestCase):
             update_rate_history.validate_report_data(report)
 
     def test_import_records_the_version_and_same_day_rerun_updates_value(self):
-        today = update_rate_history.datetime.now(update_rate_history.JST).date().isoformat()
+        day = next_survey_day()
+        today = day.isoformat()
         source = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["rows"][0]
 
         def feed(rate, version):
@@ -820,16 +845,20 @@ class FeedVersionImportTest(unittest.TestCase):
             report = Path(tmp) / "feed.json"
             first = f"{today}T07:10:00+09:00"
             report.write_text(json.dumps(feed(1.0, first)), encoding="utf-8")
+            clock = freeze_clock(self, day, 7, 15)  # 07:10 版の直後
             with self.assertRaises(SystemExit):  # マイカーが空なので最後は赤（#6）
                 helper._run_main([str(report)], tmp)
+            clock.stop()
             housing = json.loads((Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
             self.assertEqual(first, housing["last_feed_generated_at"])
 
             # 同じ日の新しい版（月初の 09:00 取り直し）は --only-newer でも取り込み直す
             second = f"{today}T09:10:00+09:00"
             report.write_text(json.dumps(feed(1.5, second)), encoding="utf-8")
+            clock = freeze_clock(self, day, 9, 15)  # 09:10 版の直後
             with self.assertRaises(SystemExit):
                 helper._run_main([str(report), "--only-newer"], tmp, keep=True)
+            clock.stop()
             housing = json.loads((Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
             self.assertEqual(second, housing["last_feed_generated_at"])
             row = next(
@@ -844,8 +873,10 @@ class FeedVersionImportTest(unittest.TestCase):
             (Path(tmp) / "rate-history.json").write_text(json.dumps(housing, ensure_ascii=False), encoding="utf-8")
             before = (Path(tmp) / "rate-history.json").read_text(encoding="utf-8")
             report.write_text(json.dumps(feed(2.0, f"{today}T10:10:00+09:00")), encoding="utf-8")
+            clock = freeze_clock(self, day, 10, 15)  # 10:10 版の直後
             with self.assertRaises(SystemExit):
                 helper._run_main([str(report), "--only-newer"], tmp, keep=True)
+            clock.stop()
             self.assertEqual(before, (Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
 
 
@@ -1047,7 +1078,9 @@ class ImportGuardTest(unittest.TestCase):
         self.assertEqual(1, len(summary["held"]))
         validate_history(history)
 
-    def test_partial_hold_does_not_record_the_version(self):
+    def test_partial_hold_still_records_the_version(self):
+        # 再レビュー G23（本人決定 2026-10-19）: 保留があっても版を記録する。記録しないと同じ日の
+        # 新しい版が「版の記録が無い日は守る」で断られ、報告側の検算も「公開中の版 なし」になる
         history = self.history()
         history["rows"].append({
             **history["rows"][0], "rate_type": "fixed_10y",
@@ -1057,15 +1090,20 @@ class ImportGuardTest(unittest.TestCase):
         report["feed_generated_at"] = "2026-10-12T07:00:00+09:00"
         summary = update_history(history, report, "2026-10-12")
         self.assertEqual("2026-10-12", history["generated_at"])  # 変動は取り込めた
-        self.assertNotIn("last_feed_generated_at", history)  # 直った新しい版を同じ日に取り込めるように
+        self.assertEqual("2026-10-12T07:00:00+09:00", history["last_feed_generated_at"])
         self.assertEqual(1, len(summary["held"]))
+        # 直った新しい版は、版の比較で同じ日に取り込み直せる
+        should, _ = update_rate_history.import_decision(history, "2026-10-12", "2026-10-12T09:00:00+09:00")
+        self.assertTrue(should)
 
     def test_max_rate_constant_for_whole_history_is_unchanged(self):
         # 履歴全体の検証（validate_history）と共用なので、取り込み用の範囲とは別に保つ
         self.assertEqual(100.0, update_rate_history.MAX_RATE_PERCENT)
 
     def test_main_prints_warnings_for_holds(self):
-        today = update_rate_history.datetime.now(update_rate_history.JST).date().isoformat()
+        day = next_survey_day()
+        today = day.isoformat()
+        freeze_clock(self, day, 7, 15)
         source = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["rows"][0]
         helper = SecurityAuditFixTest()
         with tempfile.TemporaryDirectory() as tmp:
@@ -1081,6 +1119,196 @@ class ImportGuardTest(unittest.TestCase):
             }), encoding="utf-8")
             _, _, log = helper._run_main([str(report)], tmp)
         self.assertIn("::warning title=住宅ローン金利で保留した金利があります::", log)
+
+
+class SameDayReplaceTest(unittest.TestCase):
+    """再レビュー G23（本人決定 2026-10-19）: 同じ日の新しい版の取り込み直しは、その日の列の置き換え。
+    確かめられなかった項目の当日の値は消す。取れた割合が 7 割未満の種別は前の版のまま残す。"""
+
+    DAY = "2026-11-02"
+    V7 = "2026-11-02T07:10:00+09:00"
+    V9 = "2026-11-02T09:10:00+09:00"
+
+    def history(self, products=1):
+        rows = [{
+            "bank_id": "bank", "bank_name": "確認銀行",
+            "product_id": f"loan{n}", "product_name": f"住宅ローン{n}",
+            "url": "https://www.example-bank.jp/loan/", "rate_type": "variable",
+            "history": [{"rate": 2.0, "observed_on": "2026-10-26"}],
+        } for n in range(products)]
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "rate_type_order": list(HOUSING_DATASET.rate_type_order),
+            "rate_type_labels": dict(HOUSING_DATASET.rate_type_labels),
+            "observation_dates": ["2026-10-26"],
+            "generated_at": "2026-10-26",
+            "rows": rows,
+        }
+
+    def report(self, version, loans):
+        return {
+            "rate_contract": expected_rate_contract_metadata(),
+            "feed_generated_at": version,
+            "loan_table": [
+                {"bank_id": "bank", "bank_name": "確認銀行", "product_id": pid,
+                 "product_name": f"住宅ローン{pid[4:]}", "url": "https://www.example-bank.jp/loan/",
+                 "loan_variable": rate}
+                for pid, rate in loans.items()
+            ],
+        }
+
+    def all_at(self, rate, count):
+        return {f"loan{n}": rate for n in range(count)}
+
+    def entries(self, history, product_id):
+        row = next((r for r in history["rows"] if r["product_id"] == product_id), None)
+        return None if row is None else row["history"]
+
+    def setUp(self):
+        freeze_clock(self, update_rate_history.datetime(2026, 11, 2).date(), 9, 15)
+
+    def test_held_first_version_is_recorded_and_newer_version_reimports(self):
+        # (i) 07:00 版で 1 項目保留 → 版が記録される → 09:00 版で取り込み直される
+        history = self.history(products=2)
+        update_history(history, self.report(self.V7, {"loan0": 2.1, "loan1": 9.9}), self.DAY)
+        self.assertEqual(self.V7, history["last_feed_generated_at"])
+        self.assertTrue(update_rate_history.import_decision(history, self.DAY, self.V9)[0])
+        update_history(history, self.report(self.V9, {"loan0": 2.1, "loan1": 2.2}), self.DAY)
+        self.assertEqual({"rate": 2.2, "observed_on": self.DAY}, self.entries(history, "loan1")[0])
+        self.assertEqual(self.V9, history["last_feed_generated_at"])
+
+    def test_blank_in_newer_version_clears_that_days_value_only(self):
+        # (ii) 07:00 は値あり、09:00 版では空欄 → 当日の値が消え、前週の値は残る
+        history = self.history(products=4)
+        update_history(history, self.report(self.V7, self.all_at(2.1, 4)), self.DAY)
+        summary = update_history(
+            history, self.report(self.V9, {**self.all_at(2.1, 3), "loan3": None}), self.DAY
+        )
+        self.assertEqual([{"rate": 2.0, "observed_on": "2026-10-26"}], self.entries(history, "loan3"))
+        self.assertEqual(1, summary["cleared"])
+        self.assertEqual(self.DAY, history["generated_at"])
+        validate_history(history)
+
+    def test_product_missing_from_newer_version_is_cleared(self):
+        # (iii) 09:00 版に載っていない商品の当日値が消える（その日だけの行は行ごと消える）
+        history = self.history(products=4)
+        update_history(history, self.report(self.V7, {**self.all_at(2.1, 4), "loan9": 1.5}), self.DAY)
+        self.assertIsNotNone(self.entries(history, "loan9"))
+        update_history(history, self.report(self.V9, self.all_at(2.1, 4)), self.DAY)
+        self.assertIsNone(self.entries(history, "loan9"))
+        validate_history(history)
+
+    def test_partial_hold_on_reimport_clears_only_held_items(self):
+        # (iv) 同じ日の取り直しで一部だけ保留 → 保留項目の当日値だけ消え、ほかは新しい版の値
+        history = self.history(products=4)
+        update_history(history, self.report(self.V7, self.all_at(2.1, 4)), self.DAY)
+        summary = update_history(
+            history, self.report(self.V9, {**self.all_at(2.3, 3), "loan3": 42.0}), self.DAY
+        )
+        self.assertEqual(1, len(summary["held"]))
+        self.assertEqual(2.3, self.entries(history, "loan0")[0]["rate"])
+        self.assertEqual("2026-10-26", self.entries(history, "loan3")[0]["observed_on"])
+        self.assertEqual(self.V9, history["last_feed_generated_at"])
+
+    def test_low_confirmed_ratio_keeps_the_previous_version(self):
+        # (iv-4) 07:00 に値があった項目の 6 割しか取れない → 置き換えず前の版のまま
+        #        7 割・8 割取れた → 置き換え、取れなかった項目の当日値は消える
+        self.assertEqual(0.7, update_rate_history.SAME_DAY_MIN_CONFIRMED_RATIO)
+        for confirmed, replaced in ((6, False), (7, True), (8, True)):
+            with self.subTest(confirmed=confirmed):
+                history = self.history(products=10)
+                update_history(history, self.report(self.V7, self.all_at(2.1, 10)), self.DAY)
+                before = copy.deepcopy(history)
+                loans = {f"loan{n}": (2.4 if n < confirmed else None) for n in range(10)}
+                summary = update_history(history, self.report(self.V9, loans), self.DAY)
+                if replaced:
+                    self.assertNotIn("kept_previous", summary)
+                    self.assertEqual(2.4, self.entries(history, "loan0")[0]["rate"])
+                    self.assertEqual("2026-10-26", self.entries(history, "loan9")[0]["observed_on"])
+                    self.assertEqual(self.V9, history["last_feed_generated_at"])
+                else:
+                    self.assertIn("kept_previous", summary)
+                    self.assertEqual(before, history)
+
+    def test_all_held_on_reimport_keeps_the_previous_version(self):
+        # 全項目が保留・空欄なら前の版のまま。版も前のままなので、さらに新しい版なら取り込み直せる
+        history = self.history(products=2)
+        update_history(history, self.report(self.V7, self.all_at(2.1, 2)), self.DAY)
+        before = copy.deepcopy(history)
+        summary = update_history(history, self.report(self.V9, {"loan0": 42.0, "loan1": None}), self.DAY)
+        self.assertIn("kept_previous", summary)
+        self.assertEqual(before, history)
+        self.assertEqual(self.V7, history["last_feed_generated_at"])
+
+    def test_manual_lock_and_unversioned_history_are_still_protected(self):
+        # (v)(vi) 手直しの印の日と、版の記録が無い旧形式の履歴は、同じ日の新しい版を断る（緩めない）
+        history = self.history()
+        update_history(history, self.report(self.V7, {"loan0": 2.1}), self.DAY)
+        locked = copy.deepcopy(history)
+        locked["manual_lock"] = {self.DAY: "手直し"}
+        self.assertFalse(update_rate_history.import_decision(locked, self.DAY, self.V9)[0])
+        unversioned = copy.deepcopy(history)
+        unversioned.pop("last_feed_generated_at")
+        self.assertFalse(update_rate_history.import_decision(unversioned, self.DAY, self.V9)[0])
+
+
+class SameDayReplaceMainTest(unittest.TestCase):
+    """G23 の終了コード: (iv-2) 片方の種別だけ前の版のまま → 取り込めた種別は書いて 2。
+    (iv-3) どの種別も取り込めない → 書き込まずに 3（workflow は 2 以外ですぐ赤・公開しない）。"""
+
+    def feed(self, day, version, housing_rate, car_rate):
+        housing = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["rows"][0]
+        car = json.loads(update_rate_history.CAR_HISTORY_PATH.read_text(encoding="utf-8"))["rows"][0]
+        housing_key = next(k for k, v in update_rate_history.RATE_KEY_MAP.items() if v == housing["rate_type"])
+        car_key = next(k for k, v in update_rate_history.CAR_RATE_KEY_MAP.items() if v == car["rate_type"])
+        return {
+            "rate_contract": update_rate_history.expected_rate_contract_metadata_with_car(),
+            "survey_date": day,
+            "feed_generated_at": version,
+            "loan_table": [{
+                "bank_id": housing["bank_id"], "bank_name": housing["bank_name"],
+                "product_id": housing["product_id"], "product_name": housing["product_name"],
+                housing_key: housing_rate,
+            }],
+            "car_loan_table": [{
+                "bank_id": car["bank_id"], "bank_name": car["bank_name"],
+                "product_id": car["product_id"], "product_name": car["product_name"],
+                car_key: car_rate,
+            }],
+        }
+
+    def run_pair(self, housing9, car9):
+        day = next_survey_day()
+        helper = SecurityAuditFixTest()
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "feed.json"
+            clock = freeze_clock(self, day, 7, 15)
+            report.write_text(json.dumps(self.feed(day.isoformat(), f"{day}T07:10:00+09:00", 2.0, 3.0)), encoding="utf-8")
+            helper._run_main([str(report)], tmp)
+            clock.stop()
+            housing7 = (Path(tmp) / "rate-history.json").read_text(encoding="utf-8")
+            car7 = (Path(tmp) / "car-loan-history.json").read_text(encoding="utf-8")
+            freeze_clock(self, day, 9, 15)
+            report.write_text(json.dumps(self.feed(day.isoformat(), f"{day}T09:10:00+09:00", housing9, car9)), encoding="utf-8")
+            with self.assertRaises(SystemExit) as raised:
+                helper._run_main([str(report), "--only-newer"], tmp, keep=True)
+            housing = (Path(tmp) / "rate-history.json").read_text(encoding="utf-8")
+            car = (Path(tmp) / "car-loan-history.json").read_text(encoding="utf-8")
+        return raised.exception.code, housing7 == housing, car7 == car
+
+    def test_housing_kept_car_updated_exits_partial(self):
+        # (iv-2) 住宅が全項目空欄・マイカー正常 → 住宅は前の版のまま、マイカーは更新
+        code, housing_same, car_same = self.run_pair(None, 3.1)
+        self.assertEqual(update_rate_history.EXIT_PARTIAL, code)
+        self.assertTrue(housing_same)
+        self.assertFalse(car_same)
+
+    def test_nothing_imported_exits_without_writing(self):
+        # (iv-3) 全種別が取り込めない → 書き込まず終了コード 3
+        code, housing_same, car_same = self.run_pair(None, 42.0)
+        self.assertEqual(update_rate_history.EXIT_KEPT_PREVIOUS, code)
+        self.assertTrue(housing_same)
+        self.assertTrue(car_same)
 
 
 if __name__ == "__main__":

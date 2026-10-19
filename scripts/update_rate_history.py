@@ -18,6 +18,7 @@ DATASETS の定義だけに閉じ込め、積み上げ・検証の処理は共�
     python scripts/update_rate_history.py report_data.json --date 2026-07-21
 """
 import argparse
+import copy
 import json
 import math
 import os
@@ -177,7 +178,15 @@ DATASETS = {dataset.key: dataset for dataset in (HOUSING_DATASET, CAR_DATASET)}
 # ときも取り込めた分を公開し、最後のステップで失敗にする（本人決定 2026-10-13）。使う場面は 2 つ。
 #   - 約束（rate_contract）にある表のどれかが空で、残りの表だけ取り込んだ（再レビュー #6）
 #   - 公開用データの調査日が、期待される最新の調査日より古いまま止まっている（再レビュー G-3）
+#   - 同じ日の取り直しで、ある種別を前の版のまま残し、ほかの種別だけ取り込んだ（再レビュー G23）
 EXIT_PARTIAL = 2
+# 同じ日の取り直しで、どの種別も取り込まなかった（前の版のまま残した）ときの終了コード。
+# workflow は 2 以外の 0 でない値ですぐ赤にし、公開しない（再レビュー G23・本人決定 2026-10-19）。
+EXIT_KEPT_PREVIOUS = 3
+# 同じ日の取り直しで、前の版に値があった項目のうち新しい版でも取れた割合がこれ未満なら、
+# その種別は置き換えず前の版のまま残す（本人決定 2026-10-19 Q5）。サイト障害の日に、
+# 07:00 に取れていた正しい値まで消えるのを防ぐため。
+SAME_DAY_MIN_CONFIRMED_RATIO = 0.7
 # 公開用データが古いままでも、期待される調査日のこの時刻（JST）までは警告だけにする。
 # 金利調査ツールの控えが遅れて動く日でも、取り込みの控え（月曜 11:00・1〜7日 12:00）で拾えるため。
 STALE_FEED_ERROR_HOUR_JST = 11
@@ -566,6 +575,21 @@ def update_history(
         )
 
     added_survey_date = survey_date not in history["observation_dates"]
+    # 最新の調査日を新しい版で取り込み直すときは、その日の列を置き換える（再レビュー G23・
+    # 本人決定 2026-10-19）。新しい版で空欄・保留の項目と、載っていない商品の当日の値は消す。
+    # 過去日の履歴は残す。取れた割合が低い回は、前の版のまま残すため写しを取っておく。
+    same_day_reimport = not added_survey_date and survey_date == latest_date
+    before_reimport = copy.deepcopy(history) if same_day_reimport else None
+    previous_same_day = (
+        {
+            row_key(r.get("bank_id"), r.get("product_id"), r.get("rate_type"))
+            for r in history["rows"]
+            if any(entry.get("observed_on") == survey_date for entry in r.get("history", []))
+        }
+        if same_day_reimport
+        else set()
+    )
+    imported_keys = set()
     if added_survey_date:
         history["observation_dates"].append(survey_date)
         history["observation_dates"].sort(reverse=True)
@@ -613,6 +637,7 @@ def update_history(
                 # その項目だけ保留する（前回の値は残る。ほかの項目と種別の取り込みは止めない）
                 summary["held"].append(f"{bank_id}/{product_id} {rate_type}={value:g}（{hold_reason}）")
                 continue
+            imported_keys.add(key)
             if row is None:
                 # 新規の(機関×商品×種別)。履歴を1件で作る。名前が無い新商品は表に
                 # 名前の空いた行を作ってしまうため、その回の取り込みを止めて気づかせる。
@@ -712,6 +737,16 @@ def update_history(
                 else:
                     summary["changed"] += 1
 
+    if same_day_reimport:
+        shortfall = same_day_shortfall(previous_same_day, imported_keys)
+        if shortfall:
+            # 置き換えず、前の版のまま残す（呼び出し側は書き込まずに赤で知らせる）
+            history.clear()
+            history.update(before_reimport)
+            summary["kept_previous"] = shortfall
+            return summary
+        summary["cleared"] = clear_unconfirmed_same_day(history, survey_date, imported_keys)
+
     if added_survey_date and summary["held"] and not any(
         entry.get("observed_on") == survey_date
         for row in history["rows"]
@@ -728,9 +763,11 @@ def update_history(
     if survey_date == history.get("generated_at"):
         # 最新の調査日を書いた公開用データの版を残す。同じ日に新しい版が来たら取り込み直す
         # 判定（import_decision）に使う。版の無いデータで書いたときは、古い版を残さない。
-        # 保留した項目があった回は版を残さない（直った新しい版が来たら、同じ日でも取り込み直せるように）
+        # 保留した項目があった回も版を残す（再レビュー G23・本人決定 2026-10-19）。残さないと
+        # import_decision が「版の記録が無い日は手直しを守る」として同じ日の新しい版を断り、
+        # 報告側の検算も「公開中の版 なし」で未照合になるため。直った新しい版は版の比較で取り込み直せる。
         version = report_data.get("feed_generated_at")
-        if version and not summary["held"]:
+        if version:
             history["last_feed_generated_at"] = version
         else:
             history.pop("last_feed_generated_at", None)
@@ -738,6 +775,36 @@ def update_history(
     extend_automated_source_period(history, survey_date)
     validate_history(history)
     return summary
+
+
+def same_day_shortfall(previous_keys: set, imported_keys: set):
+    """同じ日の取り直しで、前の版に値があった項目のうち新しい版で取れた割合が足りなければ理由を返す。"""
+    if not previous_keys:
+        return None
+    confirmed = len(previous_keys & imported_keys)
+    if confirmed / len(previous_keys) >= SAME_DAY_MIN_CONFIRMED_RATIO:
+        return None
+    return (
+        f"前の版で値があった {len(previous_keys)} 項目のうち、新しい版で取れたのは {confirmed} 項目だけ"
+        f"（{SAME_DAY_MIN_CONFIRMED_RATIO:.0%} 未満）"
+    )
+
+
+def clear_unconfirmed_same_day(history: dict, survey_date: str, imported_keys: set) -> int:
+    """新しい版で確かめられなかった項目の当日の値を消し、消した数を返す。その日だけの行は行ごと消す。"""
+    cleared = 0
+    kept_rows = []
+    for row in history["rows"]:
+        key = row_key(row.get("bank_id"), row.get("product_id"), row.get("rate_type"))
+        entries = row.get("history", [])
+        if key not in imported_keys and any(e.get("observed_on") == survey_date for e in entries):
+            row["history"] = [e for e in entries if e.get("observed_on") != survey_date]
+            cleared += 1
+            if not row["history"]:
+                continue
+        kept_rows.append(row)
+    history["rows"] = kept_rows
+    return cleared
 
 
 def write_history_atomic(history: dict, path: Path = HISTORY_PATH) -> None:
@@ -856,8 +923,10 @@ def main() -> None:
         targets = [DATASETS[args.dataset]]
 
     reject_future_date(survey_date)
-    update_targets(args, report_data, survey_date, targets)
-    alert = bool(empty)
+    written, kept = update_targets(args, report_data, survey_date, targets)
+    if kept and not written:
+        sys.exit(EXIT_KEPT_PREVIOUS)
+    alert = bool(empty) or bool(kept)
     if args.only_newer:
         # 週次の自動取り込みのときだけ、公開用データの鮮度を見る（手動の取り込み直しは対象外）
         stale = stale_feed_message(survey_date, datetime.now(JST))
@@ -957,7 +1026,7 @@ def update_targets(args, report_data: dict, survey_date: str, targets: list) -> 
                 newer.append(dataset)
         targets = newer
         if not targets:
-            return
+            return 0, []
 
     # 全種別をメモリ上で更新・検証してから書き込む。マイカー側の入力が不正な回に
     # 住宅ローン側だけが新しい調査日になる部分更新を防ぐ（書き込み自体の途中失敗は対象外。
@@ -974,8 +1043,20 @@ def update_targets(args, report_data: dict, survey_date: str, targets: list) -> 
         )
         for dataset in targets
     ]
+    written = 0
+    kept = []
     for dataset, history, summary in prepared:
+        if summary.get("kept_previous"):
+            kept.append(dataset)
+            print(
+                f"::error title={dataset.label}は前の版のまま残しました::"
+                f"同じ調査日 {survey_date} の取り直しで、{summary['kept_previous']}でした。"
+                "サイト障害などで正しい値まで消えないよう、この種別は置き換えていません。"
+                + ("保留: " + " / ".join(summary["held"]) if summary["held"] else "")
+            )
+            continue
         write_history_atomic(history, dataset.history_path)
+        written += 1
         print(
             f"{dataset.label}の履歴を更新しました（調査日 {survey_date}）: "
             f"{dataset.history_path}"
@@ -990,11 +1071,18 @@ def update_targets(args, report_data: dict, survey_date: str, targets: list) -> 
             print(
                 f"::warning title={dataset.label}で保留した金利があります::"
                 f"範囲外や急な変化のため {len(summary['held'])} 項目を取り込みませんでした"
-                "（その日の値は空欄。1 項目も取り込めなかった日は調査日も進めない）。"
+                "（その日の値は空欄。同じ日の取り直しでは前の版の当日の値も消す。"
+                "1 項目も取り込めなかった日は調査日も進めない）。"
                 "公式サイトの値を確かめてください: " + " / ".join(summary["held"])
+            )
+        if summary.get("cleared"):
+            print(
+                f"  同じ日の取り直しで、新しい版で確かめられなかった {summary['cleared']} 項目の"
+                "当日の値を消しました"
             )
         for message in summary["warnings"]:
             print(f"::warning title={dataset.label}の名前・リンクの変更を保留しました::{message}")
+    return written, kept
 
 
 if __name__ == "__main__":
