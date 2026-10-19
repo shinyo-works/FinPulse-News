@@ -798,8 +798,17 @@ class FeedVersionImportTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "未来"):
             update_rate_history.validate_report_data(report)
 
+    @staticmethod
+    def frozen_clock(hour, minute, day=(2026, 11, 2)):
+        """update_rate_history の「今」を固定する（未来の版の拒否が本物の時計に左右されないように）。"""
+        fixed = update_rate_history.datetime(*day, hour, minute, tzinfo=update_rate_history.JST)
+        patcher = mock.patch.object(update_rate_history, "datetime", wraps=update_rate_history.datetime)
+        fake = patcher.start()
+        fake.now.return_value = fixed
+        return patcher
+
     def test_import_records_the_version_and_same_day_rerun_updates_value(self):
-        today = update_rate_history.datetime.now(update_rate_history.JST).date().isoformat()
+        today = "2026-11-02"
         source = json.loads(update_rate_history.HISTORY_PATH.read_text(encoding="utf-8"))["rows"][0]
 
         def feed(rate, version):
@@ -820,16 +829,21 @@ class FeedVersionImportTest(unittest.TestCase):
             report = Path(tmp) / "feed.json"
             first = f"{today}T07:10:00+09:00"
             report.write_text(json.dumps(feed(1.0, first)), encoding="utf-8")
+            clock = self.frozen_clock(7, 15)  # 07:10 版の直後
+            self.addCleanup(mock.patch.stopall)
             with self.assertRaises(SystemExit):  # マイカーが空なので最後は赤（#6）
                 helper._run_main([str(report)], tmp)
+            clock.stop()
             housing = json.loads((Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
             self.assertEqual(first, housing["last_feed_generated_at"])
 
             # 同じ日の新しい版（月初の 09:00 取り直し）は --only-newer でも取り込み直す
             second = f"{today}T09:10:00+09:00"
             report.write_text(json.dumps(feed(1.5, second)), encoding="utf-8")
+            clock = self.frozen_clock(9, 15)  # 09:10 版の直後
             with self.assertRaises(SystemExit):
                 helper._run_main([str(report), "--only-newer"], tmp, keep=True)
+            clock.stop()
             housing = json.loads((Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
             self.assertEqual(second, housing["last_feed_generated_at"])
             row = next(
@@ -844,8 +858,10 @@ class FeedVersionImportTest(unittest.TestCase):
             (Path(tmp) / "rate-history.json").write_text(json.dumps(housing, ensure_ascii=False), encoding="utf-8")
             before = (Path(tmp) / "rate-history.json").read_text(encoding="utf-8")
             report.write_text(json.dumps(feed(2.0, f"{today}T10:10:00+09:00")), encoding="utf-8")
+            clock = self.frozen_clock(10, 15)  # 10:10 版の直後
             with self.assertRaises(SystemExit):
                 helper._run_main([str(report), "--only-newer"], tmp, keep=True)
+            clock.stop()
             self.assertEqual(before, (Path(tmp) / "rate-history.json").read_text(encoding="utf-8"))
 
 
