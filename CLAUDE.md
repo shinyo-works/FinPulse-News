@@ -38,6 +38,7 @@ FinPulse-News/
 │   └── update_rate_history.py # 金利履歴の検証・更新
 ├── .github/
 │   └── workflows/
+│       ├── ci.yml                  # PR と main への push で全テストと依存の脆弱性検査
 │       ├── weekly-news-report.yml  # 週次自動実行ワークフロー
 │       └── import-rate-history.yml # 金利履歴の取り込み（週次から呼ぶ・控えは月曜11:00）
 ├── output/                # 収集結果の保存先
@@ -74,6 +75,7 @@ FinPulse-News/
 - 収集結果は `InstitutionResult.status/error` で正常0件と失敗を区別する。汎用抽出を全機関向けに条件分岐させず、サイト固有構造は `SCRAPERS` 登録簿へ専用抽出を追加する。
 - HTML/XMLはサイズ・Content-Type・HTTP状態を検証し、接続待ちと読取無通信に共通タイムアウトを使う。加えて接続から読み切りまでを1回60秒で打ち切る（`fetch_limited`。少しずつ返し続けるサイト対策で、取得を別スレッドで動かして締切で見切る）。収集ステップは15分で打ち切るが、ジョブ全体は打ち切らず、失敗時も成果物保存を続ける。
 - GitHub Actionsは収集ジョブを読み取り権限、公開ジョブだけを書き込み権限とする。外部ActionはコミットSHA、Python依存は `requirements.lock` のバージョンとハッシュで固定する。
+- CI（`ci.yml`）は PR と main への push で全テスト（商品突合は週次と同じく外す）と `pip-audit` を回す。読み取り権限だけ・secrets なし（公開リポジトリでフォークの PR でも安全な形）。マージの関所 `~/.claude/scripts/safe-merge.sh` はこの CI の緑を条件にする（2026-10-19 本人指示）。`pip-audit` が赤になったら、直る版へ `pip-compile --generate-hashes --upgrade-package <名前> --output-file=requirements.lock requirements.in` で上げる。
 - `requirements.in` 更新後は Python 3.11 で `pip-compile --generate-hashes --output-file=requirements.lock requirements.in` を実行し、ロックを再生成する。
 - 金融機関の収集・JSON・表示順は `config.json` の `institutions` 配列を唯一の正とする。生成処理とバックフィルで順序を正規化し、ヴューアー側では並べ替えない。
 - 公開JSONは、日付別・日付一覧・機関別集約の三点を一時領域で全検証し、入口の `index.json` を最後に置換する。成功マーカーがない実行では既存JSONを公開し直さない。
