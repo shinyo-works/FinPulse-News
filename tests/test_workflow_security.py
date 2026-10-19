@@ -12,7 +12,7 @@ class WorkflowSecurityTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
     def test_all_actions_are_pinned_to_full_commit(self):
-        for name in ("weekly-news-report.yml", "import-rate-history.yml"):
+        for name in ("weekly-news-report.yml", "import-rate-history.yml", "ci.yml"):
             workflow = (self.repository_root / ".github/workflows" / name).read_text(encoding="utf-8")
             action_refs = re.findall(r"^\s*uses:\s*([^\s#]+)", workflow, re.MULTILINE)
             self.assertGreater(len(action_refs), 0)
@@ -207,3 +207,36 @@ class RateImportWorkflowTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CiWorkflowTest(unittest.TestCase):
+    """2026-10-19 本人指示: PR と main への push で全テストと依存の脆弱性検査を回す。"""
+
+    @classmethod
+    def setUpClass(cls):
+        root = Path(__file__).resolve().parents[1]
+        cls.ci = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+
+    def test_runs_on_pull_request_and_main_push(self):
+        self.assertRegex(self.ci, r"pull_request:\s*\n\s*branches: \[main\]")
+        self.assertRegex(self.ci, r"push:\s*\n\s*branches: \[main\]")
+
+    def test_is_read_only_and_gets_no_secrets(self):
+        # 公開リポジトリなので、フォークからの PR でも書き込めず、合言葉も渡らない形を保つ
+        self.assertRegex(self.ci, re.compile(r"^permissions:\s*\n\s*contents: read\n", re.MULTILINE))
+        self.assertNotIn("contents: write", self.ci)
+        self.assertNotIn("secrets.", self.ci)
+        self.assertNotIn("git push", self.ci)
+        self.assertEqual(2, self.ci.count("persist-credentials: false"))
+
+    def test_tests_use_locked_dependencies_and_defer_data_sync(self):
+        self.assertIn("--require-hashes -r requirements.lock", self.ci)
+        self.assertRegex(
+            self.ci,
+            r"- name: 自動テスト\s*\n\s*env:[\s\S]*?FINPULSE_DEFER_DATA_SYNC_TESTS: '1'[\s\S]*?"
+            r"python -m unittest discover -s tests",
+        )
+
+    def test_audit_checks_the_lockfile(self):
+        self.assertRegex(self.ci, r"pip-audit==\d+\.\d+\.\d+")
+        self.assertIn("pip-audit -r requirements.lock --require-hashes --disable-pip", self.ci)
