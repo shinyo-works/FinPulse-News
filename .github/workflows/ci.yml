@@ -7,9 +7,13 @@ name: CI
 # secrets は渡さない（テストはメール送信も外部への接続もしない）。公開リポジトリなので、
 # フォークからの PR でも安全なよう contents: read だけにし、git に書き戻すステップも持たない。
 on:
+  # AI 向けの引継ぎメモだけを直したときは CI を回さない（Actions の無料枠＝private は月2000分の節約）。
+  # これらのファイルはコードからもテストからも読まれない。関所 safe-merge は「チェック0件でもこの3ファイルだけの PR」は通す。
   pull_request:
+    paths-ignore: ["**/HANDOFF.md", "**/AGENTS.md", "**/CLAUDE.md"]
     branches: [main]
   push:
+    paths-ignore: ["**/HANDOFF.md", "**/AGENTS.md", "**/CLAUDE.md"]
     branches: [main]
 
 permissions:
