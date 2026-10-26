@@ -149,6 +149,8 @@ IMPORT_MAX_RATE_JUMP = 3.0
 IMPORT_MAX_RATE_RATIO = 10.0
 # 保証料注記の上限文字数。表の1セルに収める前提で、長文が来ても画面を壊さない。
 MAX_GUARANTEE_NOTE_CHARS = 80
+# 取得不可の注記（例: 不正アクセスのため取得不可）の上限文字数。保証料注記と同じく表の1セル前提。
+MAX_OUTAGE_NOTE_CHARS = 80
 SCHEMA_VERSION = 2
 
 HOUSING_DATASET = Dataset(
@@ -258,10 +260,19 @@ def normalize_guarantee_note(value) -> str:
     上流の設定ファイル由来の自由文なので、型と長さだけをここで確定させる。
     改行やタブが混ざると表の1セルが崩れるため空白に潰す。
     """
+    return _normalize_short_note(value, MAX_GUARANTEE_NOTE_CHARS)
+
+
+def normalize_outage_note(value) -> str:
+    """機関の取得不可の注記（上流 banks.json の outage_note）を、保証料注記と同じ形に整える。"""
+    return _normalize_short_note(value, MAX_OUTAGE_NOTE_CHARS)
+
+
+def _normalize_short_note(value, limit: int) -> str:
     if not isinstance(value, str):
         return ""
     text = " ".join(value.split())
-    return text[:MAX_GUARANTEE_NOTE_CHARS]
+    return text[:limit]
 
 
 def validate_rate(value, field_name: str) -> float:
@@ -456,6 +467,16 @@ def validate_history(history: dict) -> None:
         ):
             raise ValueError(
                 f"rows[{index}].guarantee_note は{MAX_GUARANTEE_NOTE_CHARS}文字以内の"
+                "空でない文字列にしてください。"
+            )
+        outage_note = row.get("outage_note")
+        if outage_note is not None and (
+            not isinstance(outage_note, str)
+            or not outage_note.strip()
+            or len(outage_note) > MAX_OUTAGE_NOTE_CHARS
+        ):
+            raise ValueError(
+                f"rows[{index}].outage_note は{MAX_OUTAGE_NOTE_CHARS}文字以内の"
                 "空でない文字列にしてください。"
             )
         key = row_key(bank_id, product_id, rate_type)
@@ -747,6 +768,8 @@ def update_history(
             return summary
         summary["cleared"] = clear_unconfirmed_same_day(history, survey_date, imported_keys)
 
+    apply_outage_notes(history, report_data, survey_date, dataset)
+
     if added_survey_date and summary["held"] and not any(
         entry.get("observed_on") == survey_date
         for row in history["rows"]
@@ -775,6 +798,34 @@ def update_history(
     extend_automated_source_period(history, survey_date)
     validate_history(history)
     return summary
+
+
+def apply_outage_notes(history: dict, report_data: dict, survey_date: str, dataset: Dataset) -> None:
+    """機関の取得不可の注記（例: 不正アクセスのため取得不可）を、その商品の全種別の行へ写す。
+
+    注記が付く週はその商品の金利が1つも取れていない（上流 compare._bank_outage_note）ため、
+    金利を取り込む上のループは行に触れない。そこで商品単位でここから付け外しする。
+    注記の無い週は消す（サイトが戻った後に古い断り書きを残さない）。最新の調査日の取り込みでだけ
+    動かし、過去データの投入で今の注記を巻き戻さない。
+    """
+    dates = history.get("observation_dates") or []
+    if dates and survey_date < dates[0]:
+        return
+    notes = {}
+    for loan in report_data.get(dataset.table_key, []):
+        if loan.get("manual"):
+            continue
+        notes[(loan.get("bank_id"), loan.get("product_id"))] = normalize_outage_note(
+            loan.get("outage_note")
+        )
+    for row in history["rows"]:
+        key = (row.get("bank_id"), row.get("product_id"))
+        if key not in notes:
+            continue
+        if notes[key]:
+            row["outage_note"] = notes[key]
+        else:
+            row.pop("outage_note", None)
 
 
 def same_day_shortfall(previous_keys: set, imported_keys: set):
