@@ -138,6 +138,10 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn('<div class="guarantee-note">', self.rate_html)
         self.assertIn("row.guarantee_note", self.rate_html)
         self.assertIn(".guarantee-note {", self.rate_html)
+        # 取得不可の理由（例: 不正アクセスのため取得不可）も機関名セルの中で断る
+        self.assertIn('<div class="outage-note">', self.rate_html)
+        self.assertIn("escapeHtml(row.outage_note)", self.rate_html)
+        self.assertIn(".outage-note {", self.rate_html)
 
     def test_titles_use_the_japanese_site_name(self):
         # ブラウザのタブ名・ブックマーク名は画面上の見出しと同じ名前に揃える

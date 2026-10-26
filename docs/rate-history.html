@@ -262,6 +262,7 @@
     .bank-name a:hover { color: var(--teal-700); text-decoration: underline; }
     .product-name { margin-top: 1px; color: var(--muted); font-size: 0.71rem; white-space: normal; line-height: 1.25; }
     .guarantee-note { margin-top: 2px; color: #b91c1c; font-size: 0.68rem; font-weight: 600; white-space: normal; line-height: 1.2; }
+    .outage-note { margin-top: 2px; color: #b91c1c; font-size: 0.68rem; font-weight: 600; white-space: normal; line-height: 1.2; }
     /* 住宅ローンの保証料・事務手数料。既定は控えめにし、保証料が別途の商品を赤、
        条件次第で別途負担が生じる商品・記載が無く不明な商品を橙で立てる */
     .feature-note { margin-top: 2px; color: #5c6f7c; font-size: 0.66rem; font-weight: 600; white-space: normal; line-height: 1.2; }
@@ -788,9 +789,14 @@
           const guaranteeHtml = row.guarantee_note
             ? `<div class="guarantee-note">※${escapeHtml(row.guarantee_note)}</div>`
             : "";
+          // 機関のサイト障害などで今回1つも取れなかった商品は、理由を機関名の下で断る（「—」だけでは理由が伝わらない）
+          const outageHtml = row.outage_note
+            ? `<div class="outage-note">※${escapeHtml(row.outage_note)}</div>`
+            : "";
           bankCell = `<td class="col-bank" rowspan="${span}">
             <div class="bank-name">${bankHtml}</div>
             <div class="product-name">${escapeHtml(row.product_name || "")}</div>
+            ${outageHtml}
             ${guaranteeHtml}
             ${featureNotesHtml(row)}
           </td>`;
