@@ -559,6 +559,44 @@ class CarLoanHistoryTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_history(history)
 
+    def test_outage_note_marks_all_rate_rows_even_when_no_rate_was_taken(self):
+        """機関のサイト障害で金利が1つも取れない週も、注記は商品の全種別の行に付き、戻った週に消える。"""
+        history = self.car_history()
+        update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET)
+        down = copy.deepcopy(self.report)
+        loan = down["car_loan_table"][0]
+        loan["car_loan_variable"] = None
+        loan["car_loan_fixed"] = None
+        loan["outage_note"] = "  不正アクセスのため\n取得不可  "
+        update_history(history, down, "2026-08-31", dataset=CAR_DATASET)
+
+        self.assertEqual(
+            ["不正アクセスのため 取得不可"] * len(history["rows"]),
+            [row["outage_note"] for row in history["rows"]],
+        )
+        validate_history(history)
+
+        update_history(history, self.report, "2026-09-07", dataset=CAR_DATASET)
+        self.assertTrue(all("outage_note" not in row for row in history["rows"]))
+
+    def test_outage_note_is_not_rewound_by_an_older_survey(self):
+        """過去の調査日を後から入れても、今の注記を付け外ししない。"""
+        history = self.car_history()
+        down = copy.deepcopy(self.report)
+        down["car_loan_table"][0]["outage_note"] = "不正アクセスのため取得不可"
+        update_history(history, down, "2026-08-31", dataset=CAR_DATASET)
+        update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET, allow_backfill=True)
+        self.assertTrue(all(row.get("outage_note") for row in history["rows"]))
+
+    def test_invalid_outage_note_is_rejected_by_validation(self):
+        history = self.car_history()
+        update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET)
+        for bad in ("長" * 81, "", 1):
+            broken = copy.deepcopy(history)
+            broken["rows"][0]["outage_note"] = bad
+            with self.assertRaises(ValueError):
+                validate_history(broken)
+
     def test_old_contract_is_still_accepted_for_housing(self):
         # 上流が version 1 のままでも住宅ローンの取り込みは止めない（移行期間）。
         legacy = copy.deepcopy(self.report)
