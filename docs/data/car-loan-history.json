@@ -191,10 +191,6 @@
       "history": [
         {
           "rate": 3.2,
-          "observed_on": "2026-11-02"
-        },
-        {
-          "rate": 3.2,
           "observed_on": "2026-10-26"
         },
         {
@@ -239,10 +235,6 @@
       "url": "https://www.hokuyobank.co.jp/person/loan/mycar/",
       "rate_type": "fixed",
       "history": [
-        {
-          "rate": 3.8,
-          "observed_on": "2026-11-02"
-        },
         {
           "rate": 3.8,
           "observed_on": "2026-10-26"
@@ -290,7 +282,7 @@
       "rate_type": "variable",
       "history": [
         {
-          "rate": 2.8,
+          "rate": 3.05,
           "observed_on": "2026-11-02"
         },
         {
@@ -767,5 +759,5 @@
     }
   ],
   "generated_at": "2026-11-02",
-  "last_feed_generated_at": "2026-11-02T07:06:30+09:00"
+  "last_feed_generated_at": "2026-11-02T09:06:14+09:00"
 }
