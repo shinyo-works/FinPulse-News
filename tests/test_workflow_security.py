@@ -218,8 +218,18 @@ class CiWorkflowTest(unittest.TestCase):
         cls.ci = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
 
     def test_runs_on_pull_request_and_main_push(self):
-        self.assertRegex(self.ci, r"pull_request:\s*\n\s*branches: \[main\]")
-        self.assertRegex(self.ci, r"push:\s*\n\s*branches: \[main\]")
+        # 引継ぎメモだけの変更では回さない paths-ignore 行（2026-11-03）を間に挟んでもよい
+        memo_ignore = r'(?:\s*paths-ignore: \["\*\*/HANDOFF\.md", "\*\*/AGENTS\.md", "\*\*/CLAUDE\.md"\]\s*\n)?'
+        self.assertRegex(self.ci, r"pull_request:\s*\n" + memo_ignore + r"\s*branches: \[main\]")
+        self.assertRegex(self.ci, r"push:\s*\n" + memo_ignore + r"\s*branches: \[main\]")
+
+    def test_memo_only_changes_skip_ci(self):
+        # 2026-11-03: 引継ぎメモ（HANDOFF/AGENTS/CLAUDE.md）だけの変更では CI を回さない。
+        # コードを含む変更まで止めないよう、無視するのはこの 3 ファイルだけに限る
+        ignores = re.findall(r"paths-ignore: (\[.*?\])", self.ci)
+        self.assertEqual(2, len(ignores))
+        for value in ignores:
+            self.assertEqual('["**/HANDOFF.md", "**/AGENTS.md", "**/CLAUDE.md"]', value)
 
     def test_is_read_only_and_gets_no_secrets(self):
         # 公開リポジトリなので、フォークからの PR でも書き込めず、合言葉も渡らない形を保つ
