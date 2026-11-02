@@ -13,6 +13,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19"
           ]
         },
@@ -37,6 +39,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -53,6 +57,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -65,6 +71,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -83,6 +91,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -102,6 +112,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -119,6 +131,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -141,6 +154,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -498,6 +512,17 @@
       "url": "https://www.hokkaidobank.co.jp/info/",
       "items": [
         {
+          "date": "2026-10-30",
+          "title": "定期預金金利引上げのお知らせ",
+          "url": "https://www.hokkaidobank.co.jp/business/news/uploads/9f0306ef6274643104063ab36f3f702b.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02"
+          ]
+        },
+        {
           "date": "2026-10-08",
           "title": "「DOMIれ！ファイターズ応援定期預金」の適用金利について",
           "url": "https://www.hokkaidobank.co.jp/info/uploads/b5fdb90051202dea4435ee77cc4cf2a5.pdf",
@@ -505,6 +530,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -517,6 +544,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -551,6 +580,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -563,6 +594,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -575,6 +608,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -587,6 +622,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -602,6 +639,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -614,6 +653,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -641,6 +682,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -653,6 +695,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -770,6 +813,17 @@
       "url": "https://www.hokuyobank.co.jp/announcement/",
       "items": [
         {
+          "date": "2026-10-29",
+          "title": "電子証明書必須化（11月2日）以降のログオンとご利用規定改定について",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20261029_076974.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02"
+          ]
+        },
+        {
           "date": "2026-10-06",
           "title": "北洋ダイレクト長期未利用のお客さまへの重要なお知らせ",
           "url": "https://www.hokuyobank.co.jp/announcement/detail/20261006_076934.html",
@@ -777,6 +831,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -789,6 +845,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05"
@@ -802,6 +860,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -814,6 +874,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -829,6 +891,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -844,6 +908,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -861,6 +927,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -880,6 +948,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -900,6 +970,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -912,6 +984,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1152,46 +1226,15 @@
       "url": "https://www.tokachishinkumi.com/info/",
       "items": [
         {
-          "date": "2026-10-13",
-          "title": "両替・金種指定払出手数料の改定について",
-          "url": "https://www.tokachishinkumi.com/common/pdf/info_charge.pdf",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-10-19"
-          ]
-        },
-        {
-          "date": "2026-10-13",
-          "title": "「大量硬貨入金に関する手数料」新設のお知らせ",
-          "url": "https://www.tokachishinkumi.com/common/pdf/info_kouka.pdf",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-10-19"
-          ]
-        },
-        {
-          "date": "2026-10-13",
-          "title": "「破産管財人等特殊口座開設手数料」新設のお知らせ",
-          "url": "https://www.tokachishinkumi.com/common/pdf/info_hasan.pdf",
-          "star": false,
-          "fallback": false,
-          "date_inferred": false,
-          "reports": [
-            "2026-10-19"
-          ]
-        },
-        {
-          "date": "2026-10-01",
+          "date": "2026-11-01",
           "title": "今月のローン金利",
           "url": "https://www.tokachishinkumi.com/customer/loan/myhome.html",
           "star": true,
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1219,6 +1262,69 @@
           ]
         },
         {
+          "date": "2026-10-22",
+          "title": "オリコ提携各種ローンWeb申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_orico_maintenance_20261022.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02",
+            "2026-10-26"
+          ]
+        },
+        {
+          "date": "2026-10-22",
+          "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
+          "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance06.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02",
+            "2026-10-26"
+          ]
+        },
+        {
+          "date": "2026-10-13",
+          "title": "両替・金種指定払出手数料の改定について",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_charge.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02",
+            "2026-10-26",
+            "2026-10-19"
+          ]
+        },
+        {
+          "date": "2026-10-13",
+          "title": "「大量硬貨入金に関する手数料」新設のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_kouka.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02",
+            "2026-10-26",
+            "2026-10-19"
+          ]
+        },
+        {
+          "date": "2026-10-13",
+          "title": "「破産管財人等特殊口座開設手数料」新設のお知らせ",
+          "url": "https://www.tokachishinkumi.com/common/pdf/info_hasan.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02",
+            "2026-10-26",
+            "2026-10-19"
+          ]
+        },
+        {
           "date": "2026-09-28",
           "title": "創業70周年記念定期預金「ありがとうキャンペーン2026」の取扱開始について",
           "url": "https://www.tokachishinkumi.com/common/pdf/arigatou2026.pdf",
@@ -1226,6 +1332,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05"
@@ -1239,6 +1347,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1253,6 +1363,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1267,6 +1379,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1325,6 +1439,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1342,6 +1457,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1363,6 +1479,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -1639,6 +1756,17 @@
       "url": "https://www.ja-otofuke.jp/newslist/",
       "items": [
         {
+          "date": "2026-10-30",
+          "title": "金利改定のご案内（貸付金）",
+          "url": "https://www.ja-otofuke.jp/2023/13255/",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-02"
+          ]
+        },
+        {
           "date": "2026-10-01",
           "title": "定期貯金（独自取扱商品）キャンペーンのご案内",
           "url": "https://www.ja-otofuke.jp/2023/13149/",
@@ -1646,6 +1774,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05"
@@ -1671,6 +1801,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1687,6 +1819,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1726,6 +1860,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1745,6 +1881,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1765,6 +1902,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1938,6 +2076,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -1963,6 +2103,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05"
@@ -1976,6 +2118,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05"
@@ -1989,6 +2133,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05"
@@ -2304,6 +2450,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -2316,6 +2464,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -2328,6 +2478,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -2346,6 +2498,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -2376,6 +2530,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05",
@@ -2543,6 +2698,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -2555,6 +2712,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -2567,6 +2726,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
@@ -2612,6 +2773,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12",
             "2026-10-05"
@@ -2625,6 +2788,8 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-02",
+            "2026-10-26",
             "2026-10-19",
             "2026-10-12"
           ]
