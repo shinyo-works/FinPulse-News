@@ -190,6 +190,10 @@
       "rate_type": "variable",
       "history": [
         {
+          "rate": 3.45,
+          "observed_on": "2026-11-02"
+        },
+        {
           "rate": 3.2,
           "observed_on": "2026-10-26"
         },
@@ -235,6 +239,10 @@
       "url": "https://www.hokuyobank.co.jp/person/loan/mycar/",
       "rate_type": "fixed",
       "history": [
+        {
+          "rate": 4.05,
+          "observed_on": "2026-11-02"
+        },
         {
           "rate": 3.8,
           "observed_on": "2026-10-26"
@@ -759,5 +767,8 @@
     }
   ],
   "generated_at": "2026-11-02",
-  "last_feed_generated_at": "2026-11-02T09:06:14+09:00"
+  "last_feed_generated_at": "2026-11-02T09:06:14+09:00",
+  "manual_lock": {
+    "2026-11-02": "北洋銀行が11/2朝にマイカーローン金利を改定し、週次の読み取りが旧金利の指示文のため保留された。公式ページの通常プラン最優遇（変動3.45%・固定4.05%）で補完（本人承認）"
+  }
 }
