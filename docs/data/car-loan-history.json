@@ -34,7 +34,7 @@
       "bank_id": "hokugin",
       "bank_name": "北陸銀行",
       "product_id": "hokugin_mycar",
-      "product_name": "マイカーローン",
+      "product_name": "マイカーローン（SDGs割・環境対応車等）",
       "url": "https://www.hokugin.co.jp/kinri/loan.html",
       "rate_type": "fixed",
       "history": [
@@ -535,7 +535,7 @@
       "bank_id": "hokkaido_rokin",
       "bank_name": "北海道労働金庫",
       "product_id": "rokin_todoroki",
-      "product_name": "轟ローン",
+      "product_name": "轟ローン（ろうきん会員）",
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "variable",
       "history": [
@@ -577,7 +577,7 @@
       "bank_id": "hokkaido_rokin",
       "bank_name": "北海道労働金庫",
       "product_id": "rokin_todoroki",
-      "product_name": "轟ローン",
+      "product_name": "轟ローン（ろうきん会員）",
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed",
       "history": [
@@ -619,7 +619,7 @@
       "bank_id": "tokachi_shinso",
       "bank_name": "十勝信用組合",
       "product_id": "tokachi_mycar",
-      "product_name": "マイカーローン（オリコ提携）",
+      "product_name": "マイカーローン（オリコ提携・5年以内）",
       "url": "https://www.tokachishinkumi.com/customer/loan/mycar_loan.html",
       "rate_type": "fixed",
       "history": [
