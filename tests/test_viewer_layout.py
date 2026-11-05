@@ -124,7 +124,7 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn("const DATASET = DATASETS[DATASET_KEY];", self.rate_html)
 
     def test_guarantee_fee_is_stated_for_car_loans_only(self):
-        """マイカーローンは表の上で保証料込を断り、例外は機関名の下に出す。"""
+        """マイカーローンは表の上で保証料込を断り、商品ごとの扱いは「保証料」列に出す。"""
         datasets = re.search(
             r"const DATASETS = \{.*?\n    \};", self.rate_html, re.DOTALL
         ).group(0)
@@ -134,14 +134,29 @@ class ViewerLayoutTest(unittest.TestCase):
         self.assertIn("guaranteeNote:", car_block)
         self.assertNotIn("guaranteeNote:", housing_block)
         self.assertIn("保証料込", car_block)
-        # 例外のある機関は機関名セルの中で断る
-        self.assertIn('<div class="guarantee-note">', self.rate_html)
-        self.assertIn("row.guarantee_note", self.rate_html)
-        self.assertIn(".guarantee-note {", self.rate_html)
-        # 取得不可の理由（例: 不正アクセスのため取得不可）も機関名セルの中で断る
+        # 取得不可の理由（例: 不正アクセスのため取得不可）は機関名セルの中で断る
         self.assertIn('<div class="outage-note">', self.rate_html)
         self.assertIn("escapeHtml(row.outage_note)", self.rate_html)
         self.assertIn(".outage-note {", self.rate_html)
+
+    def test_guarantee_column_sits_right_of_the_rate_type(self):
+        """2026-11-05 本人指示: 保証料は種別の右隣に表示する（住宅・マイカーとも）。"""
+        head = re.search(r"const thead = `<tr>(.*?)</tr>`;", self.rate_html, re.DOTALL).group(1)
+        self.assertLess(head.index('class="col-type">種別'), head.index('class="col-guarantee">保証料'))
+        self.assertLess(head.index('class="col-guarantee">保証料'), head.index("columns.map"))
+        row = re.search(r"return `<tr\$\{isBankStart.*?</tr>`;", self.rate_html, re.DOTALL).group(0)
+        self.assertLess(row.index('class="col-type"'), row.index("${guaranteeCell}"))
+        self.assertLess(row.index("${guaranteeCell}"), row.index('${cells.join("")}'))
+        # 商品ごとに1つなので機関名と同じく結合する。機関名の下には保証料を出さない
+        self.assertIn("guaranteeCell = guaranteeCellHtml(row, span);", self.rate_html)
+        self.assertNotIn("guaranteeHtml", self.rate_html)
+        # マイカーローンは行の区分（上流 banks.json 由来）、知らない値は橙に寄せる
+        self.assertIn("row.guarantee_status", self.rate_html)
+        self.assertIn('Object.hasOwn(GUARANTEE_LABELS, info.status) ? info.status : "unknown"', self.rate_html)
+        self.assertIn('unknown: "記載なし"', self.rate_html)
+        # 固定列にしない（狭い画面で金利の列を押し出さない）
+        css = re.search(r"td\.col-guarantee \{[^}]*\}", self.rate_html).group(0)
+        self.assertNotIn("sticky", css)
 
     def test_titles_use_the_japanese_site_name(self):
         # ブラウザのタブ名・ブックマーク名は画面上の見出しと同じ名前に揃える
