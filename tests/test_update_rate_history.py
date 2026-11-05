@@ -552,6 +552,48 @@ class CarLoanHistoryTest(unittest.TestCase):
         # 整形後の値は履歴の検証も通る（画面へ出す前にここで止める）
         validate_history(history)
 
+    def test_guarantee_status_is_carried_and_cleared_with_the_report(self):
+        """保証料の区分（上流 banks.json の guarantee）も注記と同じく上流に追従する。"""
+        history = self.car_history()
+        with_status = copy.deepcopy(self.report)
+        with_status["car_loan_table"][0]["guarantee"] = "included"
+        update_history(history, with_status, "2026-08-24", dataset=CAR_DATASET)
+        self.assertTrue(all(row["guarantee_status"] == "included" for row in history["rows"]))
+        validate_history(history)
+
+        # 知らない値は取り込まない（画面は「区分なし」として橙に寄せる）
+        odd = copy.deepcopy(self.report)
+        odd["car_loan_table"][0]["guarantee"] = "<script>"
+        update_history(history, odd, "2026-08-31", dataset=CAR_DATASET)
+        self.assertTrue(all("guarantee_status" not in row for row in history["rows"]))
+
+    def test_invalid_guarantee_status_is_rejected_by_validation(self):
+        history = self.car_history()
+        update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET)
+        history["rows"][0]["guarantee_status"] = "free"
+        with self.assertRaises(ValueError):
+            validate_history(history)
+
+    def test_guarantee_mismatch_with_the_features_file_is_warned(self):
+        """住宅ローンの区分が条件比較の資料と食い違えば、取り込みは止めずに警告する。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "loan-features.json"
+            path.write_text(json.dumps({"products": [
+                {"product_id": "p-same", "guarantee_status": "included"},
+                {"product_id": "p-diff", "guarantee_status": "included"},
+            ]}), encoding="utf-8")
+            report = {"loan_table": [
+                {"bank_id": "b", "product_id": "p-same", "guarantee": "included"},
+                {"bank_id": "b", "product_id": "p-diff", "guarantee": "separate"},
+                {"bank_id": "b", "product_id": "p-new", "guarantee": "separate"},
+                {"bank_id": "b", "product_id": "p-diff", "guarantee": "separate", "manual": True},
+            ]}
+            warnings = update_rate_history.guarantee_mismatch_warnings(report, path)
+            self.assertEqual(1, len(warnings))
+            self.assertIn("b/p-diff", warnings[0])
+            # 資料が読めないときは何も言わない（取り込みを止めない）
+            self.assertEqual([], update_rate_history.guarantee_mismatch_warnings(report, Path(tmp) / "none.json"))
+
     def test_invalid_guarantee_note_is_rejected_by_validation(self):
         history = self.car_history()
         update_history(history, self.report, "2026-08-24", dataset=CAR_DATASET)

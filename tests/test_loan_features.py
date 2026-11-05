@@ -12,13 +12,16 @@ from pathlib import Path
 
 DOCS = Path(__file__).resolve().parents[1] / "docs"
 
-# 機関名セルの既定幅は142ページピクセル（狭い画面は112）。利用者がドラッグで広げられる
-# ようになったが、既定のまま見る人のために、長い注記で行を伸ばさない上限は残す。
-MAX_GUARANTEE_NOTE_CHARS = 20
+# 保証料の注記は「保証料」列（幅132px・狭い画面は112px）に出す。別途なら目安の額まで書くため
+# 機関名の下にあった頃（20字）より広げたが、行を伸ばしすぎない上限は残す（2026-11-05）。
+# 事務手数料は機関名セル（既定幅142px）の中なので従来どおり。
+MAX_GUARANTEE_NOTE_CHARS = 40
 MAX_FEE_NOTE_CHARS = 30
 
-# 保証料の扱い。included=金利に含む／separate=必ず別途／conditional=条件次第・記載がなく不明
-GUARANTEE_STATUSES = ("included", "separate", "conditional")
+# 保証料の扱い。included=金利に含む／separate=必ず別途／conditional=会員かどうか・審査で別途／
+# unknown=公式に記載がなく確かめられない（2026-11-05 に conditional から分けた）。
+# 金利調査ツールの banks.json の guarantee と同じ4値で、商品ごとに一致させる。
+GUARANTEE_STATUSES = ("included", "separate", "conditional", "unknown")
 
 # 上流（金利履歴）で住宅ローンの商品が増減した週は、人手で書く条件比較JSONとの突合が
 # 落ちる。週次ワークフローはこの環境変数で突合を配信前ゲートから外し、収集の後に
@@ -120,13 +123,15 @@ class LoanFeaturesDataTest(unittest.TestCase):
             ):
                 note = product[key]
                 self.assertIsInstance(note, str)
-                self.assertTrue(note.strip(), f"{product['product_id']} の {key} が空")
+                # 保証料が「込」だけの商品は札で足りるので注記を空にしてよい（同じ言葉を2回出さない）
+                if not (key == "guarantee_note" and product["guarantee_status"] == "included"):
+                    self.assertTrue(note.strip(), f"{product['product_id']} の {key} が空")
                 self.assertLessEqual(
                     len(note), limit, f"{product['product_id']} の {key} が長すぎる: {note}"
                 )
 
     def test_guarantee_status_matches_the_wording_of_each_product(self):
-        """保証料の色分けは3値。included=灰・separate=赤・conditional=橙。"""
+        """保証料の色分けは4値。included=灰・separate=赤・conditional と unknown=橙。"""
         for product in self.features["products"]:
             status = product["guarantee_status"]
             self.assertIn(status, GUARANTEE_STATUSES, product["product_id"])
@@ -143,15 +148,26 @@ class LoanFeaturesDataTest(unittest.TestCase):
                     self.assertNotIn(
                         word, guarantee, f"{product['product_id']} は conditional では"
                     )
+            elif status == "unknown":
+                # 記載なしは「記載がない」ことが本文から読み取れるものだけ
+                self.assertIn("記載がな", guarantee, product["product_id"])
             else:
-                # 橙にするのは、条件次第・審査次第・記載がなく不明のいずれかが読み取れるもの
+                # 条件付は、会員かどうか・審査次第・選び方のいずれかが読み取れるもの
                 self.assertTrue(
-                    any(
-                        word in guarantee
-                        for word in ("会員", "場合あり", "選択制", "記載がな")
-                    ),
+                    any(word in guarantee for word in ("会員", "場合あり", "選択制")),
                     f"{product['product_id']} の guarantee に条件付きの根拠がない",
                 )
+
+    def test_notes_not_included_tell_the_amount_or_that_it_is_unpublished(self):
+        """込みでない商品は、上乗せの額・料率（公表が無ければ非公表・記載なし）を注記に書く。"""
+        for product in self.features["products"]:
+            if product["guarantee_status"] == "included":
+                continue
+            note = product["guarantee_note"]
+            self.assertTrue(
+                re.search(r"\d", note) or "非公表" in note or "記載なし" in note,
+                f"{product['product_id']} の注記に額も非公表の旨も無い: {note}",
+            )
 
     def test_values_do_not_rank_institutions_against_each_other(self):
         """比較の断定は書かない。機関を足すたびに全セルの再検証が要るのを避ける。"""
@@ -199,19 +215,21 @@ class LoanFeaturesViewerTest(unittest.TestCase):
         self.assertIn("overflow-x: auto;", tabs_css)
         self.assertNotIn("overflow: hidden;", tabs_css)
 
-    def test_rate_table_shows_the_two_notes_under_the_bank_name(self):
+    def test_rate_table_shows_guarantee_in_its_column_and_fee_under_the_bank_name(self):
         self.assertIn('featuresUrl: "./data/loan-features.json"', self.rate_html)
+        # 事務手数料は機関名の下
         self.assertIn("function featureNotesHtml(row)", self.rate_html)
         self.assertIn("${featureNotesHtml(row)}", self.rate_html)
         self.assertIn(".feature-note {", self.rate_html)
-        self.assertIn(".feature-note.warn {", self.rate_html)
-        self.assertIn(".feature-note.caution {", self.rate_html)
-        # 色分けは3値の guarantee_status を見る（旧2値のキーは参照しない）
+        self.assertIn("escapeHtml(feature.fee_note)", self.rate_html)
+        # 保証料は「保証料」列。住宅ローンは条件データの4値の guarantee_status を正とする
         self.assertIn("feature.guarantee_status", self.rate_html)
+        self.assertIn("function guaranteeCellHtml(row, span)", self.rate_html)
+        self.assertIn(".guarantee-badge.warn {", self.rate_html)
+        self.assertIn(".guarantee-badge.caution {", self.rate_html)
         self.assertNotIn("guarantee_warn", self.rate_html)
         # 注記は必ずエスケープしてから差し込む
-        self.assertIn("escapeHtml(feature.guarantee_note)", self.rate_html)
-        self.assertIn("escapeHtml(feature.fee_note)", self.rate_html)
+        self.assertIn("escapeHtml(info.note)", self.rate_html)
 
     def test_feature_notes_are_housing_only(self):
         datasets = re.search(

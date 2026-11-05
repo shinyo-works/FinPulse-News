@@ -38,6 +38,8 @@ except ImportError:  # pragma: no cover - 直接実行のとき
 DATA_DIR = Path(__file__).resolve().parent.parent / "docs" / "data"
 HISTORY_PATH = DATA_DIR / "rate-history.json"
 CAR_HISTORY_PATH = DATA_DIR / "car-loan-history.json"
+# 住宅ローンの条件比較（人手で確かめた資料）。保証料の区分の食い違い検知にだけ使う
+FEATURES_PATH = DATA_DIR / "loan-features.json"
 
 # report_data.loan_table のキー -> 履歴側の rate_type
 RATE_KEY_MAP = {
@@ -149,6 +151,9 @@ IMPORT_MAX_RATE_JUMP = 3.0
 IMPORT_MAX_RATE_RATIO = 10.0
 # 保証料注記の上限文字数。表の1セルに収める前提で、長文が来ても画面を壊さない。
 MAX_GUARANTEE_NOTE_CHARS = 80
+# 保証料の扱い（上流 banks.json の guarantee）。included=金利に含む／separate=必ず別途／
+# conditional=人や選び方で別途／unknown=公式に記載なし。知らない値は取り込まない（行から消す）。
+GUARANTEE_STATUSES = ("included", "separate", "conditional", "unknown")
 # 取得不可の注記（例: 不正アクセスのため取得不可）の上限文字数。保証料注記と同じく表の1セル前提。
 MAX_OUTAGE_NOTE_CHARS = 80
 SCHEMA_VERSION = 2
@@ -261,6 +266,41 @@ def normalize_guarantee_note(value) -> str:
     改行やタブが混ざると表の1セルが崩れるため空白に潰す。
     """
     return _normalize_short_note(value, MAX_GUARANTEE_NOTE_CHARS)
+
+
+def normalize_guarantee_status(value) -> str | None:
+    """保証料の区分を4値のどれかに確定させる。知らない値・欠けは None（行に残さない）。"""
+    return value if value in GUARANTEE_STATUSES else None
+
+
+def guarantee_mismatch_warnings(report_data: dict, features_path: Path = FEATURES_PATH) -> list[str]:
+    """住宅ローンの保証料の区分が、上流（banks.json）と条件比較の資料で食い違う商品を挙げる。
+
+    画面の住宅ローンは条件比較の資料を正として表示するため、上流だけ直して資料を直し忘れると
+    古い区分が出続ける。取り込みは止めず、Actions の警告で気づかせる。
+    """
+    try:
+        features = json.loads(features_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    statuses = {
+        p.get("product_id"): p.get("guarantee_status")
+        for p in features.get("products", []) or []
+        if isinstance(p, dict)
+    }
+    warnings = []
+    for loan in report_data.get("loan_table", []) or []:
+        if not isinstance(loan, dict) or loan.get("manual"):
+            continue
+        upstream = normalize_guarantee_status(loan.get("guarantee"))
+        documented = statuses.get(loan.get("product_id"))
+        if upstream and documented and upstream != documented:
+            warnings.append(
+                f"{log_safe(loan.get('bank_id'))}/{log_safe(loan.get('product_id'))} の保証料の区分が"
+                f"上流 {upstream} と条件比較 {documented} で食い違っています"
+                "（docs/data/loan-features.json を確かめてください）"
+            )
+    return warnings
 
 
 def normalize_outage_note(value) -> str:
@@ -468,6 +508,11 @@ def validate_history(history: dict) -> None:
             raise ValueError(
                 f"rows[{index}].guarantee_note は{MAX_GUARANTEE_NOTE_CHARS}文字以内の"
                 "空でない文字列にしてください。"
+            )
+        guarantee_status = row.get("guarantee_status")
+        if guarantee_status is not None and guarantee_status not in GUARANTEE_STATUSES:
+            raise ValueError(
+                f"rows[{index}].guarantee_status は {', '.join(GUARANTEE_STATUSES)} のどれかにしてください。"
             )
         outage_note = row.get("outage_note")
         if outage_note is not None and (
@@ -682,6 +727,9 @@ def update_history(
                 guarantee_note = normalize_guarantee_note(loan.get("guarantee_note"))
                 if guarantee_note:
                     row["guarantee_note"] = guarantee_note
+                guarantee_status = normalize_guarantee_status(loan.get("guarantee"))
+                if guarantee_status:
+                    row["guarantee_status"] = guarantee_status
                 if loan.get("is_legacy"):
                     row["is_legacy"] = True
                 history["rows"].append(row)
@@ -734,6 +782,11 @@ def update_history(
                     row["guarantee_note"] = guarantee_note
                 else:
                     row.pop("guarantee_note", None)
+                guarantee_status = normalize_guarantee_status(loan.get("guarantee"))
+                if guarantee_status:
+                    row["guarantee_status"] = guarantee_status
+                else:
+                    row.pop("guarantee_status", None)
 
             same_day = next(
                 (entry for entry in hist if entry.get("observed_on") == survey_date),
@@ -1133,6 +1186,9 @@ def update_targets(args, report_data: dict, survey_date: str, targets: list) -> 
             )
         for message in summary["warnings"]:
             print(f"::warning title={dataset.label}の名前・リンクの変更を保留しました::{message}")
+        if dataset is HOUSING_DATASET:
+            for message in guarantee_mismatch_warnings(report_data):
+                print(f"::warning title=保証料の区分が条件比較の資料と食い違っています::{message}")
     return written, kept
 
 
