@@ -73,5 +73,43 @@ class RateHistoryLayoutTest(unittest.TestCase):
         self.assertIn("function minRateByDateAndType(rows, dates)", self.html)
 
 
+
+class RateHistoryColumnResizeTest(unittest.TestCase):
+    """「金融機関・商品」列と「保証料」列は見出しのつまみで幅を変えられる。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.html = (
+            Path(__file__).resolve().parents[1] / "docs" / "rate-history.html"
+        ).read_text(encoding="utf-8")
+
+    def test_guarantee_header_has_its_own_resizer(self):
+        self.assertIn('金融機関・商品${resizerHtml("bank")}</th>', self.html)
+        self.assertIn('<th class="col-guarantee">保証料${resizerHtml("guarantee")}</th>', self.html)
+        self.assertIn('data-col="${key}"', self.html)
+
+    def test_guarantee_width_follows_a_css_variable_including_narrow_screens(self):
+        self.assertRegex(self.html, r":root\s*\{[^}]*--guarantee-col-w:\s*140px;")
+        self.assertRegex(
+            self.html,
+            r"\.col-guarantee\s*\{\s*width:\s*var\(--guarantee-col-w\);\s*"
+            r"min-width:\s*var\(--guarantee-col-w\);\s*max-width:\s*var\(--guarantee-col-w\);",
+        )
+        self.assertRegex(self.html, r":root\s*\{\s*--guarantee-col-w:\s*112px;\s*\}")
+        # 固定幅のまま残っていると、つまみを動かしても列が変わらない
+        self.assertNotRegex(self.html, r"td\.col-guarantee\s*\{[^}]*width:\s*\d+px")
+
+    def test_each_column_saves_its_width_separately_and_keeps_the_old_key(self):
+        self.assertIn("finpulse.rateHistory.bankColWidth.${DATASET_KEY}", self.html)
+        self.assertIn("finpulse.rateHistory.guaranteeColWidth.${DATASET_KEY}", self.html)
+        # 未知の data-col（例: constructor）を設定として扱わない
+        self.assertIn('Object.hasOwn(RESIZABLE_COLS, key ?? "")', self.html)
+
+
+    def test_resizer_stays_inside_its_header_so_the_next_header_does_not_cover_it(self):
+        self.assertRegex(self.html, r"\.col-resizer\s*\{[^}]*right:\s*0;")
+        self.assertNotRegex(self.html, r"\.col-resizer\s*\{[^}]*right:\s*-")
+
+
 if __name__ == "__main__":
     unittest.main()
