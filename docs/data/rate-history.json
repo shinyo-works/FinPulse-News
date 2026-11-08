@@ -13,6 +13,7 @@
     "fixed_10y": "固定10年"
   },
   "observation_dates": [
+    "2026-11-09",
     "2026-11-02",
     "2026-10-26",
     "2026-10-19",
@@ -39,7 +40,7 @@
   "data_sources": [
     {
       "period_start": "2026-06-22",
-      "period_end": "2026-11-02",
+      "period_end": "2026-11-09",
       "kind": "financial_report_tool",
       "description": "報告自動化ツールの週次JSON（GitHub Actions成功Artifactを含む）"
     }
@@ -55,6 +56,10 @@
       "history": [
         {
           "rate": 1.875,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.875,
           "observed_on": "2026-11-02"
         },
         {
@@ -141,7 +146,9 @@
           "rate": 1.625,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "金利に含む（一括前払いも選べる）",
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokugin",
@@ -151,6 +158,10 @@
       "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.35,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 1.35,
           "observed_on": "2026-11-02"
@@ -239,7 +250,9 @@
           "rate": 0.95,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "金利に含む（一括前払いも選べる）",
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokugin",
@@ -249,6 +262,10 @@
       "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
       "rate_type": "fixed_5y",
       "history": [
+        {
+          "rate": 2.35,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.35,
           "observed_on": "2026-11-02"
@@ -337,7 +354,9 @@
           "rate": 1.95,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "金利に含む（一括前払いも選べる）",
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokugin",
@@ -347,6 +366,10 @@
       "url": "https://www.hokugin.co.jp/loan/jyutaku/jyutaku_hokkaido.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.75,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.75,
           "observed_on": "2026-11-02"
@@ -435,7 +458,9 @@
           "rate": 2.45,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "金利に含む（一括前払いも選べる）",
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokugin",
@@ -447,6 +472,10 @@
       "history": [
         {
           "rate": 1.0,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.0,
           "observed_on": "2026-11-02"
         },
         {
@@ -533,7 +562,8 @@
           "rate": 0.6,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokugin",
@@ -545,6 +575,10 @@
       "history": [
         {
           "rate": 1.91,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.91,
           "observed_on": "2026-11-02"
         },
         {
@@ -631,7 +665,8 @@
           "rate": 1.51,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokkaidobank",
@@ -643,6 +678,10 @@
       "history": [
         {
           "rate": 2.075,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.075,
           "observed_on": "2026-11-02"
         },
         {
@@ -729,7 +768,8 @@
           "rate": 1.825,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokkaidobank",
@@ -741,6 +781,10 @@
       "history": [
         {
           "rate": 1.35,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.35,
           "observed_on": "2026-11-02"
         },
         {
@@ -827,7 +871,8 @@
           "rate": 0.95,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokkaidobank",
@@ -839,6 +884,10 @@
       "history": [
         {
           "rate": 2.35,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.35,
           "observed_on": "2026-11-02"
         },
         {
@@ -925,7 +974,8 @@
           "rate": 1.95,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokkaidobank",
@@ -937,6 +987,10 @@
       "history": [
         {
           "rate": 2.75,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.75,
           "observed_on": "2026-11-02"
         },
         {
@@ -1023,7 +1077,8 @@
           "rate": 2.45,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokkaidobank",
@@ -1035,6 +1090,10 @@
       "history": [
         {
           "rate": 1.0,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.0,
           "observed_on": "2026-11-02"
         },
         {
@@ -1121,7 +1180,8 @@
           "rate": 0.6,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "hokkaidobank",
@@ -1133,6 +1193,10 @@
       "history": [
         {
           "rate": 1.91,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.91,
           "observed_on": "2026-11-02"
         },
         {
@@ -1219,7 +1283,8 @@
           "rate": 1.51,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "northpacific",
@@ -1231,6 +1296,10 @@
       "history": [
         {
           "rate": 1.35,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.35,
           "observed_on": "2026-11-02"
         },
         {
@@ -1317,7 +1386,9 @@
           "rate": 0.95,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "原則 金利に含む。審査により別途 一括前払いの場合あり（額は公表なし）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "northpacific",
@@ -1329,6 +1400,10 @@
       "history": [
         {
           "rate": 2.35,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.35,
           "observed_on": "2026-11-02"
         },
         {
@@ -1415,7 +1490,9 @@
           "rate": 1.85,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "原則 金利に含む。審査により別途 一括前払いの場合あり（額は公表なし）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "northpacific",
@@ -1427,6 +1504,10 @@
       "history": [
         {
           "rate": 2.75,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.75,
           "observed_on": "2026-11-02"
         },
         {
@@ -1513,7 +1594,9 @@
           "rate": 2.25,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "原則 金利に含む。審査により別途 一括前払いの場合あり（額は公表なし）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "northpacific",
@@ -1525,6 +1608,10 @@
       "history": [
         {
           "rate": 1.0,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.0,
           "observed_on": "2026-11-02"
         },
         {
@@ -1611,7 +1698,9 @@
           "rate": 0.6,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "原則 金利に含む。審査により別途 一括前払いの場合あり（額は公表なし）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "northpacific",
@@ -1623,6 +1712,10 @@
       "history": [
         {
           "rate": 1.91,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.91,
           "observed_on": "2026-11-02"
         },
         {
@@ -1709,7 +1802,9 @@
           "rate": 1.41,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "原則 金利に含む。審査により別途 一括前払いの場合あり（額は公表なし）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "northpacific",
@@ -1721,6 +1816,10 @@
       "history": [
         {
           "rate": 2.32,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.32,
           "observed_on": "2026-11-02"
         },
         {
@@ -1807,7 +1906,9 @@
           "rate": 1.82,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "原則 金利に含む。審査により別途 一括前払いの場合あり（額は公表なし）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "obihiro_shinkin",
@@ -1819,6 +1920,10 @@
       "history": [
         {
           "rate": 1.775,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.775,
           "observed_on": "2026-11-02"
         },
         {
@@ -1905,7 +2010,8 @@
           "rate": 1.525,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "obihiro_shinkin",
@@ -1915,6 +2021,10 @@
       "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.45,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 1.45,
           "observed_on": "2026-11-02"
@@ -2003,7 +2113,8 @@
           "rate": 1.05,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "obihiro_shinkin",
@@ -2013,6 +2124,10 @@
       "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
       "rate_type": "fixed_5y",
       "history": [
+        {
+          "rate": 2.35,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.35,
           "observed_on": "2026-11-02"
@@ -2101,7 +2216,8 @@
           "rate": 1.85,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "obihiro_shinkin",
@@ -2111,6 +2227,10 @@
       "url": "https://www.shinkin.co.jp/obishin/rate/loan/",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.7,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.7,
           "observed_on": "2026-11-02"
@@ -2199,7 +2319,8 @@
           "rate": 2.2,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2209,6 +2330,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "variable",
       "history": [
+        {
+          "rate": 3.575,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 3.575,
           "observed_on": "2026-11-02"
@@ -2297,7 +2422,8 @@
           "rate": 3.325,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2307,6 +2433,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.45,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 1.45,
           "observed_on": "2026-11-02"
@@ -2395,7 +2525,8 @@
           "rate": 1.15,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2405,6 +2536,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "fixed_5y",
       "history": [
+        {
+          "rate": 2.45,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.45,
           "observed_on": "2026-11-02"
@@ -2493,7 +2628,8 @@
           "rate": 2.05,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2503,6 +2639,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/k_kariru_RED.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.85,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.85,
           "observed_on": "2026-11-02"
@@ -2591,7 +2731,8 @@
           "rate": 2.55,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2601,6 +2742,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
       "rate_type": "variable",
       "history": [
+        {
+          "rate": 1.75,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 1.75,
           "observed_on": "2026-11-02"
@@ -2689,7 +2834,8 @@
           "rate": 1.375,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2699,6 +2845,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.35,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 1.35,
           "observed_on": "2026-11-02"
@@ -2787,7 +2937,8 @@
           "rate": 1.05,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2797,6 +2948,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
       "rate_type": "fixed_5y",
       "history": [
+        {
+          "rate": 2.35,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.35,
           "observed_on": "2026-11-02"
@@ -2885,7 +3040,8 @@
           "rate": 1.95,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kushiro_shinkin",
@@ -2895,6 +3051,10 @@
       "url": "https://www.shinkin.co.jp/kushiro/cont/CRYSTAL%20RED/",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.75,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.75,
           "observed_on": "2026-11-02"
@@ -2983,7 +3143,8 @@
           "rate": 2.45,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kitami_shinkin",
@@ -2995,6 +3156,10 @@
       "history": [
         {
           "rate": 1.05,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.05,
           "observed_on": "2026-11-02"
         },
         {
@@ -3081,7 +3246,8 @@
           "rate": 0.95,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kitami_shinkin",
@@ -3093,6 +3259,10 @@
       "history": [
         {
           "rate": 1.85,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.85,
           "observed_on": "2026-11-02"
         },
         {
@@ -3179,7 +3349,8 @@
           "rate": 1.65,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kitami_shinkin",
@@ -3191,6 +3362,10 @@
       "history": [
         {
           "rate": 2.15,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.15,
           "observed_on": "2026-11-02"
         },
         {
@@ -3277,7 +3452,8 @@
           "rate": 1.8,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_status": "included"
     },
     {
       "bank_id": "kitami_shinkin",
@@ -3289,6 +3465,10 @@
       "history": [
         {
           "rate": 0.85,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 0.85,
           "observed_on": "2026-11-02"
         },
         {
@@ -3375,7 +3555,9 @@
           "rate": 0.75,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "公式に記載なし（保証会社を使わず親族の保証人が必要）",
+      "guarantee_status": "unknown"
     },
     {
       "bank_id": "kitami_shinkin",
@@ -3387,6 +3569,10 @@
       "history": [
         {
           "rate": 1.65,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.65,
           "observed_on": "2026-11-02"
         },
         {
@@ -3473,7 +3659,9 @@
           "rate": 1.45,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "公式に記載なし（保証会社を使わず親族の保証人が必要）",
+      "guarantee_status": "unknown"
     },
     {
       "bank_id": "kitami_shinkin",
@@ -3485,6 +3673,10 @@
       "history": [
         {
           "rate": 1.95,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.95,
           "observed_on": "2026-11-02"
         },
         {
@@ -3571,7 +3763,9 @@
           "rate": 1.6,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "公式に記載なし（保証会社を使わず親族の保証人が必要）",
+      "guarantee_status": "unknown"
     },
     {
       "bank_id": "hokkaido_rokin",
@@ -3583,6 +3777,10 @@
       "history": [
         {
           "rate": 3.575,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 3.575,
           "observed_on": "2026-11-02"
         },
         {
@@ -3661,7 +3859,9 @@
           "rate": 3.325,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "ろうきん会員は無料。会員以外は別途（一括前払い 年0.10〜0.16% 相当 または 金利+0.16〜0.22%）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "hokkaido_rokin",
@@ -3671,6 +3871,10 @@
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_3y",
       "history": [
+        {
+          "rate": 1.35,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 1.35,
           "observed_on": "2026-11-02"
@@ -3751,7 +3955,9 @@
           "rate": 0.75,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "ろうきん会員は無料。会員以外は別途（一括前払い 年0.10〜0.16% 相当 または 金利+0.16〜0.22%）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "hokkaido_rokin",
@@ -3763,6 +3969,10 @@
       "history": [
         {
           "rate": 2.35,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.35,
           "observed_on": "2026-11-02"
         },
         {
@@ -3841,7 +4051,9 @@
           "rate": 1.85,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "ろうきん会員は無料。会員以外は別途（一括前払い 年0.10〜0.16% 相当 または 金利+0.16〜0.22%）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "hokkaido_rokin",
@@ -3851,6 +4063,10 @@
       "url": "https://www.rokin-hokkaido.or.jp/site/company/rate-02.html",
       "rate_type": "fixed_10y",
       "history": [
+        {
+          "rate": 2.75,
+          "observed_on": "2026-11-09"
+        },
         {
           "rate": 2.75,
           "observed_on": "2026-11-02"
@@ -3931,7 +4147,9 @@
           "rate": 2.25,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "ろうきん会員は無料。会員以外は別途（一括前払い 年0.10〜0.16% 相当 または 金利+0.16〜0.22%）",
+      "guarantee_status": "conditional"
     },
     {
       "bank_id": "tokachi_shinso",
@@ -3943,6 +4161,10 @@
       "history": [
         {
           "rate": 0.9,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 0.9,
           "observed_on": "2026-11-02"
         },
         {
@@ -4029,7 +4251,9 @@
           "rate": 0.8,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "一括前払い（例: 100万円・25年で16,909円＝3,000万円なら約51万円）",
+      "guarantee_status": "separate"
     },
     {
       "bank_id": "tokachi_shinso",
@@ -4041,6 +4265,10 @@
       "history": [
         {
           "rate": 1.9,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.9,
           "observed_on": "2026-11-02"
         },
         {
@@ -4127,7 +4355,9 @@
           "rate": 1.15,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "一括前払い（例: 100万円・25年で16,909円＝3,000万円なら約51万円）",
+      "guarantee_status": "separate"
     },
     {
       "bank_id": "tokachi_shinso",
@@ -4139,6 +4369,10 @@
       "history": [
         {
           "rate": 2.3,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 2.3,
           "observed_on": "2026-11-02"
         },
         {
@@ -4225,7 +4459,9 @@
           "rate": 1.25,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "一括前払い（例: 100万円・25年で16,909円＝3,000万円なら約51万円）",
+      "guarantee_status": "separate"
     },
     {
       "bank_id": "ja_obihiro_kawanishi",
@@ -4237,6 +4473,10 @@
       "history": [
         {
           "rate": 3.375,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 3.375,
           "observed_on": "2026-11-02"
         },
         {
@@ -4323,7 +4563,9 @@
           "rate": 3.125,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "一括（1,000万円・35年で最大 約26万円）または 金利+0.10〜0.23%（分割は別に一律3万円）",
+      "guarantee_status": "separate"
     },
     {
       "bank_id": "ja_obihiro_kawanishi",
@@ -4335,6 +4577,10 @@
       "history": [
         {
           "rate": 0.9,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 0.9,
           "observed_on": "2026-11-02"
         },
         {
@@ -4421,7 +4667,9 @@
           "rate": 0.7,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "一括（1,000万円・35年で最大 約26万円）または 金利+0.10〜0.23%（分割は別に一律3万円）",
+      "guarantee_status": "separate"
     },
     {
       "bank_id": "ja_obihiro_kawanishi",
@@ -4433,6 +4681,10 @@
       "history": [
         {
           "rate": 1.57,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.57,
           "observed_on": "2026-11-02"
         },
         {
@@ -4519,7 +4771,9 @@
           "rate": 1.22,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "一括（1,000万円・35年で最大 約26万円）または 金利+0.10〜0.23%（分割は別に一律3万円）",
+      "guarantee_status": "separate"
     },
     {
       "bank_id": "ja_obihiro_kawanishi",
@@ -4531,6 +4785,10 @@
       "history": [
         {
           "rate": 1.87,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.87,
           "observed_on": "2026-11-02"
         },
         {
@@ -4617,7 +4875,9 @@
           "rate": 1.67,
           "observed_on": "2026-06-22"
         }
-      ]
+      ],
+      "guarantee_note": "一括（1,000万円・35年で最大 約26万円）または 金利+0.10〜0.23%（分割は別に一律3万円）",
+      "guarantee_status": "separate"
     },
     {
       "bank_id": "hokkaido_rokin",
@@ -4629,6 +4889,10 @@
       "history": [
         {
           "rate": 1.15,
+          "observed_on": "2026-11-09"
+        },
+        {
+          "rate": 1.15,
           "observed_on": "2026-11-02"
         },
         {
@@ -4699,10 +4963,12 @@
           "rate": 0.75,
           "observed_on": "2026-06-25"
         }
-      ]
+      ],
+      "guarantee_note": "ろうきん会員は無料。会員以外は別途（一括前払い 年0.10〜0.16% 相当 または 金利+0.16〜0.22%）",
+      "guarantee_status": "conditional"
     }
   ],
-  "generated_at": "2026-11-02",
+  "generated_at": "2026-11-09",
   "is_demo": false,
-  "last_feed_generated_at": "2026-11-02T09:06:14+09:00"
+  "last_feed_generated_at": "2026-11-09T07:06:52+09:00"
 }
