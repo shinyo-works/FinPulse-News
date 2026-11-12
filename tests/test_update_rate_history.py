@@ -739,6 +739,77 @@ class CarLoanHistoryTest(unittest.TestCase):
             # 資料が読めないときは何も言わない（取り込みを止めない）
             self.assertEqual([], update_rate_history.guarantee_mismatch_warnings(report, Path(tmp) / "none.json"))
 
+    def _note_warnings(self, documented_note, upstream_note):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "loan-features.json"
+            path.write_text(json.dumps({"products": [
+                {"product_id": "p", "guarantee_status": "conditional", "guarantee_note": documented_note},
+            ]}), encoding="utf-8")
+            report = {"loan_table": [
+                {"bank_id": "b", "product_id": "p", "guarantee": "conditional", "guarantee_note": upstream_note},
+            ]}
+            return update_rate_history.guarantee_mismatch_warnings(report, path)
+
+    def test_guarantee_note_rate_change_is_warned(self):
+        """条件比較の料率が上流の注記に無ければ、改定の直し漏れとして警告する（M6・Q3=(a)）。"""
+        warnings = self._note_warnings(
+            "会員は無料／他は前払0.10〜0.16%か金利+0.16〜0.22%",
+            "ろうきん会員は無料。会員以外は別途（一括前払い 年0.12〜0.18% 相当 または 金利+0.18〜0.24%）",
+        )
+        self.assertEqual(1, len(warnings))
+        self.assertIn("0.1%", warnings[0])
+        self.assertIn("b/p", warnings[0])
+
+    def test_guarantee_note_wording_only_is_quiet(self):
+        """言い回しだけ違い、料率が同じなら何も言わない（文面全体は比べない）。"""
+        self.assertEqual([], self._note_warnings(
+            "会員は無料／他は前払0.10〜0.16%か金利+0.16〜0.22%",
+            "ろうきん会員は無料。会員以外は別途（一括前払い 年0.10〜0.16% 相当 または 金利+0.16〜0.22%）",
+        ))
+        # 料率の無い注記どうし（金額だけ・言い回し違い）も比べない
+        self.assertEqual([], self._note_warnings(
+            "別途前払い（100万円・25年で16,909円）",
+            "一括前払い（例: 100万円・25年で16,909円＝3,000万円なら約51万円）",
+        ))
+
+    def test_guarantee_note_shortened_in_features_is_quiet(self):
+        """条件比較が料率の一部を省くのは意図した短縮なので警告しない。"""
+        self.assertEqual([], self._note_warnings(
+            "別途（前払1千万円35年で最大約26万円か金利+0.23%まで）",
+            "一括（1,000万円・35年で最大 約26万円）または 金利+0.10〜0.23%（分割は別に一律3万円）",
+        ))
+
+    def test_guarantee_note_rates_are_parsed(self):
+        self.assertEqual(
+            {0.1, 0.16, 0.22, 1.0},
+            update_rate_history.guarantee_note_rates("年0.10〜0.16% または 金利+0.22％・1%"),
+        )
+        self.assertEqual(set(), update_rate_history.guarantee_note_rates(None))
+
+    def test_published_feed_and_features_agree_today(self):
+        """11/9 の公開用データと今の条件比較では警告が出ない（毎週の誤警告にしない）。"""
+        root = Path(__file__).resolve().parents[1]
+        features = json.loads((root / "docs" / "data" / "loan-features.json").read_text(encoding="utf-8"))
+        report = {"loan_table": []}
+        history = json.loads((root / "docs" / "data" / "rate-history.json").read_text(encoding="utf-8"))
+        seen = set()
+        for row in history["rows"]:
+            key = row["product_id"]
+            if key in seen:
+                continue
+            seen.add(key)
+            report["loan_table"].append({
+                "bank_id": row["bank_id"],
+                "product_id": key,
+                "guarantee": row.get("guarantee_status"),
+                "guarantee_note": row.get("guarantee_note", ""),
+            })
+        self.assertTrue(features["products"])
+        rate_warnings = [
+            w for w in update_rate_history.guarantee_mismatch_warnings(report) if "料率" in w
+        ]
+        self.assertEqual([], rate_warnings)
+
     def test_malformed_features_file_does_not_crash_the_import(self):
         """条件資料の中身が想定外の形でも、取り込みは落とさず警告 1 件で続ける（L1）。"""
         report = {"loan_table": [{"bank_id": "b", "product_id": "p", "guarantee": "included"}]}
