@@ -283,11 +283,28 @@ def normalize_guarantee_status(value) -> str | None:
     return value if value in GUARANTEE_STATUSES else None
 
 
+# 注記の中の料率（「年0.10〜0.16%」「金利+0.23%」など）。% の付いた数字と、その前の範囲の下限を拾う
+_GUARANTEE_RATE_RE = re.compile(r"(\d+(?:\.\d+)?)(?:\s*[〜~～－-]\s*(\d+(?:\.\d+)?))?\s*[%％]")
+
+
+def guarantee_note_rates(note) -> set[float]:
+    """保証料の注記から料率（% の付いた数字）を集合で返す。範囲は両端を入れる。"""
+    rates = set()
+    for low, high in _GUARANTEE_RATE_RE.findall(str(note or "").replace(",", "").replace("，", "")):
+        rates.add(float(low))
+        if high:
+            rates.add(float(high))
+    return rates
+
+
 def guarantee_mismatch_warnings(report_data: dict, features_path: Path = FEATURES_PATH) -> list[str]:
-    """住宅ローンの保証料の区分が、上流（banks.json）と条件比較の資料で食い違う商品を挙げる。
+    """住宅ローンの保証料が、上流（banks.json）と条件比較の資料で食い違う商品を挙げる。
 
     画面の住宅ローンは条件比較の資料を正として表示するため、上流だけ直して資料を直し忘れると
     古い区分が出続ける。取り込みは止めず、Actions の警告で気づかせる。
+    比べるのは区分と、注記の中の料率（%）だけ（M6・本人決定 Q3=(a)・2026-11-12）。資料にある料率が
+    上流の注記に無ければ、料率の改定の直し漏れとして警告する。資料が上流より短く書く（料率を省く）のは
+    意図した短縮なので警告しない。文面全体は比べない（言い回しの違いで毎週警告になるため）。
     """
     try:
         features = json.loads(features_path.read_text(encoding="utf-8"))
@@ -295,8 +312,8 @@ def guarantee_mismatch_warnings(report_data: dict, features_path: Path = FEATURE
         return []
     if not isinstance(features, dict):
         return [f"{features_path.name} の形が想定と違うため、保証料の区分の食い違いは確かめていません"]
-    statuses = {
-        p.get("product_id"): p.get("guarantee_status")
+    documented_products = {
+        p.get("product_id"): p
         for p in features.get("products", []) or []
         if isinstance(p, dict)
     }
@@ -304,13 +321,25 @@ def guarantee_mismatch_warnings(report_data: dict, features_path: Path = FEATURE
     for loan in report_data.get("loan_table", []) or []:
         if not isinstance(loan, dict) or loan.get("manual"):
             continue
+        product = documented_products.get(loan.get("product_id")) or {}
+        label = f"{log_safe(loan.get('bank_id'))}/{log_safe(loan.get('product_id'))}"
         upstream = normalize_guarantee_status(loan.get("guarantee"))
-        documented = statuses.get(loan.get("product_id"))
+        documented = product.get("guarantee_status")
         if upstream and documented and upstream != documented:
             warnings.append(
-                f"{log_safe(loan.get('bank_id'))}/{log_safe(loan.get('product_id'))} の保証料の区分が"
-                f"上流 {upstream} と条件比較 {documented} で食い違っています"
+                f"{label} の保証料の区分が上流 {upstream} と条件比較 {documented} で食い違っています"
                 "（docs/data/loan-features.json を確かめてください）"
+            )
+        if not product:
+            continue
+        documented_rates = guarantee_note_rates(product.get("guarantee_note"))
+        upstream_rates = guarantee_note_rates(loan.get("guarantee_note"))
+        missing = sorted(documented_rates - upstream_rates)
+        if missing:
+            shown = "・".join(f"{rate:g}%" for rate in missing)
+            warnings.append(
+                f"{label} の保証料の注記で、条件比較にある料率 {shown} が上流の注記に見当たりません"
+                "（料率の改定の直し漏れかもしれません。docs/data/loan-features.json を確かめてください）"
             )
     return warnings
 

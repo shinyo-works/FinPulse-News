@@ -294,7 +294,10 @@ class LoanFeaturesViewerTest(unittest.TestCase):
         self.assertIn("return true;", loader)
         self.assertIn("return false;", loader)
         self.assertIn("if (DATASET.featuresUrl) showFeaturesNote(await loadFeatures());", self.rate_html)
-        self.assertIn("保証料・事務手数料を読み込めませんでした", self.rate_html)
+        self.assertIn("保証料・事務手数料の条件データを読み込めませんでした", self.rate_html)
+        # 読めなかった週も保証料列は履歴の行で埋める（L4・Q4=(a)）。凡例はその事実を書く
+        self.assertIn("保証料の列は金利調査ツールの区分で表示し", self.rate_html)
+        self.assertIn("if (row.guarantee_status) return { status: row.guarantee_status", self.rate_html)
         # 読み込み前から「機関名の下の2行」の説明を出さない
         self.assertNotIn("DATASET.guaranteeNote || DATASET.featuresNote", self.rate_html)
 
