@@ -258,7 +258,7 @@ class UpdateRateHistoryTest(unittest.TestCase):
 
         empty_id = copy.deepcopy(self.report)
         empty_id["loan_table"][0]["bank_id"] = ""
-        invalid_reports.append((empty_id, "bank_id は空でない文字列"))
+        invalid_reports.append((empty_id, "bank_id は英数字と _ - だけ"))
 
         string_rate = copy.deepcopy(self.report)
         string_rate["loan_table"][0]["loan_variable"] = "1.0"
@@ -288,6 +288,36 @@ class UpdateRateHistoryTest(unittest.TestCase):
         report["loan_table"][0]["product_name"] = "  "
         with self.assertRaisesRegex(ValueError, "機関名・商品名"):
             update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+    def test_new_product_with_overlong_names_stops_the_import(self):
+        """新しい行の名前が80字を超えたら止める（2026-11-12 レビュー L5）。既存の行の名前は切らない。"""
+        report = copy.deepcopy(self.report)
+        report["loan_table"][0]["product_name"] = "長" * 81
+        with self.assertRaisesRegex(ValueError, "80字を超えています"):
+            update_history(copy.deepcopy(self.history), report, "2026-08-01")
+        report = copy.deepcopy(self.report)
+        report["loan_table"][0]["bank_name"] = "長" * 80  # ちょうど80字は通る
+        update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+    def test_ids_with_control_characters_are_rejected(self):
+        """機関ID・商品IDに改行などがあると Actions のログ命令を偽装できるため、入口で拒否する（M9）。"""
+        for bad in ("x\n::stop-commands::abc", "a b", "日本語", "", " ", "x" * 65, None, 5):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    update_rate_history.validate_id(bad, "bank_id")
+        for good in ("hokkaido_rokin", "northpacific_mycar_large", "A-1", " trimmed "):
+            update_rate_history.validate_id(good, "bank_id")
+        report = copy.deepcopy(self.report)
+        report["loan_table"][0]["bank_id"] = "x\n::error::偽"
+        with self.assertRaises(ValueError):
+            update_history(copy.deepcopy(self.history), report, "2026-08-01")
+
+    def test_existing_ids_in_published_data_pass_the_id_rule(self):
+        """公開中の履歴の ID がすべて新しい規則に収まる（規則が既存データを弾かない確認）。"""
+        for path in (update_rate_history.HISTORY_PATH, update_rate_history.CAR_HISTORY_PATH):
+            for row in json.loads(path.read_text(encoding="utf-8"))["rows"]:
+                update_rate_history.validate_id(row["bank_id"], "bank_id")
+                update_rate_history.validate_id(row["product_id"], "product_id")
 
     def test_existing_row_keeps_previous_names_when_upstream_drops_them(self):
         update_history(self.history, self.report, "2026-08-01")
@@ -593,6 +623,17 @@ class CarLoanHistoryTest(unittest.TestCase):
             self.assertIn("b/p-diff", warnings[0])
             # 資料が読めないときは何も言わない（取り込みを止めない）
             self.assertEqual([], update_rate_history.guarantee_mismatch_warnings(report, Path(tmp) / "none.json"))
+
+    def test_malformed_features_file_does_not_crash_the_import(self):
+        """条件資料の中身が想定外の形でも、取り込みは落とさず警告 1 件で続ける（L1）。"""
+        report = {"loan_table": [{"bank_id": "b", "product_id": "p", "guarantee": "included"}]}
+        with tempfile.TemporaryDirectory() as tmp:
+            for payload in ("[]", '"text"', "123", "null"):
+                path = Path(tmp) / "loan-features.json"
+                path.write_text(payload, encoding="utf-8")
+                warnings = update_rate_history.guarantee_mismatch_warnings(report, path)
+                self.assertEqual(1, len(warnings), payload)
+                self.assertIn("形が想定と違う", warnings[0])
 
     def test_invalid_guarantee_note_is_rejected_by_validation(self):
         history = self.car_history()

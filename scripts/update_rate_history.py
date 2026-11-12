@@ -113,6 +113,9 @@ def resolve_product_name(bank_id: str, product_id: str, product_name: str) -> st
     return PRODUCT_NAME_OVERRIDES.get((bank_id, product_id), product_name)
 
 
+MAX_NEW_DISPLAY_NAME_CHARS = 80  # 現状の最長は31文字。新しい行の名前だけに適用する（既存の名前は切らない）
+
+
 def clean_display_name(value) -> str | None:
     """上流の表示名を、空でない文字列のときだけ採用する（null・空欄・数値は None）。"""
     if isinstance(value, str) and value.strip():
@@ -252,10 +255,17 @@ def reject_future_date(survey_date: str, today: str | None = None) -> None:
         raise ValueError(f"調査日 {survey_date} は未来の日付のため更新できません（今日は {today}）。")
 
 
+_ID_RE = re.compile(r"[A-Za-z0-9_-]{1,64}")
+
+
 def validate_id(value, field_name: str) -> str:
-    """機関ID・商品IDが空でない文字列であることを確認する。"""
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{field_name} は空でない文字列にしてください。")
+    """機関ID・商品IDを英数字と _ - の64文字以内に限る。
+
+    上流（他リポジトリ）由来の値は信用しない。改行が入ると GitHub Actions のログで
+    次の行が `::error::` などの命令として読まれるため、入口で止める（2026-11-12 レビュー M9）。
+    """
+    if not isinstance(value, str) or not _ID_RE.fullmatch(value.strip()):
+        raise ValueError(f"{field_name} は英数字と _ - だけの64文字以内にしてください。")
     return value.strip()
 
 
@@ -283,6 +293,8 @@ def guarantee_mismatch_warnings(report_data: dict, features_path: Path = FEATURE
         features = json.loads(features_path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return []
+    if not isinstance(features, dict):
+        return [f"{features_path.name} の形が想定と違うため、保証料の区分の食い違いは確かめていません"]
     statuses = {
         p.get("product_id"): p.get("guarantee_status")
         for p in features.get("products", []) or []
@@ -715,6 +727,11 @@ def update_history(
                     raise ValueError(
                         f"新しい商品 {bank_id}/{product_id} に機関名・商品名がありません。"
                     )
+                if max(len(bank_name), len(product_name)) > MAX_NEW_DISPLAY_NAME_CHARS:
+                    raise ValueError(
+                        f"新しい商品 {bank_id}/{product_id} の機関名・商品名が"
+                        f"{MAX_NEW_DISPLAY_NAME_CHARS}字を超えています。"
+                    )
                 row = {
                     "bank_id": bank_id,
                     "bank_name": bank_name,
@@ -1117,7 +1134,7 @@ def stale_feed_message(survey_date: str, now: datetime):
     return level, text
 
 
-def update_targets(args, report_data: dict, survey_date: str, targets: list) -> None:
+def update_targets(args, report_data: dict, survey_date: str, targets: list) -> tuple[int, list]:
     """targets の種別を更新して書き込む（--only-newer なら import_decision で選ぶ）。"""
     if args.only_newer:
         newer = []
