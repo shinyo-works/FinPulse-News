@@ -591,11 +591,18 @@ class CarLoanHistoryTest(unittest.TestCase):
         self.assertTrue(all(row["guarantee_status"] == "included" for row in history["rows"]))
         validate_history(history)
 
-        # 知らない値は取り込まない（画面は「区分なし」として橙に寄せる）
+        # 知らない値は取り込まず、前回の区分を保って警告する（M7・2026-11-12。
+        # 上流の一時的な誤りで「込」の札が黙って消えるほうが危ないため）
         odd = copy.deepcopy(self.report)
         odd["car_loan_table"][0]["guarantee"] = "<script>"
-        update_history(history, odd, "2026-08-31", dataset=CAR_DATASET)
-        self.assertTrue(all("guarantee_status" not in row for row in history["rows"]))
+        summary = update_history(history, odd, "2026-08-31", dataset=CAR_DATASET)
+        self.assertTrue(all(row["guarantee_status"] == "included" for row in history["rows"]))
+        self.assertTrue(any("保証料の区分" in w for w in summary["warnings"]))
+
+        # 区分の無い商品に知らない値が来ても、守るものが無いので何も付けない
+        fresh = self.car_history()
+        update_history(fresh, odd, "2026-08-31", dataset=CAR_DATASET)
+        self.assertTrue(all("guarantee_status" not in row for row in fresh["rows"]))
 
     def test_invalid_guarantee_status_is_rejected_by_validation(self):
         history = self.car_history()
@@ -603,6 +610,114 @@ class CarLoanHistoryTest(unittest.TestCase):
         history["rows"][0]["guarantee_status"] = "free"
         with self.assertRaises(ValueError):
             validate_history(history)
+
+    def _two_product_report(self):
+        report = copy.deepcopy(self.report)
+        second = copy.deepcopy(report["car_loan_table"][0])
+        second.update({"product_id": "test-mycar2", "product_name": "マイカーローン2"})
+        report["car_loan_table"].append(second)
+        for row in report["car_loan_table"]:
+            row.update({"guarantee": "included", "guarantee_note": "保証料は金利に含む"})
+        return report
+
+    def test_guarantee_reaches_rate_rows_without_a_value_this_week(self):
+        """片方の金利が欠けた週でも、同じ商品の全種別の行へ同じ区分を当てる（M5a）。"""
+        history = self.car_history()
+        update_history(history, self._two_product_report(), "2026-08-24", dataset=CAR_DATASET)
+        changed = self._two_product_report()
+        changed["car_loan_table"][0].update(
+            {"car_loan_fixed": None, "guarantee": "separate", "guarantee_note": "保証料は別途"}
+        )
+        update_history(history, changed, "2026-08-31", dataset=CAR_DATASET)
+        rows = [row for row in history["rows"] if row["product_id"] == "test-mycar"]
+        self.assertEqual({"variable", "fixed"}, {row["rate_type"] for row in rows})
+        self.assertEqual(["separate", "separate"], [row["guarantee_status"] for row in rows])
+        self.assertEqual({"保証料は別途"}, {row["guarantee_note"] for row in rows})
+        validate_history(history)
+
+    def test_guarantee_reaches_rows_whose_value_was_held(self):
+        """値が保留された種別の行にも、その週の区分を当てる（M5a）。"""
+        history = self.car_history()
+        update_history(history, self._two_product_report(), "2026-08-24", dataset=CAR_DATASET)
+        jumped = self._two_product_report()
+        jumped["car_loan_table"][0].update({"car_loan_fixed": 24.0, "guarantee": "conditional"})
+        summary = update_history(history, jumped, "2026-08-31", dataset=CAR_DATASET)
+        self.assertTrue(summary["held"])
+        rows = [row for row in history["rows"] if row["product_id"] == "test-mycar"]
+        self.assertEqual(["conditional", "conditional"], [row["guarantee_status"] for row in rows])
+
+    def test_product_dropped_from_the_feed_keeps_guarantee_but_loses_outage_note(self):
+        """公開用データから外れた商品の行は、取得不可の注記だけ外し、区分は残す（M5b・Q2=(a)）。"""
+        history = self.car_history()
+        down = self._two_product_report()
+        down["car_loan_table"][1].update(
+            {"car_loan_variable": None, "car_loan_fixed": None, "outage_note": "不正アクセスのため取得不可"}
+        )
+        update_history(history, self._two_product_report(), "2026-08-24", dataset=CAR_DATASET)
+        update_history(history, down, "2026-08-31", dataset=CAR_DATASET)
+        dropped_rows = [row for row in history["rows"] if row["product_id"] == "test-mycar2"]
+        self.assertTrue(all(row.get("outage_note") for row in dropped_rows))
+
+        without = self._two_product_report()
+        del without["car_loan_table"][1]
+        update_history(history, without, "2026-09-07", dataset=CAR_DATASET)
+        dropped_rows = [row for row in history["rows"] if row["product_id"] == "test-mycar2"]
+        self.assertTrue(dropped_rows)
+        self.assertTrue(all("outage_note" not in row for row in dropped_rows))
+        self.assertTrue(all(row["guarantee_status"] == "included" for row in dropped_rows))
+        validate_history(history)
+
+    def test_guarantee_missing_for_every_product_keeps_previous(self):
+        """区分が全商品で欠けた週は、前回の区分と注記を保ち警告する（M7）。"""
+        history = self.car_history()
+        update_history(history, self._two_product_report(), "2026-08-24", dataset=CAR_DATASET)
+        missing = self._two_product_report()
+        for row in missing["car_loan_table"]:
+            del row["guarantee"]
+            del row["guarantee_note"]
+        summary = update_history(history, missing, "2026-08-31", dataset=CAR_DATASET)
+        self.assertTrue(all(row["guarantee_status"] == "included" for row in history["rows"]))
+        self.assertTrue(all(row["guarantee_note"] == "保証料は金利に含む" for row in history["rows"]))
+        self.assertEqual(2, sum("保証料の区分" in w for w in summary["warnings"]))
+
+    def test_guarantee_missing_for_one_product_keeps_only_that_product(self):
+        """一部の商品だけ区分が欠けた週は、その商品だけ前回を保つ（M7・商品単位）。"""
+        history = self.car_history()
+        update_history(history, self._two_product_report(), "2026-08-24", dataset=CAR_DATASET)
+        partial = self._two_product_report()
+        del partial["car_loan_table"][0]["guarantee"]
+        partial["car_loan_table"][1].update({"guarantee": "separate", "guarantee_note": "保証料は別途"})
+        summary = update_history(history, partial, "2026-08-31", dataset=CAR_DATASET)
+        statuses = {(row["product_id"], row["rate_type"]): row["guarantee_status"] for row in history["rows"]}
+        self.assertEqual("included", statuses[("test-mycar", "variable")])
+        self.assertEqual("included", statuses[("test-mycar", "fixed")])
+        self.assertEqual("separate", statuses[("test-mycar2", "variable")])
+        self.assertEqual("separate", statuses[("test-mycar2", "fixed")])
+        self.assertEqual(1, sum("保証料の区分" in w for w in summary["warnings"]))
+
+    def test_guarantee_is_not_rewound_by_an_older_survey(self):
+        """過去データの投入で今の区分を巻き戻さない。"""
+        history = self.car_history()
+        update_history(history, self._two_product_report(), "2026-08-31", dataset=CAR_DATASET)
+        older = self._two_product_report()
+        for row in older["car_loan_table"]:
+            row["guarantee"] = "separate"
+        update_history(history, older, "2026-08-24", allow_backfill=True, dataset=CAR_DATASET)
+        self.assertTrue(all(row["guarantee_status"] == "included" for row in history["rows"]))
+
+    def test_guarantee_statuses_agree_across_finpulse(self):
+        """4 区分の定義（取り込み・条件資料のテスト・履歴画面）が食い違わない。"""
+        import re
+
+        from tests import test_loan_features
+
+        root = Path(__file__).resolve().parents[1]
+        html = (root / "docs" / "rate-history.html").read_text(encoding="utf-8")
+        match = re.search(r"const GUARANTEE_LABELS = \{([^}]*)\}", html)
+        self.assertIsNotNone(match)
+        labels = tuple(re.findall(r"(\w+):", match.group(1)))
+        self.assertEqual(update_rate_history.GUARANTEE_STATUSES, labels)
+        self.assertEqual(update_rate_history.GUARANTEE_STATUSES, test_loan_features.GUARANTEE_STATUSES)
 
     def test_guarantee_mismatch_with_the_features_file_is_warned(self):
         """住宅ローンの区分が条件比較の資料と食い違えば、取り込みは止めずに警告する。"""
