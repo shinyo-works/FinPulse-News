@@ -793,17 +793,7 @@ def update_history(
                         summary["warnings"].append(message)
                 elif loan_url:
                     row["url"] = loan_url
-                # 保証料の条件が消えた週は注記も消す（古い断り書きを残さない）
-                guarantee_note = normalize_guarantee_note(loan.get("guarantee_note"))
-                if guarantee_note:
-                    row["guarantee_note"] = guarantee_note
-                else:
-                    row.pop("guarantee_note", None)
-                guarantee_status = normalize_guarantee_status(loan.get("guarantee"))
-                if guarantee_status:
-                    row["guarantee_status"] = guarantee_status
-                else:
-                    row.pop("guarantee_status", None)
+                # 保証料の区分・注記は金利の種別ごとではなく商品ごとに反映する（apply_guarantee_attributes）
 
             same_day = next(
                 (entry for entry in hist if entry.get("observed_on") == survey_date),
@@ -849,6 +839,7 @@ def update_history(
         # 進めると、公開ページに値の空いた日付の列ができる。単に値が取れなかっただけの日は
         # 従来どおり調査日を残す（画面で「未確認」と出す設計）
         history["observation_dates"].remove(survey_date)
+    apply_guarantee_attributes(history, report_data, survey_date, dataset, summary)
     if history["observation_dates"]:
         history["generated_at"] = history["observation_dates"][0]
     else:
@@ -888,14 +879,65 @@ def apply_outage_notes(history: dict, report_data: dict, survey_date: str, datas
         notes[(loan.get("bank_id"), loan.get("product_id"))] = normalize_outage_note(
             loan.get("outage_note")
         )
+    if not notes:
+        return
     for row in history["rows"]:
         key = (row.get("bank_id"), row.get("product_id"))
-        if key not in notes:
-            continue
-        if notes[key]:
+        if notes.get(key):
             row["outage_note"] = notes[key]
         else:
+            # 注記の無い週と、公開用データから外れた商品の行は消す（M5b・本人決定 2026-11-12。
+            # 外れた商品の行に「取得不可」の断り書きを残し続けない。保証料の区分は残す）
             row.pop("outage_note", None)
+
+
+def apply_guarantee_attributes(
+    history: dict, report_data: dict, survey_date: str, dataset: Dataset, summary: dict
+) -> None:
+    """保証料の区分・注記を、商品ごとにその商品の全種別の行へ反映する（M5・M7・2026-11-12）。
+
+    以前は金利の種別ごとのループの中で付け外ししていたため、その週に値が欠けた種別・保留した種別の
+    行だけ古い区分が残り、同じ商品の行で区分が食い違った（M5a）。
+    区分（guarantee）が欠けた・知らない値の商品は、前回の区分と注記を保ち警告する（M7）。
+    上流の一時的な欠けで「込」「別途」の札が黙って消えるほうが危ないため。前回の区分が無い商品は
+    守るものが無いので、注記だけ従来どおり上流に合わせる。
+    公開用データに載っていない商品の行は触らない（区分を残す・Q2=(a)）。
+    最新の調査日の取り込みでだけ動かし、過去データの投入で今の区分を巻き戻さない。
+    保留ばかりで調査日を進めなかった回も動かさない（その回の上流は丸ごとおかしい可能性がある）。
+    """
+    dates = history.get("observation_dates") or []
+    if not dates or survey_date != dates[0]:
+        return
+    rows_by_product: dict = {}
+    for row in history["rows"]:
+        rows_by_product.setdefault((row.get("bank_id"), row.get("product_id")), []).append(row)
+    for loan in report_data.get(dataset.table_key, []):
+        if loan.get("manual"):
+            continue
+        key = (loan.get("bank_id"), loan.get("product_id"))
+        rows = rows_by_product.get(key)
+        if not rows:
+            continue
+        status = normalize_guarantee_status(loan.get("guarantee"))
+        note = normalize_guarantee_note(loan.get("guarantee_note"))
+        if status is None and any(row.get("guarantee_status") for row in rows):
+            message = (
+                f"{log_safe(key[0])}/{log_safe(key[1])} の保証料の区分が公開用データに無いか"
+                "想定外の値のため、前回の区分と注記のままにしました"
+            )
+            if message not in summary["warnings"]:
+                summary["warnings"].append(message)
+            continue
+        for row in rows:
+            if status:
+                row["guarantee_status"] = status
+            else:
+                row.pop("guarantee_status", None)
+            # 保証料の条件が消えた週は注記も消す（古い断り書きを残さない）
+            if note:
+                row["guarantee_note"] = note
+            else:
+                row.pop("guarantee_note", None)
 
 
 def same_day_shortfall(previous_keys: set, imported_keys: set):
@@ -1202,7 +1244,7 @@ def update_targets(args, report_data: dict, survey_date: str, targets: list) -> 
                 "当日の値を消しました"
             )
         for message in summary["warnings"]:
-            print(f"::warning title={dataset.label}の名前・リンクの変更を保留しました::{message}")
+            print(f"::warning title={dataset.label}の名前・リンク・保証料の変更を保留しました::{message}")
         if dataset is HOUSING_DATASET:
             for message in guarantee_mismatch_warnings(report_data):
                 print(f"::warning title=保証料の区分が条件比較の資料と食い違っています::{message}")
