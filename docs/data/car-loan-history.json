@@ -9,6 +9,7 @@
     "fixed": "固定"
   },
   "observation_dates": [
+    "2026-11-16",
     "2026-11-09",
     "2026-11-02",
     "2026-10-26",
@@ -24,7 +25,7 @@
   "data_sources": [
     {
       "period_start": "",
-      "period_end": "2026-11-09",
+      "period_end": "2026-11-16",
       "kind": "financial_report_tool",
       "description": "報告自動化ツールの週次JSON（GitHub Actions実行のArtifactを含む）"
     }
@@ -43,6 +44,10 @@
       "history": [
         {
           "rate": 2.2,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 2.2,
           "observed_on": "2026-11-09"
         },
         {
@@ -97,6 +102,10 @@
       "guarantee_status": "included",
       "guarantee_note": "オリコ・ジャックス保証になった場合は 年1.0% 上乗せ",
       "history": [
+        {
+          "rate": 3.325,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 3.325,
           "observed_on": "2026-11-09"
@@ -155,6 +164,10 @@
       "history": [
         {
           "rate": 3.9,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 3.9,
           "observed_on": "2026-11-09"
         },
         {
@@ -210,6 +223,10 @@
       "history": [
         {
           "rate": 3.45,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 3.45,
           "observed_on": "2026-11-09"
         },
         {
@@ -263,6 +280,10 @@
       "rate_type": "fixed",
       "guarantee_status": "included",
       "history": [
+        {
+          "rate": 4.05,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 4.05,
           "observed_on": "2026-11-09"
@@ -320,6 +341,10 @@
       "history": [
         {
           "rate": 3.05,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 3.05,
           "observed_on": "2026-11-09"
         },
         {
@@ -373,6 +398,10 @@
       "rate_type": "variable",
       "guarantee_status": "included",
       "history": [
+        {
+          "rate": 3.1,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 3.1,
           "observed_on": "2026-11-09"
@@ -430,6 +459,10 @@
       "history": [
         {
           "rate": 2.45,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 2.45,
           "observed_on": "2026-11-09"
         },
         {
@@ -483,6 +516,10 @@
       "rate_type": "fixed",
       "guarantee_status": "included",
       "history": [
+        {
+          "rate": 2.28,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 2.28,
           "observed_on": "2026-11-09"
@@ -540,6 +577,10 @@
       "history": [
         {
           "rate": 2.78,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 2.78,
           "observed_on": "2026-11-09"
         },
         {
@@ -593,6 +634,10 @@
       "rate_type": "variable",
       "guarantee_status": "included",
       "history": [
+        {
+          "rate": 3.1,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 3.1,
           "observed_on": "2026-11-09"
@@ -642,6 +687,10 @@
       "history": [
         {
           "rate": 3.9,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 3.9,
           "observed_on": "2026-11-09"
         },
         {
@@ -687,6 +736,10 @@
       "rate_type": "fixed",
       "guarantee_status": "included",
       "history": [
+        {
+          "rate": 1.95,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 1.95,
           "observed_on": "2026-11-09"
@@ -744,6 +797,10 @@
       "history": [
         {
           "rate": 2.75,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 2.75,
           "observed_on": "2026-11-09"
         },
         {
@@ -797,6 +854,10 @@
       "rate_type": "fixed",
       "guarantee_status": "included",
       "history": [
+        {
+          "rate": 4.0,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 4.0,
           "observed_on": "2026-11-09"
@@ -853,6 +914,10 @@
       "history": [
         {
           "rate": 2.4,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 2.4,
           "observed_on": "2026-11-09"
         }
       ],
@@ -867,6 +932,10 @@
       "url": "https://www.hokuyobank.co.jp/person/loan/mycar/",
       "rate_type": "variable",
       "history": [
+        {
+          "rate": 3.05,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 3.05,
           "observed_on": "2026-11-09"
@@ -884,6 +953,10 @@
       "history": [
         {
           "rate": 2.9,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 2.9,
           "observed_on": "2026-11-09"
         }
       ],
@@ -897,6 +970,10 @@
       "url": "https://www.tokachishinkumi.com/customer/loan/mycar_loan.html",
       "rate_type": "fixed",
       "history": [
+        {
+          "rate": 2.45,
+          "observed_on": "2026-11-16"
+        },
         {
           "rate": 2.45,
           "observed_on": "2026-11-09"
@@ -914,14 +991,18 @@
       "history": [
         {
           "rate": 2.95,
+          "observed_on": "2026-11-16"
+        },
+        {
+          "rate": 2.95,
           "observed_on": "2026-11-09"
         }
       ],
       "guarantee_status": "included"
     }
   ],
-  "generated_at": "2026-11-09",
-  "last_feed_generated_at": "2026-11-09T07:06:52+09:00",
+  "generated_at": "2026-11-16",
+  "last_feed_generated_at": "2026-11-16T07:07:03+09:00",
   "manual_lock": {
     "2026-11-02": "北洋銀行が11/2朝にマイカーローン金利を改定し、週次の読み取りが旧金利の指示文のため保留された。公式ページの通常プラン最優遇（変動3.45%・固定4.05%）で補完（本人承認）"
   }
