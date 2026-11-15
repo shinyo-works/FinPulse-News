@@ -6,6 +6,61 @@
       "url": "https://www.shinkin.co.jp/obishin/news/",
       "items": [
         {
+          "date": "2026-11-12",
+          "title": "金融機関などをかたる不審メールにご注意ください",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.11.12-ib_attention_phishingemail-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
+          "date": "2026-11-12",
+          "title": "インターネットバンキングサービスにおける暗号資産交換業者および資金移動業者へのお振込について",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.11.12-ib_angousisan_huseisoukinbousi-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
+          "date": "2026-11-11",
+          "title": "預金金利および短期プライムレートの引き上げについて",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.11.11-rate-muki.pdf",
+          "star": true,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
+          "date": "2026-11-09",
+          "title": "iOSアプリのインストールバージョン変更に関するお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/important/2026.11.09-app_ios-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
+          "date": "2026-11-09",
+          "title": "信金ギャランティ株式会社への保証審査一時停止のお知らせ",
+          "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.11.09-shinkin_guarantee-muki.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
           "date": "2026-10-16",
           "title": "インターネットバンキングにおけるセキュリティソフト「Rapport」の最新バージョンの提供について",
           "url": "https://www.shinkin.co.jp/obishin/pdf/news/2026.10.16-RapportVerup-muki.pdf",
@@ -13,6 +68,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -40,6 +96,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -59,6 +116,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -74,6 +132,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -95,6 +154,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -525,6 +585,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02"
           ]
@@ -537,6 +598,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -552,6 +614,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -589,6 +652,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -604,6 +668,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -619,6 +684,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -634,6 +700,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -652,6 +719,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -667,6 +735,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -828,6 +897,17 @@
       "url": "https://www.hokuyobank.co.jp/announcement/",
       "items": [
         {
+          "date": "2026-11-13",
+          "title": "住宅ローン年末残高証明書再発行手数料新設のお知らせ",
+          "url": "https://www.hokuyobank.co.jp/announcement/pdf/20261113_077007.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
           "date": "2026-11-02",
           "title": "「令和8年熊本地震」義援金送金のご報告と受付期間延長のお知らせ",
           "url": "https://www.hokuyobank.co.jp/announcement/pdf/20261102_076986.pdf",
@@ -835,6 +915,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -846,6 +927,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02"
           ]
@@ -858,6 +940,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -873,6 +956,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -889,6 +973,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -904,6 +989,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -922,6 +1008,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -940,6 +1027,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1260,6 +1348,17 @@
       "url": "https://www.tokachishinkumi.com/info/",
       "items": [
         {
+          "date": "2026-11-12",
+          "title": "オリコ提携各種ローンWeb申込受付サービスのメンテナンスについて（日程の変更）",
+          "url": "https://www.tokachishinkumi.com/info/info_orico_maintenance_20261112.html",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
           "date": "2026-11-02",
           "title": "クレディセゾン提携フリーローン『スーパーフリー』Web申込受付サービスのメンテナンスについて",
           "url": "https://www.tokachishinkumi.com/info/info_cs_maintenance07.html",
@@ -1267,6 +1366,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -1278,6 +1378,7 @@
           "fallback": false,
           "date_inferred": true,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1315,6 +1416,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26"
@@ -1340,6 +1442,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1354,6 +1457,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1368,6 +1472,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1382,6 +1487,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1398,6 +1504,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1415,6 +1522,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1432,6 +1540,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1817,6 +1926,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -1828,6 +1938,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -1839,6 +1950,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02"
           ]
@@ -1851,6 +1963,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1879,6 +1992,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -1898,6 +2012,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2149,6 +2264,28 @@
       "url": "https://www.ja-memuro.or.jp/category/finance_info/",
       "items": [
         {
+          "date": "2026-11-12",
+          "title": "2026.11.12お知らせ組合員・利用者本位の業務運営に関する取組状況およびＫＰＩ実績値の公表についてNEW",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/11/02_組合員・利用者本位の業務運営に関する取組状況およびＫＰＩ実績値の公表について.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
+          "date": "2026-11-02",
+          "title": "2026.11.02お知らせJAめむろ 秋のまちなか演奏会の開催について",
+          "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/11/演奏会ポスター.pdf",
+          "star": false,
+          "fallback": false,
+          "date_inferred": false,
+          "reports": [
+            "2026-11-16"
+          ]
+        },
+        {
           "date": "2026-11-02",
           "title": "2026.11.02お知らせJAめむろ 秋のまちなか演奏会の開催についてNEW",
           "url": "https://www.ja-memuro.or.jp/cms/wp-content/uploads/2026/11/演奏会ポスター.pdf",
@@ -2167,6 +2304,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2195,6 +2333,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2211,6 +2350,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2227,6 +2367,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2545,6 +2686,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -2556,6 +2698,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -2567,6 +2710,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -2578,6 +2722,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09"
           ]
         },
@@ -2589,6 +2734,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2604,6 +2750,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2839,6 +2986,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2854,6 +3002,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2869,6 +3018,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2917,6 +3067,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
@@ -2933,6 +3084,7 @@
           "fallback": false,
           "date_inferred": false,
           "reports": [
+            "2026-11-16",
             "2026-11-09",
             "2026-11-02",
             "2026-10-26",
