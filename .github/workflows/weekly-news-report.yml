@@ -86,17 +86,20 @@ jobs:
       github.ref == 'refs/heads/main' &&
       format('{0}', inputs.check_only) != 'true' &&
       needs.guard.outputs.should_run != 'false'
+    # ジョブ全体の上限時間は付けない（時間切れで if: always() の成果物保存まで打ち切られるため）。
+    # 代わりに各ステップへ上限を付け、固まっても既定の 360 分まで走らせない。
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
       contents: read
     steps:
       - name: リポジトリをチェックアウト
+        timeout-minutes: 5
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           ref: main
 
       - name: Python環境セットアップ
+        timeout-minutes: 5
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.11'
@@ -104,6 +107,7 @@ jobs:
           cache-dependency-path: requirements.lock
 
       - name: 固定した依存パッケージをインストール
+        timeout-minutes: 10
         run: python -m pip install --require-hashes -r requirements.lock
 
       - name: 自動テスト
@@ -111,6 +115,7 @@ jobs:
           # 金利履歴と条件比較の商品突合は、上流の商品増減で落ちてもニュース配信を
           # 止めないよう、収集後の警告ステップへ回す。
           FINPULSE_DEFER_DATA_SYNC_TESTS: '1'
+        timeout-minutes: 10
         run: python -m unittest discover -s tests -v
 
       - name: 収集・レポート生成・送信
@@ -130,9 +135,11 @@ jobs:
             echo "::warning::金利履歴と条件比較データ（docs/data/loan-features.json）の商品が一致しません。上流で商品が増減した可能性があります。"
             exit 1
           }
+        timeout-minutes: 5
 
       - name: 生成した成果物を一時保存
         if: always()
+        timeout-minutes: 5
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: weekly-news-output
@@ -142,6 +149,7 @@ jobs:
 
       - name: 収集結果をActionsの成否に反映
         if: always() && steps.collect.outcome == 'failure'
+        timeout-minutes: 2
         run: |
           echo "一部の金融機関の収集、JSON生成、またはメール送信に失敗しました。"
           exit 1

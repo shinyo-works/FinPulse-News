@@ -46,6 +46,19 @@ class WorkflowSecurityTest(unittest.TestCase):
         self.assertIn("runs-on:", collect_job_header)
         self.assertNotIn("timeout-minutes", collect_job_header)
 
+    def test_every_collect_step_has_its_own_timeout(self):
+        # ジョブ全体の上限を付けない代わりに、各ステップへ上限を付ける
+        # （固まっても GitHub の既定の 360 分まで走らせない。無料枠の保険）。
+        steps = self.job_block("collect-and-report").split("steps:", 1)[1].split("\n      - name: ")[1:]
+        self.assertGreaterEqual(len(steps), 8)
+        for step in steps:
+            self.assertIn("timeout-minutes:", step, step.splitlines()[0])
+
+    def test_short_jobs_have_job_level_timeout(self):
+        # 成果物を持たない短いジョブは、ジョブ全体の上限で足りる。
+        self.assertIn("timeout-minutes: 5", self.job_block("guard").split("steps:", 1)[0])
+        self.assertIn("timeout-minutes: 10", self.job_block("publish-results").split("steps:", 1)[0])
+
     def job_block(self, name):
         """jobs 直下の1ジョブ分（次のジョブ見出しの手前まで）を返す。"""
         match = re.search(
